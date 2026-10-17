@@ -58,3 +58,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /generated/prisma
 swagger.json
 /documentation
+
+# Local pnpm files (kept on disk, not versioned)
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
