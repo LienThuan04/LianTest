@@ -884,6 +884,12 @@ lẫn remote; kết quả triển khai ở mục dưới.
   ignore và bỏ theo dõi. Workspace file vốn chưa được track, lockfile được untrack;
   không xoá lịch sử Git. Không đưa `DESIGN.md` ngoài phạm vi vào thay đổi này.
 
+Đã đồng bộ 6 commit triển khai lên nhánh `NestJS`, mốc code/tài liệu
+`2fedbc91884bb718eed83685ecbcec6dff06339c`. Kiểm tra trực tiếp ref và tree GitHub:
+hai file pnpm đều không nằm trong nhánh, trong khi bản local vẫn tồn tại và được
+ignore. Terminal không có mạng GitHub nên dùng connector để ghi commit rồi đồng
+bộ chính xác các Git object về local; không force push, không sửa lịch sử cũ.
+
 **Kiểm chứng sau sửa:**
 
 | Kiểm tra | Kết quả |
