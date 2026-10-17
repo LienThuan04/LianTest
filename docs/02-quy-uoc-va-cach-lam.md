@@ -11,7 +11,7 @@ thể làm hỏng hành vi so với bản PHP gốc. (Tóm tắt luật cứng �
 | Stack nền demo | **Đã gỡ hẳn** (User/Role/Session/File…) | Hệ thi là stack DUY NHẤT. `JwtStrategy` ở `exam-auth/passport/`. Role hệ thi = `src/roles/` (NhomQuyen). |
 | View engine | **EJS** (`@Render`) | View ở `views/pages/*.ejs`, partial ở `views/partials/`. |
 | Lưu file/ảnh | **Supabase Storage**, DB lưu **public URL** | Xem [06](./06-luu-tru-file-supabase.md). |
-| Quản lý gói | **pnpm** | Chỉ có `pnpm-lock.yaml`. KHÔNG `npm install`. |
+| Quản lý gói | **pnpm** | `pnpm-lock.yaml`/`pnpm-workspace.yaml` chỉ lưu local theo yêu cầu user; KHÔNG `npm install`. |
 
 ## 2. Quy ước port (theo NGHIÊM NGẶT)
 
@@ -69,6 +69,11 @@ node dist/src/main.js        # boot: xem log "Mapped ... route"
   git PowerShell chạy nhầm repo → luôn về `.../NestJS` trước khi git/prisma.
 - Môi trường có thể **không có DB local** — kiểm bằng `pnpm run build` + route
   mapping trong log boot. DB thật có thể là remote (Prisma Postgres/Supabase).
+- `pnpm run start:prod` chạy `node dist/src/main.js`. Prisma chọn driver theo URL
+  và chạy `SELECT 1` trước khi báo kết nối thành công; DB không truy cập được thì
+  startup thất bại. Không coi log route mapping là bằng chứng nghiệp vụ chạy đúng.
+- Khởi động thông thường dùng `SEED_DB=false`, `CLEAR_DB=false`. Chỉ chuỗi chính xác
+  `CLEAR_DB=true` mới cho phép xoá trước khi seed; luôn dùng DB test riêng cho e2e.
 
 ## 5. Git
 

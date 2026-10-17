@@ -62,10 +62,20 @@ tiếp:
   bằng `||`) và `getEssayDetail.hinhanh[]` → đã sửa `public/js/pages/test_detail.js`
   và `vaothi.js` bỏ tiền tố `data:image/...;base64,`, dùng URL trực tiếp.
 
-## TODO còn nợ
+## Dọn ảnh sau khi thay thế (2026-10-17)
 
-- **Dọn file cũ trên bucket** khi đổi/xoá ảnh câu hỏi / ảnh bài tự luận (hiện chỉ ghi
-  URL mới, chưa gọi `remove()` cho ảnh cũ) — làm nếu cần tiết kiệm dung lượng.
-  Riêng **ảnh đại diện** đã dọn ảnh cũ khi upload ảnh mới.
+- `storage/image-cleanup.ts` chỉ chạy sau khi DB ghi thành công, dùng chung cho
+  sửa câu hỏi, thay ảnh bài tự luận và avatar. URL phải khớp chính xác origin,
+  đường dẫn public của bucket cấu hình; bỏ qua URL ngoài, tên file local và path lỗi.
+- Các URL trùng được gom theo object path. Trước khi xoá, đối chiếu mọi tham chiếu
+  trong `cauhoi`, `cautraloi`, `hinhanh_traloi_tuluan`, `nguoidung`, kể cả bản ghi ẩn
+  và soft-delete. Câu hỏi xoá mềm vẫn giữ ảnh. Ảnh dùng lại trong đáp án mới cũng giữ.
+- Nộp lại một mục tự luận thay bộ ảnh của chính mục đó trong transaction, không
+  nối thêm ảnh cũ; chỉ dọn ảnh cũ hết tham chiếu sau commit.
+- Lỗi truy vấn tham chiếu hoặc Storage chỉ ghi cảnh báo, không làm thao tác đã ghi
+  DB báo thất bại. Không dọn hàng loạt ảnh lịch sử hoặc ảnh mới upload khi DB rollback.
+
+## Trường hợp cấu hình khác
+
 - Nếu bucket đổi sang **private**: phải dùng **signed URL** (DB lưu path, server ký
   URL khi trả) — hiện code giả định bucket **public** + `getPublicUrl`.

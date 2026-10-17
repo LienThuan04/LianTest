@@ -12,14 +12,22 @@ NestJS (PostgreSQL + Prisma, JWT/Passport, guards, interceptors, bcrypt, email).
 Giữ **nguyên nghiệp vụ + giao diện** của hệ thi cũ; chỉ đổi công nghệ.
 
 - **Repo này = sản phẩm** (thư mục `NestJS/`, nhánh git `NestJS`).
-- **Nguồn PHP để port tiếp = `../DHT_OneTest/`** (thư mục anh em, **KHÔNG nằm trong
-  repo này**). Muốn port tính năng còn lại thì cần có nó cạnh bên. Xem `docs/05`.
+- **Nguồn PHP hiện tại = `../PHP/`** (repo anh em, **KHÔNG nằm trong repo NestJS**).
+  Trên máy cũ tên là `../DHT_OneTest/`; tên này vẫn xuất hiện trong comment lịch sử.
+  Xem `docs/05`.
 - Tài liệu đầy đủ ở **`docs/`** — đọc `docs/README.md` để biết thứ tự.
+
+> **Mốc mới 2026-10-17:** đã xử lý các lỗi sau bàn giao: Prisma chọn đúng transport
+> và xác nhận bằng truy vấn thật, seed mặc định an toàn, entrypoint production,
+> e2e không pass giả, nhập câu hỏi Excel, escape preview và dọn ảnh hết tham chiếu.
+> Hai file pnpm chỉ lưu local. Xem mục khắc phục 2026-10-17 ở `docs/03` để biết
+> kết quả kiểm chứng mới; các mốc 118/118 bên dưới là lịch sử.
 
 ## LUẬT CỨNG (vi phạm = làm hỏng quy ước dự án)
 
-1. **Dùng `pnpm`**, KHÔNG `npm` (chỉ có `pnpm-lock.yaml`). Cài: `pnpm add <pkg>`;
-   build: `pnpm run build`.
+1. **Dùng `pnpm`**, KHÔNG `npm`. Cài: `pnpm add <pkg>`; build: `pnpm run build`.
+   Theo yêu cầu user 2026-10-17, **`pnpm-lock.yaml` và `pnpm-workspace.yaml` chỉ lưu
+   local, không theo dõi Git**. Không tự thêm lại hai file này vào commit.
 2. **CSDL = PostgreSQL** (KHÔNG MySQL). Thêm bảng bằng **migration Prisma mới**
    (`npx prisma migrate dev --name ...`), KHÔNG `db pull`. Sau migration:
    `npx prisma generate` rồi `pnpm run build`.

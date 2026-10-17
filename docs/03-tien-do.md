@@ -1,6 +1,6 @@
 # 03 — Tiến độ (LIVING DOC — cập nhật mỗi phiên)
 
-> Cập nhật gần nhất: **2026-08-16**. Đây là "sổ tay tiến độ" — mỗi phiên làm xong
+> Cập nhật gần nhất: **2026-10-17** (khắc phục và kiểm chứng sau rà soát). Đây là "sổ tay tiến độ" — mỗi phiên làm xong
 > nhớ sửa file này (đánh dấu đã làm gì, còn gì) để phiên/agent sau không mất mạch.
 
 ## Bảng phase
@@ -800,6 +800,113 @@ logic permission.js:
 20 lượt tải trang (10 admin + 6 GV + 4 SV) đều **HTTP 200 và nạp `permission.js` đúng
 1 lần**. `pnpm run build` + `pnpm run lint` sạch.
 
+## Rà soát hiện trạng khi tiếp quản (2026-10-17)
+
+Đối chiếu `CLAUDE.md`, toàn bộ bộ tài liệu `docs/`, nguồn PHP hiện nằm ở
+`../PHP/`, code NestJS và SQLite `.codegraph/codegraph.db` tại thư mục cha.
+Mốc bàn giao code gần nhất trong git là `70b1d741` ngày 2026-08-16 (navbar theo quyền).
+
+**Phạm vi port:** cả 7 phase có code triển khai và module đăng ký trong `AppModule`.
+Graph ghi nhận 188 route NestJS; schema hiện có 26 model, thư mục migrations có
+22 migration. Không dùng tổng số file graph làm tỷ lệ hoàn thành vì graph chứa
+nhiều thư viện frontend. Graph được index ngày 2026-10-17; đối chiếu hash 222 file
+nguồn/test NestJS và PHP MVC có 221 file khớp, riêng `src/prisma/prisma.service.ts`
+đã khác bản được index nên phải đọc trực tiếp. Không kết luận production đã sẵn sàng.
+
+**Kiểm chứng mới trong môi trường Codex hiện tại:**
+
+| Kiểm tra | Kết quả |
+|----------|---------|
+| `node node_modules/@nestjs/cli/bin/nest.js build` (nội dung script build) | PASS, exit 0; entrypoint sinh ra là `dist/src/main.js` |
+| `node node_modules/eslint/bin/eslint.js "{src,apps,libs,test}/**/*.ts"` (không `--fix`) | FAIL: 6 lỗi `prettier/prettier`, đều ở `src/prisma/prisma.service.ts` |
+| Jest chọn riêng ca không cần đăng nhập trong `app` + `error-pages` | 2 bộ PASS; 6 ca PASS, 4 ca không được chọn |
+| Truy vấn PostgreSQL chỉ đọc | Bị môi trường hiện tại chặn với `EACCES`; chưa xác minh được dữ liệu/migration đang áp trên DB |
+| `GET /question/getQuestion` trên app khởi tạo từ bản build mới | HTTP 404 |
+
+Không chạy lại toàn bộ 118 ca nghiệp vụ vì chúng cần DB và có tạo/sửa/xoá dữ liệu
+kiểm thử. Con số **118/118** ở các mục trước là kết quả bàn giao lịch sử, không phải
+kết quả xác nhận lại hôm nay. Khi chạy riêng `error-pages`, Jest vẫn báo 9 pass dù
+đăng nhập `/auth/login` trả 500: `login()` trả `null` cho mọi HTTP >=400, rồi 4 ca
+`if (!cookie) return` kết thúc mà không assert. Vì vậy cần kiểm tra điều kiện dữ
+liệu/đăng nhập khi đọc kết quả e2e, không chỉ nhìn số ca pass. Lượt chạy chọn riêng
+6 ca ở bảng trên không phụ thuộc cơ chế bỏ qua này.
+
+**Các điểm còn lại đã xác nhận:**
+
+- `public/js/pages/question.js:1418` vẫn gọi `/question/getQuestion` và hàm được
+  gọi lúc khởi tạo ở dòng 2059, trong khi controller không có route tương ứng.
+  Lời gọi này cũng có trong PHP cũ; đây là phần legacy cần xử lý, chưa thể nói
+  mọi URL frontend đều đã khớp backend. Các route phân trang câu hỏi hiện có riêng.
+- `package.json` khai `start:prod = node dist/main`, nhưng build mới không sinh
+  `dist/main.js`; đường dẫn hiện có là `dist/src/main.js`.
+- Cấu hình local tại lúc rà soát bật `SEED_DB=true` và `CLEAR_DB=true`.
+  `SeedDbService.onModuleInit()` có nhánh xoá dữ liệu trước khi seed; cần rà lại
+  trước khi chạy với dữ liệu cần giữ. Mọi lượt dựng app trong phiên này đều ép
+  `SEED_DB`, `CLEAR_DB`, `SEED_DEMO_DATA` thành `false`, không gọi seed/migration.
+- `docs/01`, `docs/04`, `docs/05` còn một số trạng thái hoãn/stub cũ và đường dẫn
+  `../DHT_OneTest/`; `docs_API/README.md` vẫn mô tả khung BaseAuth trước khi gỡ.
+  Dùng code hiện tại và các mốc mới ở tài liệu này để xác định tiến độ.
+- Nhập câu hỏi từ Excel vẫn disabled theo PHP gốc; Word đã có triển khai.
+  Dọn ảnh câu hỏi/bài tự luận cũ trên bucket vẫn là TODO trong `docs/06`.
+  Xuất PDF hiện là trang HTML gọi `window.print()`, không phải file PDF do server sinh.
+
+Lượt rà soát ban đầu chỉ cập nhật tài liệu, giữ các thay đổi đang có và không
+commit/push. Sau đó user yêu cầu sửa toàn bộ và bỏ theo dõi hai file pnpm ở local
+lẫn remote; kết quả triển khai ở mục dưới.
+
+## Khắc phục sau rà soát theo yêu cầu user (2026-10-17)
+
+- **Prisma:** kiểm tra URL, chọn `PrismaPg` cho PostgreSQL trực tiếp và
+  `accelerateUrl` cho Prisma; không ép tắt kiểm chứng TLS. Startup chạy `SELECT 1`
+  trước khi báo thành công, kết nối có timeout. Helper của script seed dùng cùng
+  nguyên tắc, không ép SSL cho DB local. Các URL sai bị từ chối sớm.
+- **Seed:** chỉ chuỗi chính xác `CLEAR_DB=true` cho phép xoá trước khi seed.
+  `.env.example` và `.env` local đã tắt `SEED_DB`/`CLEAR_DB`; không seed/clear remote.
+- **Production:** `start:prod` đã trỏ đúng `dist/src/main.js`.
+- **Trang câu hỏi:** bỏ lời gọi legacy `/question/getQuestion`, giữ phân trang đang
+  hoạt động. Thêm `POST /question/addExcel` (preview) và `GET /question/excelTemplate`,
+  đều gate `cauhoi.create`, raw JSON, exclude prefix. Nhận `.xlsx`/`.xls`, hỗ trợ
+  mcq/essay/reading, nhóm đọc hiểu liên tiếp, giữ id nguồn để đối chiếu preview.
+  Kiểm tra toàn bộ preview trước khi lưu qua `addQuesFile`, không ghi dở lô sai.
+  UI dùng chung pipeline Word, dọn preview cũ khi đổi file và huỷ request cũ.
+- **HTML preview:** helper `public/js/question-html.js` escape cả hai loại dấu nháy
+  cùng `&<>`, ngăn dữ liệu có dấu nháy làm gãy thuộc tính input/chèn event handler.
+- **Ảnh:** dọn ảnh câu hỏi/đáp án/tự luận/avatar thay thế sau commit, đúng origin và
+  bucket; giữ ảnh còn được tham chiếu (kể cả soft-delete hoặc câu tự luận đã nộp).
+  Thay ảnh tự luận không nối thêm bộ ảnh cũ. Lỗi cleanup không làm báo lưu thất bại.
+- **E2e:** login lỗi/thiếu cookie/thiếu fixture báo lỗi rõ ràng; tài khoản SV cho
+  kiểm tra quyền là bắt buộc. Tách public-pages dùng provider DB rỗng dành riêng
+  cho test; không giả lập kết quả nghiệp vụ. Sửa ca mật khẩu cũ để kiểm HTTP 401
+  trực tiếp thay vì đòi helper trả null.
+- **Tài liệu:** cập nhật overview/kiến trúc/map/Storage/playbook/README; API hiện tại
+  ở `docs_API/README.md`, bản BaseAuth cũ chuyển sang `legacy-baseauth.md`.
+- **Git:** theo yêu cầu user, giữ `pnpm-lock.yaml` và `pnpm-workspace.yaml` trên đĩa,
+  ignore và bỏ theo dõi. Workspace file vốn chưa được track, lockfile được untrack;
+  không xoá lịch sử Git. Không đưa `DESIGN.md` ngoài phạm vi vào thay đổi này.
+
+**Kiểm chứng sau sửa:**
+
+| Kiểm tra | Kết quả |
+|----------|---------|
+| Build NestJS | PASS |
+| TypeScript `--noEmit` | PASS |
+| ESLint toàn bộ src/test, không tự sửa ở lượt cuối | 0 lỗi / 0 cảnh báo |
+| Unit Jest | 82/82 PASS, 7 bộ |
+| E2e toàn bộ với fixture đầy đủ | 136/136 PASS, 11 bộ, 0 skipped |
+| JS syntax và `git diff --check` | PASS |
+| Script seed: truy vấn chỉ đọc trên DB tạm | PASS (`SELECT 1`) |
+| Review độc lập | Hai lỗi Important được sửa và kiểm tra lại; không còn blocker |
+
+E2e chạy với PostgreSQL PGlite 0.4.1 trong bộ nhớ, áp đủ **22 migration**, seed ra
+13 người dùng / 38 câu hỏi / 3 đề / 3 nhóm; socket pool giới hạn 1 kết nối theo
+giới hạn backend của PGlite. Storage dùng HTTP server local thay cho dịch vụ thật,
+email OTP mock như bộ test gốc. Các file verifier/log nằm trong `.codegraph/` local,
+không thêm dependency vào sản phẩm. Không thay `.env` sang DB tạm và không ghi DB
+hay bucket remote. Kết quả này xác nhận code/HTTP/SQL/Excel trên fixture tạm,
+chưa xác nhận kết nối DB/Storage thật từ môi trường mạng hiện tại (`EACCES`).
+Trình duyệt tự động không khả dụng; kiểm UI dựa trên HTML/JS, HTTP e2e và review
+encoder với HTML parser, chưa chạy thao tác thủ công trên trình duyệt thật.
+
 ## Việc kế tiếp (gợi ý)
 
 **Cả 7 phase đã XONG.** Việc còn lại là kiểm chứng & nợ lẻ:
@@ -824,6 +931,7 @@ logic permission.js:
 ~~B. Chuyển ảnh đại diện sang Supabase Storage~~ — **XONG 2026-08-14**, chi tiết ở mục
 "Trả nốt 2 nợ lẻ" phía trên.
 
-**Không còn hạng mục port nào đang treo.** Ý tưởng mở rộng (KHÔNG bắt buộc, chỉ làm khi
-có yêu cầu): nhập câu hỏi từ Excel ở trang Câu hỏi (nút gốc vẫn `disabled`), và migrate
-các ảnh đại diện cũ trong `public/media/avatars/` lên bucket nếu muốn bỏ hẳn thư mục đó.
+**Không còn hạng mục port nào đang treo.** Nhập câu hỏi Excel và dọn ảnh thay thế
+đã được làm ngày 2026-10-17. Bước vận hành tiếp theo là kiểm tra DB/Storage thật
+trong môi trường có quyền mạng. Migrate avatar local cũ lên bucket là lựa chọn
+riêng nếu muốn bỏ thư mục ảnh cũ; hiện vẫn tương thích cả tên file và URL.

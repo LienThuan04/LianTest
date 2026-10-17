@@ -7,8 +7,8 @@ Dành cho agent/người mới clone repo về và muốn **tiếp tục dự á
 1. Đọc `../CLAUDE.md` (luật cứng) → `docs/02` (quy ước) → `docs/03` (đang ở đâu).
 2. Xác nhận môi trường: `pnpm install`; kiểm `.env` có `DATABASE_URL`, `SUPABASE_*`,
    `LIMIT_UPLOAD_FILE_SIZEMB`. `pnpm run build` phải sạch.
-3. Nếu định **port tiếp** tính năng PHP → cần `../DHT_OneTest/` (không có trong repo,
-   xem `docs/05`). Nếu chỉ sửa/mở rộng phần đã port thì không bắt buộc.
+3. Nguồn đối chiếu PHP hiện ở `../PHP/`, trước đây tên `../DHT_OneTest/`.
+   Cả 7 phase đã có code; đọc kết quả kiểm chứng mới trong `docs/03` trước khi làm.
 
 ## B. Quy trình thêm 1 "slice" (1 nhóm chức năng PHP)
 
@@ -33,9 +33,13 @@ Bám theo cách slice 1–5 của `exams` đã làm:
 ## C. Kiểm chứng khi không có DB local
 
 - `pnpm run build` (compile) là kiểm chính.
-- Boot `node dist/src/main.js`: nếu DB (remote) kết nối được → seed chạy + app start;
-  nếu không → vẫn thấy log `RouterExplorer` "Mapped ... route" trước lỗi DB → đủ để
-  xác nhận route + DI đúng.
+- `pnpm test` chạy unit; `pnpm run test:e2e --testPathPatterns "app|public-pages|setup-app"`
+  chạy các kiểm tra công khai/harness không cần DB.
+- Các bộ e2e nghiệp vụ cần PostgreSQL test có dữ liệu mẫu và Storage test riêng.
+  Thiếu DB, tài khoản hoặc fixture phải FAIL rõ ràng, không được `return` để pass giả.
+- `PrismaService` xác nhận kết nối bằng `SELECT 1` trước khi app sẵn sàng.
+  Log route mapping chỉ xác nhận routing/DI, không chứng minh nghiệp vụ chạy đúng.
+- Khởi động thông thường tắt `SEED_DB`/`CLEAR_DB`. Không seed/clear DB chứa dữ liệu cần giữ.
 
 ## D. Bẫy hay gặp (đã dính)
 

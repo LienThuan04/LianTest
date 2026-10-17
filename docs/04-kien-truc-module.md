@@ -24,8 +24,13 @@ src/
 ├── academic-years/    NamHoc + HocKy                                     path /namhoc
 ├── subjects/          MonHoc + Chuong                                    path /subject
 ├── questions/         Ngân hàng câu hỏi (mcq/essay/reading + ảnh + import) path /question
-├── class-modules/     Nhóm học phần (loadData cấp dropdown)              path /module
-└── exams/             Đề thi & làm bài & chấm (LỚN NHẤT)                 path /test
+├── class-modules/     Nhóm học phần GV + thành viên + Excel              path /module
+├── assignments/       Phân công giảng viên ↔ môn                         path /assignment
+├── client/            Nhóm học phần SV và lịch thi                       path /client
+├── announcements/     Quản lý thông báo và chuông thông báo              path /teacher_announcement
+├── statistic/         Thống kê theo đề/tổng hợp                          path /statistic
+├── view-subject/      Môn học được phân công và chương                   path /view_subject
+└── exams/             Đề thi & làm bài & chấm + export                    path /test
 ```
 
 ## Hạ tầng tái dùng (KHÔNG dựng lại)
@@ -54,8 +59,8 @@ AJAX (`@SkipTransform`, POST trừ khi ghi rõ):
 - Làm bài SV: `getQuestion`, `startTest`, `getTimeTest`, `getTimeEndTest`, `chuyentab`,
   `submit` (multipart), `getResultDetail`.
 - Chi tiết/kết quả GV: `getStatictical`, `getListEssaySubmissionsAction`,
-  `getEssayDetailAction`, `saveEssayScoreAction`; `exportPdf/:makq` (GET, stub),
-  `exportExcel` (stub).
+  `getEssayDetailAction`, `saveEssayScoreAction`; `exportPdf/:makq` (GET, trang in),
+  `exportExcel`, `getMarkOfAllTest`, `getTestGroup`, `getExamineeByGroup`.
 
 > **Pagination.js dùng chung**: gửi `args` JSON (controller, model, made, manhom,
 > filter, custom, input/content, page, limit). Server phân nhánh trong
@@ -71,5 +76,13 @@ AJAX (`@SkipTransform`, POST trừ khi ghi rõ):
 `giaodethi`, `ketqua`, `chitietketqua`, `traloi_tuluan`, `hinhanh_traloi_tuluan`,
 `cham_tuluan`, `nhom`, `chitietnhom`, `thongbao`, `chitietthongbao`, `trangthaithongbao`.
 Cột `hinhanh` (cauhoi/cautraloi/hinhanh_traloi_tuluan) = **String (URL Supabase)**.
+
+Ảnh thay thế được dọn sau khi transaction ghi thành công. `storage/image-cleanup.ts`
+giữ mọi ảnh vẫn được tham chiếu trong câu hỏi/đáp án/bài tự luận/avatar, bao gồm
+bản ghi ẩn hoặc đã soft-delete. Lỗi dọn Storage không làm đảo ngược kết quả ghi DB.
+
+`questions/question-excel.parser.ts` đọc `.xlsx`/`.xls` thành preview dùng chung
+với Word. `POST /question/addExcel` chỉ parse; `POST /question/addQuesFile` kiểm
+toàn bộ preview trước khi lưu. `GET /question/excelTemplate` tải mẫu Excel.
 
 → Ánh xạ chi tiết PHP↔NestJS + nguồn PHP: [05-anh-xa-va-nguon-php.md](./05-anh-xa-va-nguon-php.md).

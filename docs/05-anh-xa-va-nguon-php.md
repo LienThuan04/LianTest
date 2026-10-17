@@ -2,13 +2,13 @@
 
 ## Nguồn PHP ở đâu (QUAN TRỌNG)
 
-⚠️ **Nguồn PHP `DHT_OneTest` KHÔNG nằm trong repo này.** Trên máy gốc nó là thư mục
-anh em: `../DHT_OneTest/` (tức `convertType/DHT_OneTest/`). Muốn port tính năng còn
-lại, đặt lại `DHT_OneTest/` cạnh `NestJS/`.
+**Nguồn PHP hiện ở `../PHP/`, là repo anh em độc lập với NestJS.** Trên máy cũ
+thư mục này có tên `../DHT_OneTest/`; tên cũ trong comment/tài liệu lịch sử vẫn
+dùng để truy vết nguồn. Cả 7 phase đã có triển khai, xem kết quả kiểm chứng ở `docs/03`.
 
 Cấu trúc nguồn PHP:
 ```
-DHT_OneTest/
+PHP/
 ├── mvc/controllers/*.php    controller (mỗi file 1 nhóm chức năng)
 ├── mvc/models/*Model.php    model (SQL mysqli — nối chuỗi)
 ├── mvc/views/pages/*.php     view (port sang views/pages/*.ejs)
@@ -28,15 +28,15 @@ DHT_OneTest/
 | `user.php` | NguoiDungModel | `users` | ✅ |
 | `namhoc.php` | NamHocModel | `academic-years` | ✅ |
 | `subject.php` | MonHocModel, ChuongModel | `subjects` | ✅ |
-| `view_subject.php` | XemMonHocModel | `subjects` (read) | ⏳ hoãn |
-| `question.php` (57KB) | CauHoiModel, CauTraLoiModel | `questions` | ✅ (Excel hoãn) |
-| `module.php` | NhomModel | `class-modules` (một phần) | 🟡 chỉ loadData |
-| `test.php` (56KB) | DeThiModel, ChiTietDeThiModel, KetQuaModel | `exams` | 🟡 slice 1–5 |
-| `client.php` | NhomModel | (Phase 5) | ⏳ |
-| `assignment.php` | PhanCongModel | (Phase 5) | ⏳ |
-| `teacher_announcement.php` | AnnouncementModel | (Phase 6) | ⏳ |
-| `statistic.php` | ThongKeModel | (Phase 6) | ⏳ |
-| `dashboard.php` | (nhiều) | `pages` (một phần) | 🟡 |
+| `view_subject.php` | XemMonHocModel | `view-subject` | ✅ |
+| `question.php` | CauHoiModel, CauTraLoiModel | `questions` | ✅ Word + Excel preview/import |
+| `module.php` | NhomModel | `class-modules` | ✅ nhóm/thành viên/Excel |
+| `test.php` | DeThiModel, ChiTietDeThiModel, KetQuaModel | `exams` + `exams-export.service` | ✅ thi/chấm/Excel/trang in PDF |
+| `client.php` | NhomModel | `client` | ✅ |
+| `assignment.php` | PhanCongModel | `assignments` | ✅ |
+| `teacher_announcement.php` | AnnouncementModel | `announcements` | ✅ |
+| `statistic.php` | ThongKeModel | `statistic` | ✅ |
+| `dashboard.php` | NguoiDungModel | `pages` | ✅ onboarding email |
 | `home.php` | — | `pages` (landing) | ✅ |
 
 ## Ánh xạ khái niệm
@@ -64,7 +64,7 @@ DHT_OneTest/
 ## RBAC — seed quyền
 
 - Bảng `chitietquyen` gắn `manhomquyen` với (`chucnang`,`hanhdong`). Seed ở
-  `src/seed-db/exam-sample.ts` (nhomquyen 1=admin, 2=GV, 3=... theo dữ liệu).
+  `src/seed-db/seed/exam-sample.ts` (nhóm 1=Giáo viên, 2=Sinh viên, 3=Admin).
 - Khi thêm chức năng mới cần quyền mới → thêm vào seed cho đúng nhóm, rồi gắn
   `@Permissions('<chucnang>','<hanhdong>')` ở controller.
 - `PermissionsGuard` chỉ kiểm **1** quyền/route. Cần OR (create HOẶC update) thì

@@ -12,31 +12,30 @@ Tính năng hệ thi (nghiệp vụ cần port):
 - Môn học → chương → **câu hỏi** (mcq / tự luận `essay` / đọc hiểu `reading`) → đáp án.
 - **Tạo đề** (thủ công chọn câu / tự động random theo độ khó), giao đề cho nhóm lớp.
 - SV **vào thi → làm bài → nộp**, chấm tự động (mcq/đọc hiểu) + **chấm tay tự luận**.
-- **Thống kê** kết quả, xuất PDF/Excel (đang hoãn — xem `03`).
-- Đăng nhập email/mật khẩu, Google OAuth, quên mật khẩu qua OTP email.
+- **Thống kê** kết quả, xuất Excel và trang in để lưu PDF bằng trình duyệt.
+- Đăng nhập mã tài khoản/mật khẩu, đăng ký sinh viên và quên mật khẩu qua OTP email.
+  Google OAuth/refresh token của khung BaseAuth cũ không thuộc luồng hiện tại.
 
 ## Bối cảnh thư mục (QUAN TRỌNG)
 
-Trên máy phát triển gốc, cây thư mục là:
+Workspace hiện tại:
 
 ```
-convertType/
-├── DHT_OneTest/   ← NGUỒN PHP để port (KHÔNG nằm trong repo git NestJS)
-├── docs/          ← tài liệu KẾ HOẠCH cũ (00–11, ngoài repo) — tham khảo
-└── NestJS/        ← REPO NÀY (sản phẩm) — nhánh git `NestJS`
+DoAnHP_WEB-ontest-DHT/
+├── .codegraph/   ← chỉ mục code dùng chung, dữ liệu local
+├── PHP/          ← nguồn PHP MVC, repo Git riêng
+└── NestJS/       ← sản phẩm chuyển đổi, nhánh Git `NestJS`
 ```
 
-- **Chỉ `NestJS/` là repo git** (được push lên GitHub). `DHT_OneTest/` và
-  `convertType/docs/` là thư mục anh em **không được version** cùng repo.
-- ⚠️ **Nếu chỉ clone repo này về, bạn KHÔNG có nguồn PHP `DHT_OneTest`.** Để port
-  tính năng còn lại (Phase 5/6/7…), cần đặt lại `DHT_OneTest/` làm thư mục anh em
-  (`../DHT_OneTest/`). Bộ `docs/` trong repo này đã ghi đủ **cách làm + tiến độ**,
-  nhưng **chi tiết code PHP từng method thì phải mở nguồn PHP mới có**.
+- Repo NestJS không chứa nguồn PHP. Máy cũ gọi nguồn này là `DHT_OneTest/`;
+  các đường dẫn đó trong ghi chú lịch sử tương ứng với `../PHP/` ở workspace này.
+- Cả 7 phase đã có triển khai; kiểm chứng hiện tại và thay đổi sau bàn giao được
+  ghi ở `docs/03-tien-do.md`. Việc có code không thay thế kết quả kiểm thử mới.
 
 ## Stack thực tế
 
 - NestJS 11, TypeScript, **Prisma 7 + PostgreSQL** (DB có thể là Prisma Postgres/
-  Supabase remote — xem `.env`), Passport (JWT + Google), bcrypt, throttler,
+  Supabase remote — xem `.env`), Passport JWT, bcrypt, throttler,
   Swagger, Multer, Nodemailer, **EJS** (SSR), **@supabase/supabase-js** (lưu file).
 - Frontend: theme Dashmix (Bootstrap) + jQuery + CKEditor + Select2 + SweetAlert2 +
   Chart.js + flatpickr — **bê nguyên từ PHP**, để trong `public/`, sửa tối thiểu.
