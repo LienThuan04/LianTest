@@ -1,5 +1,4 @@
 Dashmix.helpersOnLoad(["jq-select2"]);
-let isReadingFile = false;
 
 // =============== QUẢN LÝ CKEDITOR THÔNG MINH ===============
 let ckeditorInstances = {};
@@ -192,7 +191,6 @@ function showData(data) {
 let options = [];
 let readingQuestions = [];
 let questions = [];
-let isModified = false;
 let autoSaveTimer = null;
 
 $(document).ready(function () {
@@ -898,11 +896,10 @@ $(document).ready(function () {
 
   // =================== AUTO SAVE KHI SỬA TRÊN PREVIEW ===================
   function autoSaveChanges() {
-    isModified = true;
-
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
     autoSaveTimer = setTimeout(() => {
       if (questions.length === 0) return;
+      const preview = questions;
 
       $.post(
         "/question/updateQuestionJSON",
@@ -910,8 +907,7 @@ $(document).ready(function () {
           questions: JSON.stringify(questions),
         },
         function (res) {
-          if (res.status === "success") {
-            questions = res.questions || questions;
+          if (res.status === "success" && questions === preview) {
             Dashmix.helpers("jq-notify", {
               type: "success",
               icon: "fa fa-check-circle me-1",
@@ -920,39 +916,60 @@ $(document).ready(function () {
           }
         },
         "json"
-      ).fail(() => {
+      ).fail((xhr) => {
+        if (questions !== preview) return;
         Dashmix.helpers("jq-notify", {
           type: "danger",
-          message: "Lỗi tự động lưu!",
+          message: requestError(xhr, "Dữ liệu xem trước không hợp lệ!"),
         });
       });
     }, 1200);
   }
 
-  // Gắn event cho preview edits
-  $("#preview-cau-hoi").on(
-    "change input",
-    `
-    .level-select,
-    .level-select-passage,
-    .answer-radio,
-    input[type="text"],
-    textarea,
-    input[data-type="title"],
-    textarea[data-type="passage"],
-    input[data-type="question"],
-    textarea[data-type="question"],
-    input[data-type="option"]
-  `,
-    autoSaveChanges
-  );
+  let previewRequest = null;
+  function resetFilePreview() {
+    if (autoSaveTimer) clearTimeout(autoSaveTimer);
+    if (previewRequest) previewRequest.abort();
+    previewRequest = null;
+    questions = [];
+    $("#preview-cau-hoi").empty().hide();
+    $("#nhap-file").prop("disabled", true).html("Thêm vào hệ thống");
+  }
 
-  // =================== UPLOAD FILE .DOCX ===================
-  $("#file-cau-hoi").on("change", function (e) {
+  function requestError(xhr, fallback) {
+    const message = xhr.responseJSON?.message || xhr.responseJSON?.error;
+    return Array.isArray(message) ? message.join(", ") : message || fallback;
+  }
+
+  $("#btnAddExcel").on("click", function () {
+    $("#file-excel").trigger("click");
+  });
+
+  $("#download-question-excel-template").on("click", function () {
+    $.get("/question/excelTemplate", function (result) {
+      const link = document.createElement("a");
+      link.href = result.file;
+      link.download = result.filename;
+      link.click();
+    }, "json").fail((xhr) => {
+      Dashmix.helpers("jq-notify", {
+        type: "danger",
+        message: requestError(xhr, "Không tải được file Excel mẫu!"),
+      });
+    });
+  });
+
+  // =================== WORD / EXCEL → CÙNG DỮ LIỆU PREVIEW ===================
+  $("#file-cau-hoi, #file-excel").on("change", function () {
     const file = this.files[0];
+    if (!file) return;
+    resetFilePreview();
     const loaiCauHoi = $("#loaicauhoifile").val();
+    const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+    const isWord = /\.docx$/i.test(file.name);
+    $("#import-file-name").text(file.name);
 
-    if (!loaiCauHoi) {
+    if (isWord && !loaiCauHoi) {
       Dashmix.helpers("jq-notify", {
         type: "warning",
         message: "Chọn loại câu hỏi trước khi thêm file!",
@@ -960,10 +977,10 @@ $(document).ready(function () {
       this.value = "";
       return;
     }
-    if (!file || !file.name.toLowerCase().endsWith(".docx")) {
+    if (!isWord && !isExcel) {
       Dashmix.helpers("jq-notify", {
         type: "danger",
-        message: "Chỉ chấp nhận file .docx!",
+        message: "Chỉ chấp nhận file .docx, .xlsx hoặc .xls!",
       });
       this.value = "";
       return;
@@ -979,11 +996,10 @@ $(document).ready(function () {
     };
 
     Dashmix.layout("header_loader_on");
-    $("#preview-cau-hoi").empty().hide();
     $("#nhap-file").prop("disabled", true).html("Đang xử lý...");
 
-    $.ajax({
-      url: urlMap[loaiCauHoi] || urlMap.mcq,
+    previewRequest = $.ajax({
+      url: isExcel ? "/question/addExcel" : urlMap[loaiCauHoi],
       type: "POST",
       data: formData,
       contentType: false,
@@ -1005,16 +1021,15 @@ $(document).ready(function () {
         });
 
         questions = JSON.parse(JSON.stringify(res));
-        isModified = false;
         renderPreview(questions);
         enableImportButton(res.length);
       },
-      error: function (xhr) {
-        let msg = "Lỗi xử lý file Word!";
-        try {
-          msg += " " + JSON.parse(xhr.responseText).error;
-        } catch (e) {}
-        Dashmix.helpers("jq-notify", { type: "danger", message: msg });
+      error: function (xhr, status) {
+        if (status === "abort") return;
+        Dashmix.helpers("jq-notify", {
+          type: "danger",
+          message: requestError(xhr, "Không đọc được file câu hỏi!"),
+        });
       },
       complete: () => {
         Dashmix.layout("header_loader_off");
@@ -1044,7 +1059,7 @@ $(document).ready(function () {
   <div class="block-header bg-success-subtle">
     <h3 class="block-title text-success fw-bold">
       <i class="fa fa-check-double me-2"></i>
-      Đã thêm thành công ${data.length} mục từ file Word
+      Đã đọc ${data.length} mục từ file — kiểm tra trước khi thêm
     </h3>
   </div>
   <div class="block-content">`;
@@ -1095,7 +1110,7 @@ $(document).ready(function () {
         item.questions.forEach((q, qidx) => {
           html += `
 <tr>
-  <td>${idx + 1}.${qidx + 1}</td>
+  <td>${escapeHtml(q.id || `${idx + 1}.${qidx + 1}`)}</td>
   <td>
     <input type="text" class="form-control" value="${escapeHtml(
       q.question
@@ -1133,7 +1148,7 @@ $(document).ready(function () {
       } else if (item.type === "mcq") {
         html += `
 <div class="mb-4 p-3 bg-light rounded border-start border-success border-5 shadow">
-  <div class="mb-2 fw-bold text-success">Câu ${idx + 1} 
+<div class="mb-2 fw-bold text-success">Câu ${escapeHtml(item.id || String(idx + 1))}
   (Trắc nghiệm, Mức độ <span class="display-level">${
     levelText[item.level]
   }</span>):</div>
@@ -1181,7 +1196,7 @@ $(document).ready(function () {
         html += `
 <div class="mb-3 p-3 bg-light rounded border-start border-warning border-5 shadow">
   <div class="fw-bold text-warning">Câu ${
-    idx + 1
+    escapeHtml(item.id || String(idx + 1))
   } (Tự luận, Mức độ <span class="display-level">${
           levelText[item.level]
         }</span>):</div>
@@ -1210,14 +1225,15 @@ $(document).ready(function () {
     html += `</div></div>`;
     $("#preview-cau-hoi").html(html).slideDown();
 
-    $("#preview-cau-hoi").on("change", "input[data-type='title']", function () {
+    $("#preview-cau-hoi").off(".questionPreview");
+    $("#preview-cau-hoi").on("change.questionPreview", "input[data-type='title']", function () {
       const idx = $(this).data("index");
       questions[idx].title = $(this).val();
       autoSaveChanges();
     });
 
     $("#preview-cau-hoi").on(
-      "change",
+      "change.questionPreview",
       "textarea[data-type='passage']",
       function () {
         const idx = $(this).data("index");
@@ -1227,7 +1243,7 @@ $(document).ready(function () {
     );
 
     $("#preview-cau-hoi").on(
-      "change",
+      "change.questionPreview",
       "input[data-type='question'], textarea[data-type='question']",
       function () {
         const idx = $(this).data("index");
@@ -1244,7 +1260,7 @@ $(document).ready(function () {
     );
 
     $("#preview-cau-hoi").on(
-      "change",
+      "change.questionPreview",
       "input[data-type='option']",
       function () {
         const idx = $(this).data("index");
@@ -1262,7 +1278,7 @@ $(document).ready(function () {
     );
 
     $("#preview-cau-hoi").on(
-      "change",
+      "change.questionPreview",
       ".level-select, .level-select-passage",
       function () {
         const idx = $(this).data("index");
@@ -1273,6 +1289,11 @@ $(document).ready(function () {
           questions[idx].questions[qidx].level = newLevel;
         } else {
           questions[idx].level = newLevel;
+          if (questions[idx].type === "reading") {
+            questions[idx].questions.forEach((question) => {
+              question.level = newLevel;
+            });
+          }
         }
 
         $(this)
@@ -1290,7 +1311,7 @@ $(document).ready(function () {
       }
     );
 
-    $("#preview-cau-hoi").on("change", ".answer-radio", function () {
+    $("#preview-cau-hoi").on("change.questionPreview", ".answer-radio", function () {
       const idx = $(this).data("index");
       const qidx = $(this).data("qindex");
       const oid = $(this).data("oid");
@@ -1354,8 +1375,8 @@ $(document).ready(function () {
       $btn
         .prop("disabled", true)
         .html('<i class="fa fa-spinner fa-spin"></i> Đang thêm...');
+      $("#file-cau-hoi, #file-excel, #btnAddExcel").prop("disabled", true);
       Dashmix.layout("header_loader_on");
-      console.log("📤 Sending questions:", JSON.stringify(questions));
 
       $.ajax({
         url: "/question/addQuesFile",
@@ -1376,10 +1397,9 @@ $(document).ready(function () {
               } câu hỏi!`,
             });
 
-            questions = [];
-            isModified = false;
-            $("#preview-cau-hoi").empty().hide();
-            $("#file-cau-hoi").val("");
+            resetFilePreview();
+            $("#file-cau-hoi, #file-excel").val("");
+            $("#import-file-name").empty();
             $("#form-upload")[0]?.reset();
             $btn.prop("disabled", true).html("Thêm vào hệ thống");
             $("#modal-add-question").modal("hide");
@@ -1391,14 +1411,16 @@ $(document).ready(function () {
             });
           }
         },
-        error: function () {
+        error: function (xhr) {
           Dashmix.helpers("jq-notify", {
             type: "danger",
-            message: "Lỗi kết nối hoặc timeout!",
+            message: requestError(xhr, "Lỗi kết nối hoặc timeout!"),
           });
         },
         complete: () => {
-          $btn.prop("disabled", false);
+          $("#file-cau-hoi, #file-excel, #btnAddExcel").prop("disabled", false);
+          $btn.prop("disabled", questions.length === 0);
+          if (questions.length) enableImportButton(questions.length);
           Dashmix.layout("header_loader_off");
         },
       });
@@ -1406,26 +1428,7 @@ $(document).ready(function () {
 
   // Helper escape HTML
   function escapeHtml(text) {
-    if (!text) return "";
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  // Load questions
-  function loadQuestion() {
-    $.get(
-      "/question/getQuestion",
-      {
-        page: page,
-        selected: $(".btn-filter").text(),
-        content: $("#search-input").val().trim(),
-      },
-      function (data) {
-        showData(data);
-      },
-      "json"
-    );
+    return escapeQuestionHtml(text);
   }
 
   // Add question
@@ -1627,7 +1630,9 @@ $(document).ready(function () {
     $("#add_question").show();
     $("#edit_question").hide();
     $("#question_id").val("");
-    $("#file-cau-hoi").val("");
+    resetFilePreview();
+    $("#file-cau-hoi, #file-excel").val("");
+    $("#import-file-name").empty();
 
     $("#modal-add-question").modal("show");
   });
@@ -2053,10 +2058,6 @@ $(document).ready(function () {
     });
   });
 
-  // Load questions
-  var page = 1;
-  var select = "Tất cả";
-  loadQuestion();
   // Preview ảnh khi chọn file mới
   $("#question-image").on("change", function (e) {
     const file = e.target.files[0];

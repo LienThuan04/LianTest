@@ -33,6 +33,11 @@ import type {
   IParsedItem,
 } from '@/questions/interfaces/questions.types';
 import type { IExamJwtPayload } from '@/exam-auth/interfaces/exam-auth.types';
+import {
+  assertValidQuestionItems,
+  createQuestionExcelTemplate,
+  parseQuestionExcel,
+} from './question-excel.parser';
 
 /**
  * Ngân hàng câu hỏi (SSR + AJAX) — thay controller question.php của DHT_OneTest.
@@ -43,7 +48,7 @@ import type { IExamJwtPayload } from '@/exam-auth/interfaces/exam-auth.types';
  * Đã port: trang SSR, danh sách chính (pagination/getTotalPages, JOIN phancong),
  * đọc/thêm/sửa/xoá, import từ file Word (.docx): parse (xulydoanvan/xulytracnghiem/
  * xulytuluan) + chuẩn hoá (updateQuestionJSON) + ghi lô (addQuesFile).
- * CHƯA port: addExcel — nút Excel ở UI đang vô hiệu ("sắp có").
+ * Excel (.xlsx/.xls) dùng cùng preview/chuẩn hoá/ghi lô với Word.
  */
 @Controller({ path: 'question', version: VERSION_NEUTRAL })
 export class QuestionsController {
@@ -59,13 +64,14 @@ export class QuestionsController {
 
   /** Parse JSON `questions` từ FormData; lỗi cú pháp → 400. */
   private parseItems(raw: string): IParsedItem[] {
+    let items: unknown;
     try {
-      const v = JSON.parse(raw) as unknown;
-      if (!Array.isArray(v)) throw new Error('not array');
-      return v as IParsedItem[];
+      items = JSON.parse(raw) as unknown;
     } catch {
       throw new BadRequestException('Dữ liệu câu hỏi không hợp lệ');
     }
+    assertValidQuestionItems(items);
+    return items;
   }
 
   /** Lấy buffer file .docx đã upload (field `fileToUpload`); thiếu → 400. */
@@ -231,6 +237,26 @@ export class QuestionsController {
   @Post('xulytuluan')
   parseEssay(@UploadedFile() file: Express.Multer.File) {
     return this.questions.parseEssayFile(this.requireDocx(file));
+  }
+
+  /** Excel only prepares a preview; addQuesFile performs the confirmed import. */
+  @Permissions('cauhoi', 'create')
+  @SkipTransform()
+  @UseInterceptors(FileInterceptor('fileToUpload', { limits: MULTER_LIMITS }))
+  @Post('addExcel')
+  async parseExcel(@UploadedFile() file: Express.Multer.File | undefined) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Vui lòng chọn file Excel .xlsx hoặc .xls');
+    }
+    const items = await parseQuestionExcel(file.buffer, file.originalname);
+    return this.questions.normalizeQuestions(items);
+  }
+
+  @Permissions('cauhoi', 'create')
+  @SkipTransform()
+  @Get('excelTemplate')
+  excelTemplate() {
+    return createQuestionExcelTemplate();
   }
 
   /** POST /question/updateQuestionJSON — chuẩn hoá mảng preview (tự lưu). */

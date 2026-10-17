@@ -112,6 +112,8 @@ export const setupAppConfig: (app: INestApplication) => {
       'question/xulytuluan',
       'question/updateQuestionJSON',
       'question/addQuesFile',
+      'question/addExcel',
+      'question/excelTemplate',
       // Ngân hàng câu hỏi — đếm số câu cho trang tạo đề.
       'question/getsoluongcauhoi',
       // Ngân hàng câu hỏi — đáp án nhiều câu (trang chọn câu cho đề thủ công).

@@ -312,7 +312,7 @@
                     <div class="block block-rounded shadow">
                       <div class="block-header block-header-default bg-primary-dark">
                         <h3 class="block-title text-white">
-                          Nhập câu hỏi từ file Word (.docx)
+                          Nhập câu hỏi từ Word hoặc Excel
                         </h3>
                       </div>
 
@@ -329,8 +329,8 @@
                               style="width: 100%;" data-placeholder="Chọn chương" required></select>
                           </div>
                           <div class="col-6">
-                            <label class="form-label">Loại câu hỏi <span class="text-danger">*</span></label>
-                            <select id="loaicauhoifile" class="js-select2 form-select" data-tab="2" style="width: 100%;" required>
+                            <label class="form-label">Loại câu hỏi (file Word)</label>
+                            <select id="loaicauhoifile" class="js-select2 form-select" data-tab="2" style="width: 100%;">
                               <option value="">Chọn loại câu hỏi</option>
                               <option value="mcq">Trắc nghiệm</option>
                               <option value="essay">Tự luận</option>
@@ -341,11 +341,12 @@
 
                         <div class="mb-4">
                           <label class="form-label" for="file-cau-hoi">
-                            File câu hỏi (.docx) <span class="text-danger">*</span>
+                            File câu hỏi (.docx, .xlsx, .xls) <span class="text-danger">*</span>
                           </label>
-                          <input type="file" class="form-control form-control-lg" id="file-cau-hoi" accept=".docx" required>
-                          <div class="form-text mt-2">Chỉ hỗ trợ file Word 2007 trở lên (.docx)</div>
-                          <div class="invalid-feedback">Vui lòng chọn file .docx</div>
+                          <input type="file" class="form-control form-control-lg" id="file-cau-hoi" accept=".docx,.xlsx,.xls">
+                          <input type="file" id="file-excel" accept=".xlsx,.xls" class="d-none" aria-label="Chọn file Excel câu hỏi">
+                          <div class="form-text mt-2">Word: chọn loại câu hỏi trước. Excel: có thể chứa cả ba loại; chỉ đọc sheet đầu tiên.</div>
+                          <div id="import-file-name" class="form-text" aria-live="polite"></div>
                         </div>
 
                         <div class="alert alert-info d-flex align-items-start mb-4" role="alert">
@@ -356,9 +357,18 @@
                             • Dùng <code>[Reading][2]</code> cho đoạn văn - mức độ TB<br>
                             • Dùng <code>[mcq][1]</code> cho trắc nghiệm - mức độ dễ<br><br>
 
+                            <strong>Excel:</strong> dùng dòng tiêu đề của file mẫu. Mỗi dòng là một câu hỏi; <code>type</code> là <code>mcq</code>, <code>essay</code> hoặc <code>reading</code>, <code>level</code> là 1–3, <code>question</code> là nội dung.<br>
+                            • Trắc nghiệm/đọc hiểu: nhập ít nhất hai phương án liên tiếp ở cột A–D và <code>answer</code> là A–D hoặc 1–4.<br>
+                            • Đọc hiểu: các câu con dùng cùng <code>reading_id</code>, cùng mức độ và nằm liên tiếp. Dòng đầu có <code>passage</code> và <code>title</code>; các dòng sau có thể bỏ trống hai ô này.<br>
+                            • <code>id</code> không bắt buộc, dùng để đối chiếu trong bản xem trước; nhập dạng văn bản để giữ số 0 đầu. Hệ thống tạo mã câu hỏi mới khi lưu.<br>
+                            • Kiểm tra bản xem trước rồi bấm “Thêm vào hệ thống”. File có dòng sai sẽ bị từ chối toàn bộ; chưa có câu hỏi nào được lưu khi đọc file.<br><br>
+
                             <div class="mb-3">
                               <label class="form-label fw-bold">Tải file mẫu theo định dạng:</label>
                               <div class="d-flex gap-2 flex-wrap">
+                                <button type="button" id="download-question-excel-template" class="btn btn-alt-primary btn-sm">
+                                  <i class="fa fa-download me-1"></i> Excel đủ ba loại (.xlsx)
+                                </button>
                                 <a href="/public/filemau/THEMFILE_TRACNGHIEM.pdf" class="btn btn-alt-success btn-sm" download>
                                   <i class="fa fa-download me-1"></i> Trắc nghiệm (.pdf)
                                 </a>
@@ -378,7 +388,7 @@
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                           <button type="button" class="btn btn-alt-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
                           <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-hero-primary" id="btnAddExcel" disabled>Thêm file Excel (sắp có)</button>
+                            <button type="button" class="btn btn-hero-primary" id="btnAddExcel">Chọn file Excel</button>
                             <button type="submit" class="btn btn-hero-success btn-lg" id="nhap-file" disabled>
                               <span id="text-nhap-file">Thêm vào hệ thống</span>
                             </button>
@@ -412,6 +422,7 @@
   <script src="/public/js/plugins/jquery-validation/localization/messages_vi.min.js"></script>
   <!-- Phân trang + logic trang -->
   <script src="/public/js/pagination.js"></script>
+  <script src="/public/js/question-html.js"></script>
   <script src="/public/js/pages/question.js"></script>
 
   <!-- CSS riêng cho trang (bê nguyên từ question.php) -->
