@@ -6,7 +6,12 @@ import { existsSync } from 'fs';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@/prisma/prisma.service';
 import { cellText } from '@/common/utils/excel.util';
-import { createTestApp, login } from './setup-app';
+import {
+  createTestApp,
+  login,
+  requireFixture,
+  fixtureFailure,
+} from './setup-app';
 
 /**
  * e2e Phase 7 slice 1: **xuất Excel / in PDF / nhập SV từ .xlsx**.
@@ -50,10 +55,6 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
 
   /** Nhóm tạm do test tạo (chỉ dùng cho các ca nhập SV). */
   let tempNhom = 0;
-
-  const skip = (why: string) => {
-    console.warn(`Bỏ qua e2e Excel/PDF: ${why}`);
-  };
 
   const post = (path: string, cookie: string, body: Record<string, unknown>) =>
     request(server)
@@ -140,7 +141,7 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
     prisma = app.get(PrismaService);
 
     gvCookie = await login(app, GV);
-    if (!gvCookie) return skip(`CSDL chưa có tài khoản mẫu ${GV}`);
+    if (!gvCookie) return fixtureFailure(`CSDL chưa có tài khoản mẫu ${GV}`);
 
     // Nhóm mẫu của GV có SV và có đề đã thi (để xuất bảng điểm + in phiếu).
     const rows = await prisma.$queryRaw<
@@ -156,7 +157,9 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
       LIMIT 1
     `;
     if (!rows.length) {
-      return skip('CSDL chưa có nhóm + đề đã có bài làm (chạy seed-demo)');
+      return fixtureFailure(
+        'CSDL chưa có nhóm + đề đã có bài làm (chạy seed-demo)',
+      );
     }
 
     const nhom = await prisma.nhom.findUnique({
@@ -168,7 +171,7 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
       orderBy: { manguoidung: 'asc' },
     });
     if (!nhom || nhom.namhoc == null || nhom.hocky == null || !members.length) {
-      return skip('nhóm mẫu thiếu thành viên hoặc năm học/học kỳ');
+      return fixtureFailure('nhóm mẫu thiếu thành viên hoặc năm học/học kỳ');
     }
 
     fixture = {
@@ -219,7 +222,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // ── Xuất danh sách SV của nhóm ─────────────────────────────────────────────
 
   it('POST /module/exportExcelStudentS trả .xlsx mở lại được, đủ SV của nhóm', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/module/exportExcelStudentS', gvCookie, {
       manhom: fixture.manhom,
     });
@@ -242,7 +248,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('nhóm chưa có SV → file chỉ có dòng header (không lỗi)', async () => {
-    if (!tempNhom || !gvCookie) return;
+    requireFixture(
+      tempNhom && gvCookie,
+      'temporary import group and teacher session',
+    );
     const res = await post('/module/exportExcelStudentS', gvCookie, {
       manhom: tempNhom,
     });
@@ -255,7 +264,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // ── Xuất bảng điểm 1 đề ────────────────────────────────────────────────────
 
   it('POST /test/exportExcel (lọc 1 nhóm) — SV đã thi có điểm, SV chưa thi ghi "Chưa làm"', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/test/exportExcel', gvCookie, {
       made: fixture.made,
       manhom: fixture.manhom,
@@ -307,7 +319,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('POST /test/exportExcel (tất cả nhóm, ds=[mã nhóm]) — tiêu đề hiện TÊN LỚP thật', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/test/exportExcel', gvCookie, {
       made: fixture.made,
       manhom: 0,
@@ -330,7 +345,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('POST /test/exportExcel không chọn nhóm nào → "Không có dữ liệu"', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/test/exportExcel', gvCookie, {
       made: fixture.made,
       manhom: 0,
@@ -343,7 +361,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // ── Bảng điểm tất cả đề của nhóm ───────────────────────────────────────────
 
   it('POST /test/getMarkOfAllTest dựng ma trận SV × đề, ghép đúng theo cặp', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/test/getMarkOfAllTest', gvCookie, {
       manhom: fixture.manhom,
     });
@@ -386,7 +407,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('getMarkOfAllTest với nhóm chưa có SV → "Không có dữ liệu"', async () => {
-    if (!tempNhom || !gvCookie) return;
+    requireFixture(
+      tempNhom && gvCookie,
+      'temporary import group and teacher session',
+    );
     const res = await post('/test/getMarkOfAllTest', gvCookie, {
       manhom: tempNhom,
     });
@@ -397,7 +421,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // ── Phiếu kết quả để in ────────────────────────────────────────────────────
 
   it('GET /test/exportPdf/:makq trả trang HTML tự in, đủ số câu + đúng điểm', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await request(server)
       .get(`/test/exportPdf/${fixture.makq}`)
       .set('Accept', 'text/html')
@@ -425,7 +452,7 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('exportPdf với mã kết quả lạ → 404; SV không có quyền dethi.view → 403', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     await request(server)
       .get('/test/exportPdf/999999')
       .set('Accept', 'text/html')
@@ -448,9 +475,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // ── Nhập SV từ .xlsx: đọc file ─────────────────────────────────────────────
 
   it('POST /user/addExcel đọc được FILE MẪU trong public/filemau', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const mau = join(process.cwd(), 'public', 'filemau', 'danhsachsv_mau.xlsx');
-    if (!existsSync(mau)) return skip('thiếu file mẫu danhsachsv_mau.xlsx');
+    if (!existsSync(mau))
+      return fixtureFailure('thiếu file mẫu danhsachsv_mau.xlsx');
 
     const res = await request(server)
       .post('/user/addExcel')
@@ -468,7 +496,7 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('addExcel bỏ qua dòng thiếu MSSV / email sai định dạng', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const buf = await buildStudentXlsx([
       ...svMoi,
       { mssv: '', hoDem: 'Thiếu', ten: 'MSSV', email: 'x@e2e.local' },
@@ -496,7 +524,7 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('addExcel đọc được file .xls CŨ (BIFF) y hệt file .xlsx', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const rows = [
       ...svXls,
       { mssv: '', hoDem: 'Thiếu', ten: 'MSSV', email: 'x@e2e.local' },
@@ -527,7 +555,7 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('addExcel: thiếu file / đuôi lạ / file hỏng → lỗi có kiểm soát (không 500)', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const thieu = await request(server)
       .post('/user/addExcel')
       .set('Cookie', gvCookie)
@@ -574,7 +602,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // ── Nhập SV từ .xlsx: ghi vào nhóm ─────────────────────────────────────────
 
   it('POST /user/addFileExcelGroup tạo tài khoản + thêm vào nhóm + cập sỉ số', async () => {
-    if (!tempNhom || !gvCookie) return;
+    requireFixture(
+      tempNhom && gvCookie,
+      'temporary import group and teacher session',
+    );
     const res = await post('/user/addFileExcelGroup', gvCookie, {
       listuser: JSON.stringify(
         svMoi.map((s) => ({
@@ -615,7 +646,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('nhập lại đúng danh sách đó → báo "đã có trong nhóm", KHÔNG nhân bản', async () => {
-    if (!tempNhom || !gvCookie) return;
+    requireFixture(
+      tempNhom && gvCookie,
+      'temporary import group and teacher session',
+    );
     const res = await post('/user/addFileExcelGroup', gvCookie, {
       listuser: JSON.stringify(
         svMoi.map((s) => ({
@@ -641,12 +675,18 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('email trùng người dùng sẵn có → bắt P2002, KHÔNG tạo bản ghi mồ côi', async () => {
-    if (!tempNhom || !gvCookie || !fixture) return;
+    requireFixture(
+      tempNhom && gvCookie && fixture,
+      'temporary import group and teacher session and seeded business fixture',
+    );
     const cu = await prisma.nguoiDung.findUnique({
       where: { id: fixture.svs[0] },
       select: { email: true },
     });
-    if (!cu?.email) return;
+    requireFixture(
+      cu?.email,
+      'existing student email for the duplicate-email case',
+    );
 
     const mssvLoi = `${PREFIX}TRUNG`;
     const res = await post('/user/addFileExcelGroup', gvCookie, {
@@ -676,7 +716,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   });
 
   it('addFileExcelGroup với danh sách hỏng / thiếu nhóm → lỗi có kiểm soát', async () => {
-    if (!tempNhom || !gvCookie) return;
+    requireFixture(
+      tempNhom && gvCookie,
+      'temporary import group and teacher session',
+    );
     const hong = await post('/user/addFileExcelGroup', gvCookie, {
       listuser: 'day-khong-phai-json',
       password: '123456',
@@ -701,7 +744,10 @@ describe('Xuất Excel / in PDF / nhập SV từ .xlsx (e2e)', () => {
   // Luồng đầy đủ khởi đầu từ file .xls cũ — để cuối cùng vì có thêm thành viên
   // vào nhóm tạm (các ca trên đối chiếu sỉ số theo `svMoi`).
   it('nhập SV vào nhóm từ file .xls: addExcel → addFileExcelGroup', async () => {
-    if (!tempNhom || !gvCookie) return;
+    requireFixture(
+      tempNhom && gvCookie,
+      'temporary import group and teacher session',
+    );
 
     const parsed = await request(server)
       .post('/user/addExcel')

@@ -5,7 +5,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
 import { EmailService } from '@/email/email.service';
-import { createTestApp, login } from './setup-app';
+import {
+  createTestApp,
+  login,
+  requireFixture,
+  fixtureFailure,
+} from './setup-app';
 
 /**
  * e2e cho 4 mảng bổ sung sau khi rà soát lại toàn bộ so với bản PHP:
@@ -49,10 +54,6 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   let fixtureNhom: number | null = null;
   /** Đề đã có bài làm trong nhóm mẫu (cho getExamineeByGroup). */
   let fixtureMade: number | null = null;
-
-  const skip = (why: string) => {
-    console.warn(`Bỏ qua e2e auth/account: ${why}`);
-  };
 
   const post = (
     path: string,
@@ -154,7 +155,8 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
       select: { id: true },
       orderBy: { id: 'asc' },
     });
-    if (sv) svCookie = await login(app, sv.id);
+    requireFixture(sv, 'student account for RBAC assertions');
+    svCookie = await login(app, sv.id);
   }, 90_000);
 
   afterAll(async () => {
@@ -177,7 +179,8 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   // ── 1. Đề đã giao cho 1 nhóm (offcanvas nhóm học phần) ─────────────────────
 
   it('POST /test/getTestGroup trả đề của nhóm, thời gian đã định dạng H:i d/m/Y', async () => {
-    if (!gvCookie || !fixtureNhom) return skip('chưa có nhóm mẫu có đề');
+    if (!gvCookie || !fixtureNhom)
+      return fixtureFailure('chưa có nhóm mẫu có đề');
     const res = await post('/test/getTestGroup', gvCookie, {
       manhom: fixtureNhom,
     }).expect(201);
@@ -202,7 +205,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   });
 
   it('POST /test/getTestGroup nhóm không tồn tại → mảng rỗng; SV → 403', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const res = await post('/test/getTestGroup', gvCookie, {
       manhom: 999999,
     }).expect(201);
@@ -215,7 +218,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
 
   it('POST /test/getExamineeByGroup trả bài làm của đề, lọc theo nhóm', async () => {
     if (!gvCookie || !fixtureNhom || !fixtureMade) {
-      return skip('chưa có đề đã nộp bài trong nhóm mẫu');
+      return fixtureFailure('chưa có đề đã nộp bài trong nhóm mẫu');
     }
     const res = await post('/test/getExamineeByGroup', gvCookie, {
       made: fixtureMade,
@@ -248,7 +251,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   });
 
   it('POST /test/getExamineeByGroup: nhóm/đề không khớp → rỗng; SV → 403', async () => {
-    if (!gvCookie || !fixtureMade) return;
+    requireFixture(gvCookie && fixtureMade, 'teacher session and !fixtureMade');
     const res = await post('/test/getExamineeByGroup', gvCookie, {
       made: fixtureMade,
       manhom: 999999,
@@ -266,7 +269,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   // ── 2. Nhập người dùng hàng loạt từ Excel (trang Người dùng) ───────────────
 
   it('POST /user/addExcel → /user/addFileExcel tạo tài khoản, chạy lại báo đã có', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const file = await buildStudentXlsx(svExcel);
 
     const parsed = await request(server)
@@ -305,7 +308,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   }, 60_000);
 
   it('POST /user/addFileExcel: danh sách hỏng → error; SV → 403', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const bad = await post('/user/addFileExcel', gvCookie, {
       listuser: 'khong-phai-json',
       password: 'matkhau123',
@@ -321,7 +324,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
   });
 
   it('nhập người dùng từ file .xls CŨ (BIFF) cũng chạy trọn luồng', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const parsed = await request(server)
       .post('/user/addExcel')
       .set('Cookie', gvCookie)
@@ -528,7 +531,10 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
       )?.otp,
     ).toBeNull();
     expect(await login(app, ACC.id, 'matkhaumoi9')).toBeTruthy();
-    expect(await login(app, ACC.id, ACC.password)).toBeNull();
+    await request(server)
+      .post('/auth/login')
+      .send({ id: ACC.id, password: ACC.password })
+      .expect(401);
 
     ACC.password = 'matkhaumoi9';
   }, 60_000);
@@ -537,7 +543,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
 
   it('GET /account render hồ sơ của chính người đăng nhập', async () => {
     const cookie = await login(app, ACC.id, ACC.password);
-    if (!cookie) return skip('không đăng nhập được tài khoản test');
+    if (!cookie) return fixtureFailure('không đăng nhập được tài khoản test');
 
     const res = await request(server)
       .get('/account')
@@ -553,7 +559,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
 
   it('POST /account/changePassword: sai mật khẩu cũ bị từ chối, đúng thì đổi được', async () => {
     const cookie = await login(app, ACC.id, ACC.password);
-    if (!cookie) return;
+    requireFixture(cookie, 'authenticated session');
 
     const sai = await post('/account/changePassword', cookie, {
       matkhaucu: 'saibet123',
@@ -576,13 +582,14 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
 
   it('POST /account/changeProfile: email trùng bị chặn, hợp lệ thì lưu đúng', async () => {
     const cookie = await login(app, ACC.id, ACC.password);
-    if (!cookie) return;
+    requireFixture(cookie, 'authenticated session');
 
     const gv = await prisma.nguoiDung.findUnique({
       where: { id: GV },
       select: { email: true },
     });
-    if (gv) {
+    requireFixture(gv, 'teacher account for the duplicate-email case');
+    {
       const trung = await post('/account/changeProfile', cookie, {
         hoten: 'Đổi Tên',
         email: gv.email,
@@ -619,7 +626,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
 
   it('POST /account/uploadFile: nhận .png, từ chối file lạ và request không có file', async () => {
     const cookie = await login(app, ACC.id, ACC.password);
-    if (!cookie) return;
+    requireFixture(cookie, 'authenticated session');
 
     const ok = await request(server)
       .post('/account/uploadFile')
@@ -659,7 +666,7 @@ describe('Trang cá nhân, đăng ký/khôi phục mật khẩu, đề của nh�
 
   it('avatar dạng TÊN FILE cũ vẫn hiển thị qua /public/media/avatars/', async () => {
     const cookie = await login(app, ACC.id, ACC.password);
-    if (!cookie) return;
+    requireFixture(cookie, 'authenticated session');
 
     // Dữ liệu cũ (seed/bản PHP) lưu tên file chứ không phải URL.
     await prisma.nguoiDung.update({

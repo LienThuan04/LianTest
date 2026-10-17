@@ -1,7 +1,12 @@
 import request from 'supertest';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@/prisma/prisma.service';
-import { createTestApp, login } from './setup-app';
+import {
+  createTestApp,
+  login,
+  requireFixture,
+  fixtureFailure,
+} from './setup-app';
 
 /**
  * e2e LUỒNG NGHIỆP VỤ: GV tạo đề thủ công → chọn câu hỏi → giao nhóm →
@@ -39,10 +44,6 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   let chosen: { macauhoi: number; macautl: number }[] = [];
   let makq = 0;
 
-  const skip = (why: string) => {
-    console.warn(`Bỏ qua e2e luồng nghiệp vụ: ${why}`);
-  };
-
   /** `YYYY-MM-DD HH:mm` theo giờ máy — đúng định dạng flatpickr gửi lên. */
   const fmt = (d: Date) => {
     const p = (n: number) => String(n).padStart(2, '0');
@@ -58,7 +59,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
     prisma = app.get(PrismaService);
 
     gvCookie = await login(app, 'gv001');
-    if (!gvCookie) return skip('CSDL chưa có tài khoản mẫu gv001');
+    if (!gvCookie) return fixtureFailure('CSDL chưa có tài khoản mẫu gv001');
 
     // Nhóm học phần của gv001 có ít nhất 1 sinh viên + môn có sẵn câu hỏi mcq.
     const nhomList = await prisma.nhom.findMany({
@@ -88,10 +89,11 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
       break;
     }
     if (!fixture)
-      return skip('CSDL chưa có nhóm + câu hỏi mẫu (chạy seed-demo)');
+      return fixtureFailure('CSDL chưa có nhóm + câu hỏi mẫu (chạy seed-demo)');
 
     svCookie = await login(app, fixture.sv);
-    if (!svCookie) skip(`không đăng nhập được bằng SV mẫu ${fixture.sv}`);
+    if (!svCookie)
+      fixtureFailure(`không đăng nhập được bằng SV mẫu ${fixture.sv}`);
   }, 90_000);
 
   afterAll(async () => {
@@ -121,7 +123,10 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   // ── GV: tạo đề thủ công ────────────────────────────────────────────────────
 
   it('GV tạo đề thủ công (POST /test/addTest) → trả về mã đề', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const now = Date.now();
     const res = await request(server)
       .post('/test/addTest')
@@ -157,7 +162,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('đề vừa tạo đã được giao cho nhóm + sinh thông báo tự động', async () => {
-    if (!made) return;
+    requireFixture(made, 'exam created by a preceding test');
     const giao = await prisma.giaoDeThi.count({
       where: { made, manhom: fixture!.manhom },
     });
@@ -171,7 +176,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('trang chọn câu hỏi (GET /test/select/:made) render được', async () => {
-    if (!made) return;
+    requireFixture(made, 'exam created by a preceding test');
     await request(server)
       .get(`/test/select/${made}`)
       .set('Accept', 'text/html')
@@ -180,7 +185,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('danh sách câu hỏi để chọn (pagination custom=getQuestionsForTest)', async () => {
-    if (!made) return;
+    requireFixture(made, 'exam created by a preceding test');
     const args = JSON.stringify({
       controller: 'test',
       model: 'DeThiModel',
@@ -230,7 +235,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('lưu câu hỏi vào đề (POST /test/addDetail)', async () => {
-    if (!chosen.length) return;
+    requireFixture(chosen.length, 'selected exam questions');
     const body: Record<string, string | number> = { made, action: 'add' };
     chosen.forEach((c, i) => {
       body[`cauhoi[${i}][macauhoi]`] = c.macauhoi;
@@ -250,7 +255,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('đọc lại câu hỏi của đề (POST /test/getQuestionOfTestManual)', async () => {
-    if (!chosen.length) return;
+    requireFixture(chosen.length, 'selected exam questions');
     const res = await request(server)
       .post('/test/getQuestionOfTestManual')
       .set('Cookie', gvCookie!)
@@ -267,7 +272,10 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   // ── SV: vào thi & nộp bài ──────────────────────────────────────────────────
 
   it('SV mở trang vào thi (GET /test/start/:made) → 200', async () => {
-    if (!chosen.length || !svCookie) return;
+    requireFixture(
+      chosen.length && svCookie,
+      'selected exam questions and student session',
+    );
     const res = await request(server)
       .get(`/test/start/${made}`)
       .set('Accept', 'text/html')
@@ -278,7 +286,10 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('SV bắt đầu làm bài (POST /test/startTest) → tạo bản ghi kết quả', async () => {
-    if (!chosen.length || !svCookie) return;
+    requireFixture(
+      chosen.length && svCookie,
+      'selected exam questions and student session',
+    );
     await request(server)
       .post('/test/startTest')
       .set('Cookie', svCookie)
@@ -300,7 +311,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('SV lấy đề (POST /test/getQuestion) → đủ câu + KHÔNG lộ đáp án đúng', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/getQuestion')
       .set('Cookie', svCookie!)
@@ -319,7 +330,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('SV mở trang làm bài (GET /test/taketest/:made) → render, không redirect', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .get(`/test/taketest/${made}`)
       .set('Accept', 'text/html')
@@ -329,7 +340,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('SV chuyển tab (POST /test/chuyentab) → đếm tăng, đề không bật tự nộp', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/chuyentab')
       .set('Cookie', svCookie!)
@@ -344,7 +355,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('SV nộp bài đúng hết (POST /test/submit) → 10 điểm, trạng thái Đã nộp', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const listCauTraLoi = chosen.map((c, i) => ({
       macauhoi: c.macauhoi,
       thutu: i + 1,
@@ -371,7 +382,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('nộp lại lần nữa bị từ chối (không ghi đè bài đã nộp)', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/submit')
       .set('Cookie', svCookie!)
@@ -383,7 +394,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('SV xem lại chi tiết bài làm (POST /test/getResultDetail)', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/getResultDetail')
       .set('Cookie', svCookie!)
@@ -398,7 +409,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   // ── GV: xem kết quả ────────────────────────────────────────────────────────
 
   it('GV mở trang chi tiết đề (GET /test/detail/:made) → 200', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     await request(server)
       .get(`/test/detail/${made}`)
       .set('Accept', 'text/html')
@@ -407,7 +418,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('bảng điểm (pagination model=KetQuaModel) có bài của SV vừa nộp', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const args = JSON.stringify({
       controller: 'test',
       model: 'KetQuaModel',
@@ -434,7 +445,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('thống kê đề (POST /test/getStatictical) đếm đúng 1 bài đã nộp', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/getStatictical')
       .set('Cookie', gvCookie!)
@@ -450,7 +461,7 @@ describe('Luồng nghiệp vụ: tạo đề → làm bài → chấm (e2e)', ()
   });
 
   it('không xoá được đề đã có người thi (POST /test/delete)', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/delete')
       .set('Cookie', gvCookie!)

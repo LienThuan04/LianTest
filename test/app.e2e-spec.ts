@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { createTestApp } from './setup-app';
+import { createPublicTestApp } from './setup-app';
 
 /**
  * Khói (smoke) cho trang gốc. `GET /` là landing SSR (thay `landing.php`),
@@ -10,7 +10,7 @@ describe('Trang gốc (e2e)', () => {
   let app: NestExpressApplication;
 
   beforeAll(async () => {
-    app = await createTestApp();
+    app = await createPublicTestApp();
   }, 60_000);
 
   afterAll(async () => {

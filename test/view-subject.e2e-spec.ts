@@ -1,7 +1,12 @@
 import request from 'supertest';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@/prisma/prisma.service';
-import { createTestApp, login } from './setup-app';
+import {
+  createTestApp,
+  login,
+  requireFixture,
+  fixtureFailure,
+} from './setup-app';
 
 /**
  * e2e trang **"Môn học của tôi"** (`/view_subject/*`) — port view_subject.php +
@@ -41,10 +46,6 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   let softDeleted: { mamonhoc: string; namhoc: number; hocky: number } | null =
     null;
 
-  const skip = (why: string) => {
-    console.warn(`Bỏ qua e2e view_subject: ${why}`);
-  };
-
   const post = (path: string, cookie: string, body: Record<string, unknown>) =>
     request(server)
       .post(path)
@@ -70,7 +71,7 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
     prisma = app.get(PrismaService);
 
     gvCookie = await login(app, GV);
-    if (!gvCookie) return skip(`CSDL chưa có tài khoản mẫu ${GV}`);
+    if (!gvCookie) return fixtureFailure(`CSDL chưa có tài khoản mẫu ${GV}`);
 
     const rows = await prisma.$queryRaw<
       { mamonhoc: string; tenmonhoc: string; namhoc: number; hocky: number }[]
@@ -83,7 +84,7 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
       LIMIT 1
     `;
     if (!rows.length)
-      return skip('CSDL chưa có phân công mẫu (chạy seed-demo)');
+      return fixtureFailure('CSDL chưa có phân công mẫu (chạy seed-demo)');
 
     const [count] = await prisma.$queryRaw<{ total: number }[]>`
       SELECT COUNT(*)::int AS total FROM (
@@ -123,7 +124,7 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   // ── Trang SSR ──────────────────────────────────────────────────────────────
 
   it('GET /view_subject trả trang có đủ hook cho pagination.js + view_subject.js', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     const res = await request(server)
       .get('/view_subject')
       .set('Cookie', gvCookie)
@@ -140,7 +141,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   // ── Dropdown năm học / học kỳ ─────────────────────────────────────────────
 
   it('POST /view_subject/getNamHoc trả năm học có phân công của GV', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/view_subject/getNamHoc', gvCookie, {}).expect(201);
 
     expect(res.body.success).toBe(true);
@@ -151,7 +155,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('POST /view_subject/getHocKy trả học kỳ của đúng năm học đó', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/view_subject/getHocKy', gvCookie, {
       namhoc: fixture.namhoc,
     }).expect(201);
@@ -168,14 +175,17 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('POST /view_subject/getHocKy thiếu tham số namhoc → 400', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     await post('/view_subject/getHocKy', gvCookie, {}).expect(400);
   });
 
   // ── Phân trang danh sách môn được phân công ───────────────────────────────
 
   it('POST /view_subject/pagination chỉ trả môn phân công cho chính GV', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await paginate(gvCookie, { limit: 50, page: 1 }).expect(201);
 
     expect(Array.isArray(res.body)).toBe(true);
@@ -192,13 +202,19 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('POST /view_subject/getTotalPages khớp số dòng thật', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await totalPages(gvCookie, { limit: 1, page: 1 }).expect(201);
     expect(res.body.totalPages).toBe(fixture.total);
   });
 
   it('phân trang cắt đúng trang (limit=1 → trang 1 khác trang 2)', async () => {
-    if (!fixture || !gvCookie || fixture.total < 2) return;
+    requireFixture(
+      fixture && gvCookie && !(fixture.total < 2),
+      'seeded business fixture and teacher session and at least two subject assignments',
+    );
     const p1 = await paginate(gvCookie, { limit: 1, page: 1 }).expect(201);
     const p2 = await paginate(gvCookie, { limit: 1, page: 2 }).expect(201);
 
@@ -208,7 +224,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('lọc theo năm học + học kỳ chỉ trả đúng năm/kỳ đó', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await paginate(gvCookie, {
       limit: 50,
       page: 1,
@@ -236,7 +255,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('tìm kiếm nhận cả args.input lẫn filter.input, không phân biệt hoa thường', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const keyword = fixture.mamonhoc.toLowerCase();
 
     // Nhánh pagination.js gán (gõ vào ô tìm kiếm).
@@ -274,7 +296,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('phân công đã xoá mềm (trangthai=0) KHÔNG hiện trong danh sách', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
 
     // Chọn 1 môn còn hoạt động chưa được phân công cho GV ở năm/kỳ này.
     const free = await prisma.$queryRaw<{ mamonhoc: string }[]>`
@@ -287,7 +312,8 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
         )
       ORDER BY mh.mamonhoc ASC LIMIT 1
     `;
-    if (!free.length) return skip('không còn môn trống để dựng ca xoá mềm');
+    if (!free.length)
+      return fixtureFailure('không còn môn trống để dựng ca xoá mềm');
 
     softDeleted = {
       mamonhoc: free[0].mamonhoc,
@@ -310,7 +336,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   // ── Quản lý chương của môn ────────────────────────────────────────────────
 
   it('thêm → đổi tên → xoá mềm chương của môn được phân công', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
 
     const before = await post('/view_subject/getAllChapter', gvCookie, {
       mamonhoc: fixture.mamonhoc,
@@ -369,7 +398,10 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   });
 
   it('thêm chương thiếu tên → 400 (DTO chặn trước khi vào CSDL)', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     await post('/view_subject/addChapter', gvCookie, {
       mamonhoc: fixture.mamonhoc,
       tenchuong: '',
@@ -379,7 +411,7 @@ describe('Môn học của tôi — view_subject (e2e)', () => {
   // ── RBAC ──────────────────────────────────────────────────────────────────
 
   it('sinh viên mở trang → 403 (trang lỗi HTML), gọi AJAX → 403 JSON', async () => {
-    if (!svCookie) return;
+    requireFixture(svCookie, 'student session');
     const page = await request(server)
       .get('/view_subject')
       .set('Cookie', svCookie)

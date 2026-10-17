@@ -1,7 +1,12 @@
 import request from 'supertest';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@/prisma/prisma.service';
-import { createTestApp, login } from './setup-app';
+import {
+  createTestApp,
+  login,
+  requireFixture,
+  fixtureFailure,
+} from './setup-app';
 
 /**
  * e2e LUỒNG NGHIỆP VỤ 2: đề **TỰ ĐỘNG** (`loaide=1`) có câu tự luận →
@@ -64,10 +69,6 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
     essay: number[];
   } = { mcq: [], reading: [], essay: [] };
 
-  const skip = (why: string) => {
-    console.warn(`Bỏ qua e2e đề tự động: ${why}`);
-  };
-
   /** `YYYY-MM-DD HH:mm` theo giờ máy — đúng định dạng flatpickr gửi lên. */
   const fmt = (d: Date) => {
     const p = (n: number) => String(n).padStart(2, '0');
@@ -85,7 +86,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
     prisma = app.get(PrismaService);
 
     gvCookie = await login(app, 'gv001');
-    if (!gvCookie) return skip('CSDL chưa có tài khoản mẫu gv001');
+    if (!gvCookie) return fixtureFailure('CSDL chưa có tài khoản mẫu gv001');
 
     // Nhóm của gv001 có SV + môn đủ câu để sinh đề tự động (>=2 mcq cùng mức
     // độ và >=1 tự luận; đọc hiểu có thì dùng, không có thì bỏ phần đọc hiểu).
@@ -139,11 +140,14 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
       break;
     }
     if (!fixture) {
-      return skip('CSDL chưa có nhóm + câu mcq/tự luận mẫu (chạy seed-demo)');
+      return fixtureFailure(
+        'CSDL chưa có nhóm + câu mcq/tự luận mẫu (chạy seed-demo)',
+      );
     }
 
     svCookie = await login(app, fixture.sv);
-    if (!svCookie) skip(`không đăng nhập được bằng SV mẫu ${fixture.sv}`);
+    if (!svCookie)
+      fixtureFailure(`không đăng nhập được bằng SV mẫu ${fixture.sv}`);
   }, 90_000);
 
   afterAll(async () => {
@@ -179,7 +183,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   // ── GV: tạo đề tự động ─────────────────────────────────────────────────────
 
   it('GV tạo đề TỰ ĐỘNG (loaide=1) → hệ thống tự bốc câu vào đề', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const now = Date.now();
     const socau: Record<string, Record<string, number>> = {
       mcq: { [fixture.mcqLevel]: 2 },
@@ -252,7 +259,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('chuẩn bị đáp án đúng/sai cho từng câu (đối chiếu điểm sau khi nộp)', async () => {
-    if (!made) return;
+    requireFixture(made, 'exam created by a preceding test');
     const rows = await prisma.$queryRaw<{ macauhoi: number; loai: string }[]>`
       SELECT ch.macauhoi, ch.loai
       FROM chitietdethi ctd JOIN cauhoi ch ON ch.macauhoi = ctd.macauhoi
@@ -288,7 +295,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('đòi nhiều câu hơn ngân hàng có → từ chối, KHÔNG tạo đề', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const tenLoi = `[E2E] Đề thiếu câu ${Date.now()}`;
     const res = await request(server)
       .post('/test/addTest')
@@ -318,7 +328,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   // ── SV: làm bài & nộp ──────────────────────────────────────────────────────
 
   it('SV bắt đầu làm bài → chitietketqua pre-insert đủ câu của đề', async () => {
-    if (!made || !svCookie) return;
+    requireFixture(
+      made && svCookie,
+      'exam created by a preceding test and student session',
+    );
     await request(server)
       .post('/test/startTest')
       .set('Cookie', svCookie)
@@ -338,7 +351,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('SV lấy đề: câu tự luận KHÔNG có lựa chọn, câu đọc hiểu kèm đoạn văn', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/getQuestion')
       .set('Cookie', svCookie!)
@@ -362,7 +375,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('SV nộp bài: 1/2 mcq đúng + đọc hiểu đúng hết + 1 bài tự luận', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     // mcq[0] đúng, mcq[1] sai (không có đáp án sai thì bỏ trống = 0 điểm).
     const listCauTraLoi = [
       { macauhoi: sinh.mcq[0].macauhoi, thutu: 1, cautraloi: sinh.mcq[0].dung },
@@ -419,7 +432,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   // ── GV: chấm tự luận ───────────────────────────────────────────────────────
 
   it('GV thấy bài cần chấm (POST /test/getListEssaySubmissionsAction)', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const call = (body: Record<string, unknown>) =>
       request(server)
         .post('/test/getListEssaySubmissionsAction')
@@ -453,7 +466,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('GV mở bài tự luận (POST /test/getEssayDetailAction) → chưa có điểm', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/getEssayDetailAction')
       .set('Cookie', gvCookie!)
@@ -474,7 +487,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('chấm quá điểm tự luận tối đa của đề → bị từ chối', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/saveEssayScoreAction')
       .set('Cookie', gvCookie!)
@@ -494,7 +507,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('GV lưu điểm tự luận hợp lệ → ketqua + cham_tuluan cập nhật', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const diem = 2.5;
     const res = await request(server)
       .post('/test/saveEssayScoreAction')
@@ -518,7 +531,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('chấm lại lần 2 GHI ĐÈ điểm cũ (không nhân đôi bản ghi)', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const diem = 3;
     await request(server)
       .post('/test/saveEssayScoreAction')
@@ -552,7 +565,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('SV xem lại bài: thấy nội dung tự luận + điểm GV đã chấm', async () => {
-    if (!makq) return;
+    requireFixture(makq, 'submitted exam result from a preceding test');
     const res = await request(server)
       .post('/test/getResultDetail')
       .set('Cookie', svCookie!)
@@ -571,7 +584,7 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   // ── SV: các trang /client/* ────────────────────────────────────────────────
 
   it('GET /client/group + /client/test render được', async () => {
-    if (!svCookie) return;
+    requireFixture(svCookie, 'student session');
     await request(server)
       .get('/client/group')
       .set('Accept', 'text/html')
@@ -585,7 +598,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('POST /client/loadDataGroups trả nhóm SV đang học', async () => {
-    if (!svCookie || !fixture) return;
+    requireFixture(
+      svCookie && fixture,
+      'student session and seeded business fixture',
+    );
     const res = await request(server)
       .post('/client/loadDataGroups')
       .set('Cookie', svCookie)
@@ -603,7 +619,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('POST /client/getFriendList trả bạn cùng nhóm, KHÔNG có chính mình', async () => {
-    if (!svCookie || !fixture) return;
+    requireFixture(
+      svCookie && fixture,
+      'student session and seeded business fixture',
+    );
     const res = await request(server)
       .post('/client/getFriendList')
       .set('Cookie', svCookie)
@@ -618,7 +637,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('POST /client/joinGroup: mã mời sai → 0, mã nhóm đang học → 1', async () => {
-    if (!svCookie || !fixture?.mamoi) return;
+    requireFixture(
+      svCookie && fixture?.mamoi,
+      'student session and group invitation code',
+    );
     const sai = await request(server)
       .post('/client/joinGroup')
       .set('Cookie', svCookie)
@@ -644,7 +666,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('POST /client/hide ẩn rồi hiện lại nhóm (khôi phục nguyên trạng)', async () => {
-    if (!svCookie || !fixture) return;
+    requireFixture(
+      svCookie && fixture,
+      'student session and seeded business fixture',
+    );
     const key = { manhom: fixture.manhom, manguoidung: fixture.sv };
     const truoc = await prisma.chiTietNhom.findFirst({ where: key });
     const goc = truoc?.hienthi ?? 1;
@@ -674,7 +699,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('offcanvas nhóm (POST /test/getTestsGroupWithUserResult) có đề vừa thi', async () => {
-    if (!makq || !fixture) return;
+    requireFixture(
+      makq && fixture,
+      'submitted exam result from a preceding test and seeded business fixture',
+    );
     const res = await request(server)
       .post('/test/getTestsGroupWithUserResult')
       .set('Cookie', svCookie!)
@@ -692,7 +720,10 @@ describe('Đề tự động + chấm tự luận + trang sinh viên (e2e)', () 
   });
 
   it('lịch kiểm tra (/client/pagination) xếp đề vừa nộp vào nhóm "đã thi"', async () => {
-    if (!makq || !fixture) return;
+    requireFixture(
+      makq && fixture,
+      'submitted exam result from a preceding test and seeded business fixture',
+    );
     const args = (filter: string) =>
       JSON.stringify({
         controller: 'client',

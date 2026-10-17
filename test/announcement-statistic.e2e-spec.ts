@@ -1,7 +1,12 @@
 import request from 'supertest';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { PrismaService } from '@/prisma/prisma.service';
-import { createTestApp, login } from './setup-app';
+import {
+  createTestApp,
+  login,
+  requireFixture,
+  fixtureFailure,
+} from './setup-app';
 
 /**
  * e2e Phase 6: **Thông báo** (`/teacher_announcement/*`) + **Thống kê**
@@ -55,10 +60,6 @@ describe('Thông báo + Thống kê (e2e)', () => {
 
   let matb = 0;
 
-  const skip = (why: string) => {
-    console.warn(`Bỏ qua e2e thông báo/thống kê: ${why}`);
-  };
-
   /** POST kiểu AJAX của JS gốc (urlencoded + header XHR). */
   const post = (path: string, cookie: string, body: Record<string, unknown>) =>
     request(server)
@@ -106,7 +107,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
     }
 
     gvCookie = await login(app, GV);
-    if (!gvCookie) return skip(`CSDL chưa có tài khoản mẫu ${GV}`);
+    if (!gvCookie) return fixtureFailure(`CSDL chưa có tài khoản mẫu ${GV}`);
     gv2Cookie = await login(app, GV2);
 
     // Nhóm học phần của GV, ưu tiên nhóm CÓ thành viên.
@@ -140,7 +141,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
       });
     }
     if (!withMembers.length) {
-      return skip(
+      return fixtureFailure(
         'CSDL chưa có nhóm học phần của GV kèm thành viên (chạy seed-demo)',
       );
     }
@@ -155,7 +156,9 @@ describe('Thông báo + Thống kê (e2e)', () => {
       LIMIT 1
     `;
     if (!deRows.length) {
-      return skip('CSDL chưa có đề của GV kèm bài làm (chạy seed-demo)');
+      return fixtureFailure(
+        'CSDL chưa có đề của GV kèm bài làm (chạy seed-demo)',
+      );
     }
 
     const g1 = withMembers[0];
@@ -175,7 +178,8 @@ describe('Thông báo + Thống kê (e2e)', () => {
     };
 
     svCookie = await login(app, fixture.sv);
-    if (!svCookie) skip(`không đăng nhập được bằng SV mẫu ${fixture.sv}`);
+    if (!svCookie)
+      fixtureFailure(`không đăng nhập được bằng SV mẫu ${fixture.sv}`);
   }, 90_000);
 
   afterAll(async () => {
@@ -201,7 +205,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
   // ── Thông báo: trang SSR ────────────────────────────────────────────────────
 
   it('GET /teacher_announcement + /add render được', async () => {
-    if (!gvCookie) return;
+    requireFixture(gvCookie, 'teacher session');
     await request(server)
       .get('/teacher_announcement')
       .set('Accept', 'text/html')
@@ -217,7 +221,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   // ── Thông báo: tạo & gửi ────────────────────────────────────────────────────
 
   it('GV gửi thông báo cho nhóm → sinh chitietthongbao + trạng thái "chưa xem"', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const nhom = [fixture.g1.manhom];
     if (fixture.g2) nhom.push(fixture.g2.manhom);
 
@@ -254,7 +261,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('gửi cho nhóm KHÔNG tồn tại → không tạo dòng chitietthongbao mồ côi', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/teacher_announcement/sendAnnouncement', gvCookie, {
       noticeText: `${marker} Nhóm không tồn tại`,
       manhom: [999999],
@@ -270,7 +280,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('POST getDetail trả nội dung + danh sách mã nhóm đang nhận', async () => {
-    if (!matb || !fixture || !gvCookie) return;
+    requireFixture(
+      matb && fixture && gvCookie,
+      'announcement created by a preceding test and seeded business fixture and teacher session',
+    );
     const res = await post('/teacher_announcement/getDetail', gvCookie, {
       matb,
     });
@@ -286,7 +299,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   // ── Thông báo: danh sách + phân trang ──────────────────────────────────────
 
   it('phân trang (model=AnnouncementModel) có thông báo vừa gửi, KHÔNG có thông báo tự sinh', async () => {
-    if (!matb || !fixture || !gvCookie) return;
+    requireFixture(
+      matb && fixture && gvCookie,
+      'announcement created by a preceding test and seeded business fixture and teacher session',
+    );
     const pages = await post('/teacher_announcement/getTotalPages', gvCookie, {
       args: paginationArgs(),
     });
@@ -309,7 +325,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('ô tìm kiếm + bộ lọc học kỳ/môn của phân trang', async () => {
-    if (!matb || !fixture || !gvCookie) return;
+    requireFixture(
+      matb && fixture && gvCookie,
+      'announcement created by a preceding test and seeded business fixture and teacher session',
+    );
     const call = (extra: Record<string, unknown>) =>
       post('/teacher_announcement/pagination', gvCookie!, {
         args: paginationArgs(extra),
@@ -348,7 +367,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('POST getListAnnounce gộp tên nhóm thành mảng (giữ quirk tenhocky = mã học kỳ)', async () => {
-    if (!matb || !fixture || !gvCookie) return;
+    requireFixture(
+      matb && fixture && gvCookie,
+      'announcement created by a preceding test and seeded business fixture and teacher session',
+    );
     const res = await post(
       '/teacher_announcement/getListAnnounce',
       gvCookie,
@@ -364,7 +386,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('POST getAnnounce lấy thông báo theo nhóm (nhóm lạ → rỗng)', async () => {
-    if (!matb || !fixture || !gvCookie) return;
+    requireFixture(
+      matb && fixture && gvCookie,
+      'announcement created by a preceding test and seeded business fixture and teacher session',
+    );
     const res = await post('/teacher_announcement/getAnnounce', gvCookie, {
       manhom: fixture.g1.manhom,
     });
@@ -382,7 +407,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   // ── Thông báo: phía sinh viên (chuông) ─────────────────────────────────────
 
   it('SV thấy thông báo ở chuông; markAsRead xoá số chưa xem (khôi phục sau đó)', async () => {
-    if (!matb || !fixture || !svCookie) return;
+    requireFixture(
+      matb && fixture && svCookie,
+      'announcement created by a preceding test and seeded business fixture and student session',
+    );
 
     const noti = await post(
       '/teacher_announcement/getNotifications',
@@ -438,7 +466,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('SV KHÔNG được gửi thông báo (403)', async () => {
-    if (!svCookie || !fixture) return;
+    requireFixture(
+      svCookie && fixture,
+      'student session and seeded business fixture',
+    );
     await post('/teacher_announcement/sendAnnouncement', svCookie, {
       noticeText: `${marker} SV gửi trộm`,
       manhom: [fixture.g1.manhom],
@@ -453,7 +484,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   // ── Thông báo: sửa / xoá ───────────────────────────────────────────────────
 
   it('GET /teacher_announcement/update/:matb — chủ sở hữu 200, người khác 403', async () => {
-    if (!matb || !gvCookie) return;
+    requireFixture(
+      matb && gvCookie,
+      'announcement created by a preceding test and teacher session',
+    );
     await request(server)
       .get(`/teacher_announcement/update/${matb}`)
       .set('Accept', 'text/html')
@@ -477,7 +511,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('GV khác không sửa/xoá được thông báo của người ta', async () => {
-    if (!matb || !gv2Cookie) return;
+    requireFixture(
+      matb && gv2Cookie,
+      'announcement created by a preceding test and second teacher session',
+    );
     await post('/teacher_announcement/updateAnnounce', gv2Cookie, {
       matb,
       noidung: 'cướp quyền',
@@ -492,7 +529,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('updateAnnounce đổi nội dung + nhóm nhận (giữ quirk không dọn trangthaithongbao)', async () => {
-    if (!matb || !fixture || !gvCookie) return;
+    requireFixture(
+      matb && fixture && gvCookie,
+      'announcement created by a preceding test and seeded business fixture and teacher session',
+    );
     const truoc = await prisma.trangThaiThongBao.count({ where: { matb } });
 
     const res = await post('/teacher_announcement/updateAnnounce', gvCookie, {
@@ -514,7 +554,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('deleteAnnounce xoá thông báo + dữ liệu phụ thuộc (cascade)', async () => {
-    if (!matb || !gvCookie) return;
+    requireFixture(
+      matb && gvCookie,
+      'announcement created by a preceding test and teacher session',
+    );
     const res = await post('/teacher_announcement/deleteAnnounce', gvCookie, {
       matb,
     });
@@ -529,7 +572,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   // ── Thống kê ───────────────────────────────────────────────────────────────
 
   it('GET /statistic (tổng hợp) và /statistic?made= (chi tiết) render được', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     await request(server)
       .get('/statistic')
       .set('Accept', 'text/html')
@@ -556,7 +602,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('getStatictical (tất cả nhóm) khớp số liệu tính độc lập — kể cả quirk đếm trùng', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/statistic/getStatictical', gvCookie, {
       made: fixture.made,
       manhom: 0,
@@ -579,12 +628,15 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('getStatictical lọc theo 1 nhóm → chỉ đếm bài của nhóm đó', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const gd = await prisma.giaoDeThi.findFirst({
       where: { made: fixture.made },
       select: { manhom: true },
     });
-    if (!gd) return;
+    requireFixture(gd, 'assigned group for statistics');
 
     const res = await post('/statistic/getStatictical', gvCookie, {
       made: fixture.made,
@@ -599,7 +651,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('thong_ke_diem có 10 khoảng và bỏ sót điểm 10 (giữ quirk PHP)', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/statistic/getStatictical', gvCookie, {
       made: fixture.made,
       manhom: 0,
@@ -613,7 +668,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('getStatictical với đề của người khác → trả {error}, KHÔNG lộ số liệu', async () => {
-    if (!fixture || !gv2Cookie) return;
+    requireFixture(
+      fixture && gv2Cookie,
+      'seeded business fixture and second teacher session',
+    );
     const res = await post('/statistic/getStatictical', gv2Cookie, {
       made: fixture.made,
       manhom: 0,
@@ -623,7 +681,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('getFilters + getGroupsBySubject nạp môn học / nhóm theo học kỳ - năm học', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const filters = await post('/statistic/getFilters', gvCookie, {
       mahocky: fixture.hocky,
       namhoc: fixture.namhoc,
@@ -660,7 +721,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('getAggregatedStatistical khớp số liệu tính độc lập (có/không lọc môn)', async () => {
-    if (!fixture || !gvCookie) return;
+    requireFixture(
+      fixture && gvCookie,
+      'seeded business fixture and teacher session',
+    );
     const res = await post('/statistic/getAggregatedStatistical', gvCookie, {
       mahocky: fixture.hocky,
       namhoc: fixture.namhoc,
@@ -698,7 +762,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
   });
 
   it('SV KHÔNG vào được trang/API thống kê (403)', async () => {
-    if (!svCookie || !fixture) return;
+    requireFixture(
+      svCookie && fixture,
+      'student session and seeded business fixture',
+    );
     await request(server)
       .get('/statistic')
       .set('Accept', 'text/html')
