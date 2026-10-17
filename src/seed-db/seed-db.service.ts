@@ -163,8 +163,8 @@ export class SeedDbService implements OnModuleInit {
 
   async onModuleInit() {
     const shouldSeed = this.configService.get<string>('SEED_DB') === 'true';
-    const shouldClear =
-      this.configService.get<string>('CLEAR_DB') === 'false' ? false : true; // Mặc định là true nếu không có biến môi trường CLEAR_DB hoặc nếu CLEAR_DB không phải 'false'
+    // Chỉ xoá khi được bật rõ ràng. Thiếu biến/sai chính tả phải giữ dữ liệu.
+    const shouldClear = this.configService.get<string>('CLEAR_DB') === 'true';
     // Dữ liệu mẫu nghiệp vụ là TUỲ CHỌN (mặc định TẮT) — chỉ bật khi muốn có sẵn
     // môn học/nhóm/câu hỏi/đề thi để chạy thử. Xem `seed/exam-demo.data.ts`.
     const shouldSeedDemo =

@@ -7,10 +7,22 @@ const { PrismaPg } = require('@prisma/adapter-pg');
 function createPrisma() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error('Thiếu DATABASE_URL trong .env');
-  if (url.startsWith('prisma')) return new PrismaClient({ accelerateUrl: url });
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error('DATABASE_URL không phải URL PostgreSQL hợp lệ.');
+  }
+  if (!parsed.hostname) throw new Error('DATABASE_URL thiếu hostname.');
+  if (['prisma:', 'prisma+postgres:'].includes(parsed.protocol)) {
+    return new PrismaClient({ accelerateUrl: url });
+  }
+  if (!['postgres:', 'postgresql:'].includes(parsed.protocol)) {
+    throw new Error('DATABASE_URL chỉ hỗ trợ PostgreSQL hoặc Prisma Accelerate.');
+  }
   const adapter = new PrismaPg({
     connectionString: url,
-    ssl: { rejectUnauthorized: false }, // chỉ dùng khi phát triển
+    connectionTimeoutMillis: 10_000,
   });
   return new PrismaClient({ adapter });
 }
