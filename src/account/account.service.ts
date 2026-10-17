@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { extname } from 'path';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
+import { removeUnreferencedImages } from '@/storage/image-cleanup';
 import { comparePassword, generatePasswordHash } from '@/lib/bcrypt/bcrypt';
 import { avatarSrc, DEFAULT_AVATAR } from '@/common/utils/avatar.util';
 import type {
@@ -182,7 +183,12 @@ export class AccountService {
         data: { avatar: url },
       });
       // Dọn ảnh cũ trên storage (bỏ qua nếu là tên file cũ trên đĩa).
-      await this.storage.remove(cu?.avatar);
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        [cu?.avatar],
+        this.logger,
+      );
       return true;
     } catch (err) {
       this.logger.error('Lưu ảnh đại diện thất bại', err as Error);

@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
+import { removeUnreferencedImages } from '@/storage/image-cleanup';
 import { plainText } from '@/common/utils/text.util';
 import type {
   IAddDetailResult,
@@ -1363,6 +1364,7 @@ export class ExamsService {
 
       // Upload ảnh tự luận lên Supabase TRƯỚC transaction (tránh I/O mạng trong tx).
       const essayEntries = await this.collectEssayAnswers(body);
+      const obsoleteImages: (string | null)[] = [];
 
       const diemthi = await this.prisma.$transaction(async (tx) => {
         let socaudungMcq = 0;
@@ -1424,7 +1426,9 @@ export class ExamsService {
         const diem = diemTracNghiem + diemDoChieu;
 
         // Tự luận (ảnh đã upload → URL ở essayEntries).
-        await this.saveEssayAnswers(tx, makq, essayEntries);
+        obsoleteImages.push(
+          ...(await this.saveEssayAnswers(tx, makq, essayEntries)),
+        );
 
         // Đề có câu tự luận → chờ chấm.
         const essayCount = await tx.$queryRaw<{ cnt: number }[]>(Prisma.sql`
@@ -1451,6 +1455,12 @@ export class ExamsService {
       });
 
       void diemthi;
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        obsoleteImages,
+        this.logger,
+      );
       return { success: true, makq };
     } catch (e) {
       this.logger.error(`submit(${made}) lỗi: ${(e as Error).message}`);
@@ -1528,7 +1538,8 @@ export class ExamsService {
       thutu: number;
       imageUrls: string[];
     }[],
-  ): Promise<void> {
+  ): Promise<(string | null)[]> {
+    const obsoleteImages: (string | null)[] = [];
     for (const e of entries) {
       if (e.macauhoi <= 0) continue;
 
@@ -1557,12 +1568,21 @@ export class ExamsService {
             })
           ).id;
 
+      const previousImages = await tx.hinhAnhTraLoiTuLuan.findMany({
+        where: { traloi_id: traloiId },
+        select: { hinhanh: true },
+      });
+      obsoleteImages.push(...previousImages.map((image) => image.hinhanh));
+      await tx.hinhAnhTraLoiTuLuan.deleteMany({
+        where: { traloi_id: traloiId },
+      });
       for (const url of e.imageUrls) {
         await tx.hinhAnhTraLoiTuLuan.create({
           data: { traloi_id: traloiId, hinhanh: url },
         });
       }
     }
+    return obsoleteImages;
   }
 
   /**

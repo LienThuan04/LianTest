@@ -19,6 +19,7 @@ export class SupabaseStorageService {
   // `SupabaseClient` khai báo trần không khớp 1-1 nên gán bị báo unsafe).
   private readonly client: ReturnType<typeof createClient>;
   private readonly bucket: string;
+  private readonly publicBaseUrl: URL;
 
   constructor(private readonly config: ConfigService) {
     const url = this.config.get<string>('SUPABASE_URL');
@@ -30,6 +31,9 @@ export class SupabaseStorageService {
       );
     }
     this.bucket = bucket;
+    this.publicBaseUrl = new URL(
+      `${url.replace(/\/+$/, '')}/storage/v1/object/public/${encodeURIComponent(bucket)}/`,
+    );
     this.client = createClient(url, key);
   }
 
@@ -96,24 +100,61 @@ export class SupabaseStorageService {
       .publicUrl;
   }
 
-  /** Trích object path từ 1 public URL đã lưu (để xoá). null nếu không khớp bucket. */
-  private pathFromUrl(url: string | null | undefined): string | null {
-    if (!url) return null;
-    const marker = `/storage/v1/object/public/${this.bucket}/`;
-    const i = url.indexOf(marker);
-    if (i < 0) return null;
-    return url.slice(i + marker.length);
+  /** Only public objects on this configured origin and bucket are owned here. */
+  ownedObjectPath(url: string | null | undefined): string | null {
+    if (
+      !url ||
+      [...url].some((char) => char.charCodeAt(0) <= 32 || char === '\\')
+    )
+      return null;
+    try {
+      const parsed = new URL(url);
+      if (
+        !['http:', 'https:'].includes(parsed.protocol) ||
+        parsed.origin !== this.publicBaseUrl.origin ||
+        parsed.username ||
+        parsed.password ||
+        !parsed.pathname.startsWith(this.publicBaseUrl.pathname)
+      ) {
+        return null;
+      }
+      const path = decodeURIComponent(
+        parsed.pathname.slice(this.publicBaseUrl.pathname.length),
+      );
+      if (
+        [...path].some(
+          (char) =>
+            char.charCodeAt(0) < 32 ||
+            char.charCodeAt(0) === 127 ||
+            char === '\\',
+        ) ||
+        path.split('/').some((part) => !part || part === '.' || part === '..')
+      ) {
+        return null;
+      }
+      return path;
+    } catch {
+      return null;
+    }
   }
 
   /** Xoá file theo public URL đã lưu (bỏ qua nếu URL không thuộc bucket). */
   async remove(url: string | null | undefined): Promise<void> {
-    const path = this.pathFromUrl(url);
+    const path = this.ownedObjectPath(url);
     if (!path) return;
-    const { error } = await this.client.storage
-      .from(this.bucket)
-      .remove([path]);
-    if (error) {
-      this.logger.warn(`Xoá file storage thất bại (${path}): ${error.message}`);
+    try {
+      const { error } = await this.client.storage
+        .from(this.bucket)
+        .remove([path]);
+      if (error) {
+        this.logger.warn(
+          `Xoá file storage thất bại (${path}): ${error.message}`,
+        );
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Xoá file storage thất bại (${path}): ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

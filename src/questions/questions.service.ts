@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
+import { removeUnreferencedImages } from '@/storage/image-cleanup';
 import type {
   IAddFileResult,
   IAnswerRow,
@@ -33,15 +34,13 @@ const PAGE_SIZE = 10;
  * Nghiệp vụ Ngân hàng câu hỏi — thay CauHoiModel.php + CauTraLoiModel.php.
  *
  * Quy ước port lại:
- *  - Ảnh lưu blob (Bytes) → trả base64 data-URI; nhận diện MIME qua magic-bytes
- *    (PNG/GIF/JPEG), mặc định JPEG — giống finfo của PHP.
+ *  - Ảnh lưu ở Supabase Storage, DB chỉ lưu public URL; MIME theo magic-bytes.
  *  - Xoá câu hỏi: xoá MỀM (trangthai = 0), giữ dữ liệu liên quan.
  *  - getQuestionBySubject: liệt kê theo môn/chương/độ khó; mỗi câu reading hiện
  *    nội dung ĐOẠN VĂN + số câu con (num_subquestions). machuong/dokho = 0 = bỏ lọc.
  *
- * GIỚI HẠN hiện tại (làm sau): tìm theo nội dung chỉ khớp `cauhoi.noidung`, CHƯA
- * khớp nội dung đoạn văn như bản PHP (`d.noidung LIKE`). add/edit + import
- * Excel/Word + ảnh chưa port (cần multipart) — xem [[conversion-progress]].
+ * Thêm/sửa nhận multipart; Word và Excel dùng chung preview rồi nhập cả lô.
+ * Ảnh hết tham chiếu chỉ dọn sau khi transaction cập nhật thành công.
  */
 @Injectable()
 export class QuestionsService {
@@ -636,6 +635,7 @@ export class QuestionsService {
 
     const mainImg = deleteQuestionImage ? null : await this.mainImageUrl(files);
     const optQueue = await this.uploadQueue(files, 'option_hinhanh[]');
+    const obsoleteImages: (string | null)[] = [];
 
     try {
       if (loai === 'reading') {
@@ -655,6 +655,11 @@ export class QuestionsService {
         }
 
         await this.prisma.$transaction(async (tx) => {
+          const previous = await tx.cauHoi.findUnique({
+            where: { macauhoi: id },
+            select: { hinhanh: true },
+          });
+          obsoleteImages.push(previous?.hinhanh ?? null);
           await tx.doanVan.update({
             where: { madv },
             data: {
@@ -673,6 +678,11 @@ export class QuestionsService {
             select: { macauhoi: true },
           });
           for (const sub of oldSubs) {
+            const oldAnswers = await tx.cauTraLoi.findMany({
+              where: { macauhoi: sub.macauhoi },
+              select: { hinhanh: true },
+            });
+            obsoleteImages.push(...oldAnswers.map((answer) => answer.hinhanh));
             await tx.cauTraLoi.deleteMany({
               where: { macauhoi: sub.macauhoi },
             });
@@ -727,7 +737,11 @@ export class QuestionsService {
               nguoitao,
               loai: 'reading',
               madv,
-              ...(mainImg !== null ? { hinhanh: mainImg } : {}),
+              ...(deleteQuestionImage
+                ? { hinhanh: null }
+                : mainImg !== null
+                  ? { hinhanh: mainImg }
+                  : {}),
             },
           });
         });
@@ -756,6 +770,18 @@ export class QuestionsService {
         }
 
         await this.prisma.$transaction(async (tx) => {
+          const previous = await tx.cauHoi.findUnique({
+            where: { macauhoi: id },
+            select: { hinhanh: true },
+          });
+          const oldAnswers = await tx.cauTraLoi.findMany({
+            where: { macauhoi: id },
+            select: { hinhanh: true },
+          });
+          obsoleteImages.push(
+            previous?.hinhanh ?? null,
+            ...oldAnswers.map((answer) => answer.hinhanh),
+          );
           await tx.cauHoi.update({
             where: { macauhoi: id },
             data: {
@@ -788,6 +814,12 @@ export class QuestionsService {
         });
       }
 
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        obsoleteImages,
+        this.logger,
+      );
       return { status: 'success', message: 'Cập nhật câu hỏi thành công' };
     } catch (err) {
       this.logger.error('Cập nhật câu hỏi thất bại', err as Error);
