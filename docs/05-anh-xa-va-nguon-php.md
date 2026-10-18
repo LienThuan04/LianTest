@@ -64,7 +64,8 @@ PHP/
 ## RBAC — seed quyền
 
 - Bảng `chitietquyen` gắn `manhomquyen` với (`chucnang`,`hanhdong`). Seed ở
-  `src/seed-db/seed/exam-sample.ts` (nhóm 1=Giáo viên, 2=Sinh viên, 3=Admin).
+  `src/seed-db/data/{roles,resources,permissions,users}.json`
+  (nhóm 1=Giáo viên, 2=Sinh viên, 3=Admin). Xem [hướng dẫn JSON](../src/seed-db/data/README.md).
 - Khi thêm chức năng mới cần quyền mới → thêm vào seed cho đúng nhóm, rồi gắn
   `@Permissions('<chucnang>','<hanhdong>')` ở controller.
 - `PermissionsGuard` chỉ kiểm **1** quyền/route. Cần OR (create HOẶC update) thì

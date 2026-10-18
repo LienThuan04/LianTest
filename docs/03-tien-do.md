@@ -1,7 +1,64 @@
 # 03 — Tiến độ (LIVING DOC — cập nhật mỗi phiên)
 
-> Cập nhật gần nhất: **2026-10-17** (khắc phục và kiểm chứng sau rà soát). Đây là "sổ tay tiến độ" — mỗi phiên làm xong
+> Cập nhật gần nhất: **2026-10-18** (seed JSON; frontend, LianTest và media). Đây là "sổ tay tiến độ" — mỗi phiên làm xong
 > nhớ sửa file này (đánh dấu đã làm gì, còn gì) để phiên/agent sau không mất mạch.
+
+## Checkpoint seed JSON 2026-10-18
+
+Theo yêu cầu user, toàn bộ dữ liệu mẫu đã chuyển vào **11 file JSON tại
+`src/seed-db/data`**; bỏ hai file mảng hardcode `exam-sample.ts` và
+`exam-demo.data.ts`. Hướng dẫn trường dữ liệu, ví dụ chỉnh tài khoản, quan hệ giữa
+các file và cách chạy ở [README của data](../src/seed-db/data/README.md).
+
+- Loader đọc lại JSON mỗi lần chạy; kiểm tra kiểu, trường, mã trùng, tham chiếu,
+  đáp án, số câu tự động, giới hạn Int32/Decimal và ngày giờ **trước ghi/clear**.
+  Một mốc giờ được dùng chung từ preflight đến ghi đề/bài làm. Mã môn/chương chứa
+  dấu `#` không còn có thể trùng khóa tra cứu.
+- `seedExamBase` dùng chung cho startup và CLI; demo nhận cùng bộ dữ liệu đã kiểm
+  tra. Mật khẩu lấy từ môi trường, hash bcrypt, không nằm trong JSON/log. Demo
+  chặn tài khoản tham chiếu thiếu trong DB trước khi ghi hoặc `--clear` rồi seed.
+- `pnpm run seed:check` kiểm tra JSON không cần DB, sau lần build đầu. Bản build
+  copy JSON vào `dist/src/seed-db/data`; khi có source thì ưu tiên dữ liệu nguồn.
+  `SEED_DATA_DIR` chọn một bộ JSON riêng, không trộn file thiếu với bộ mặc định.
+- Seed vẫn tắt mặc định; quy tắc bỏ qua bản ghi/bảng đã có và các cờ clear cũ giữ
+  nguyên. Chỉnh JSON không tự đồng bộ DB đang dùng. Không đổi Prisma schema hay API.
+
+Kiểm chứng cuối sau sửa review: **120/120 unit (9 bộ)**, **144/144 E2E (12 bộ,
+0 skipped)**; build, ESLint, TypeScript `--noEmit` và `git diff --check` sạch.
+E2E chạy trên fixture PostgreSQL/PGlite và Storage cục bộ riêng, áp đủ 22 migration;
+hai CLI seed thật thành công, 13 email tạo mới là `@liantest.vn`. Test bao gồm
+JSON lỗi trước clear/kết nối DB, sửa JSON có hiệu lực, custom ID, hash mật khẩu,
+và triển khai chỉ có bản build. Đối chiếu sâu cả 11 bộ JSON với snapshot trước
+refactor: dữ liệu giữ nguyên hoàn toàn. Review đã xử lý hết các phát hiện.
+
+Lệnh chuẩn: `pnpm run build`, `pnpm run seed:check`, `pnpm test --runInBand`,
+`pnpm run test:e2e --runInBand` (cần DB/Storage test riêng cho E2E nghiệp vụ).
+Máy phiên này thiếu executable pnpm nên gọi trực tiếp các CLI Node đã cài;
+không cài thêm dependency. Log/fixture cục bộ ở `../.codegraph/`, không đưa vào repo.
+User đã yêu cầu commit/push toàn bộ phần hoàn thành lên nhánh `NestJS` ngày
+2026-10-18. Kiểm chứng trước commit được chạy lại: 120 unit, 144 E2E và 2 frontend
+behavior đều pass; build/lint/typecheck sạch. Terminal không có mạng GitHub nên
+dùng connector GitHub để xuất bản commit và đồng bộ Git object về local, giữ
+lịch sử nối tiếp mốc `b46b09d2`. Không seed/clear DB đang dùng của user. Các giới
+hạn frontend đã ghi trong docs/14 vẫn giữ nguyên.
+
+## Checkpoint frontend 2026-10-18
+
+Đã tiếp tục phiên bị hết lượt hôm trước: M1–M6 có triển khai đầy đủ trong working
+tree; bổ sung QA trình duyệt và sửa các regression tìm thấy khi review. Website
+đổi tên thành **LianTest**, người tạo vẫn là **LianHarman**. Bộ media mới thống
+nhất indigo/giấy thi/dấu tích; xóa 17 asset cũ không dùng và giữ ảnh người dùng.
+
+Đọc [14 — kiểm chứng và bàn giao frontend](./14-frontend-migration-verification.md)
+để xem trạng thái kiểm tra thực tế, các phần chưa xác nhận do CDN và công việc
+lưu trữ còn lại. [15 — audit media](./15-media-audit.md) ghi file xóa/giữ và nhận
+diện mới. Việc đưa thay đổi lên remote được user yêu cầu sau phần kiểm chứng;
+xem checkpoint seed JSON ở trên. Các mốc bên dưới là lịch sử port backend.
+
+Kiểm chứng cuối trên fixture mới: **139/139 E2E (11 bộ, 0 skipped)**, **82/82
+unit**, **2/2 frontend behavior**; build, lint, typecheck và diff whitespace sạch.
+Đã sửa lỗi signin `localhost:8080` xếp dọc trên desktop và kiểm tra 6 viewport.
+13 email seed đổi sang `@liantest.vn`, không ghi đè email tài khoản đã seed trước.
 
 ## Bảng phase
 
@@ -89,7 +146,8 @@ Thay `teacher_announcement.php` + `AnnouncementModel.php`. Đủ 13 method của
   vào khoá `tenhocky`.
 - ⚠️ **Quyền:** `thongbao`(view/create/delete/update) chỉ seed cho **nhóm quyền 3
   (admin)** — đúng y dump gốc `tracnghiemonline.sql`, GV (nhóm 1) KHÔNG có. Muốn GV
-  dùng trang này phải cấp quyền qua UI nhóm quyền hoặc thêm vào `exam-sample.ts`.
+  dùng trang này phải cấp quyền qua UI nhóm quyền hoặc sửa `data/permissions.json`
+  của module seed-db (trước đây là `exam-sample.ts`; xem checkpoint JSON ở đầu file).
 
 ## Phase 6 slice 2 — Thống kê (`src/statistic/`, path `/statistic`) — XONG (2026-07-26)
 
@@ -211,7 +269,7 @@ kết thúc kèm bài làm mẫu) → thông báo tự động.
 
 | File | Vai trò |
 |------|---------|
-| `src/seed-db/seed/exam-demo.data.ts` | **Dữ liệu thuần** (không đụng DB). Khoá tự tăng tham chiếu nhau qua `key`/nhãn, KHÔNG hardcode id. |
+| `src/seed-db/data/*.json` | **Dữ liệu thuần** (thay `exam-demo.data.ts` từ 2026-10-18). Khóa tự tăng tham chiếu nhau qua `key`/nhãn. |
 | `src/seed-db/seed/exam-demo.seeder.ts` | `seedExamDemo()` / `clearExamDemo()` — hàm thuần nhận `PrismaClient`, dùng được cả trong Nest lẫn script. |
 | `src/seed-db/seed-db.service.ts` | Nối dây: `SEED_DEMO_DATA=true` → seed lúc app khởi động. |
 | `scripts/seed-demo.cjs` | Chạy một lần ngoài app (`--clear`, `--force`, `--clear-only`). |
@@ -225,8 +283,8 @@ bài làm sẽ thành bản ghi mồ côi (FK dạng scalar nên DB không chặ
 thì KHÔNG đụng tới dữ liệu nghiệp vụ (tránh lỡ tay xoá dữ liệu thật).
 
 ### Dữ liệu có gì
-- **13 người dùng** (`exam-sample.ts` đã mở rộng: `admin`, `gv001`/`gv002`, `sv001`→`sv010`;
-  mật khẩu `123456`). Id **cố định** nên xoá/seed lại vẫn khớp dữ liệu nghiệp vụ.
+- **13 người dùng** (`data/users.json`: `admin`, `gv001`/`gv002`, `sv001`→`sv010`;
+  mật khẩu mặc định `123456`). Có thể đổi ID trong JSON nếu cập nhật mọi tham chiếu.
 - 2 năm học × 3 học kỳ, **4 môn** (LTW001, CSDL01, MMT001, CTDL01) + **14 chương**,
   **9 phân công**, **3 nhóm học phần** (mã mời `ltw0001`/`csdl001`/`mmt0001`, 18 thành viên).
 - **38 câu hỏi**: 32 mcq + 3 essay + 1 đoạn văn đọc hiểu (3 câu con).
@@ -242,7 +300,8 @@ thì KHÔNG đụng tới dữ liệu nghiệp vụ (tránh lỡ tay xoá dữ l
 - Chấm bài mẫu bám đúng `ExamsService.submit` (điểm = điểm_loại/tổng_câu_loại × số câu
   đúng, làm tròn 2 số; `diemthi` chưa gồm điểm tự luận; đề có tự luận → `trangthai_tuluan`
   = `Chưa chấm` để thử trang chấm tay).
-- Thiếu người dùng mà dữ liệu tham chiếu → **cảnh báo** trong log, không chặn (FK scalar).
+- Từ refactor JSON 2026-10-18, thiếu người dùng được tham chiếu → **chặn trước ghi/clear**;
+  trước đó chỉ cảnh báo trong log (FK scalar).
 
 ### Kiểm chứng (đã chạy với DB thật)
 - `node scripts/seed-demo.cjs` và boot với `SEED_DEMO_DATA=true` đều seed đủ:

@@ -74,6 +74,9 @@ node dist/src/main.js        # boot: xem log "Mapped ... route"
   startup thất bại. Không coi log route mapping là bằng chứng nghiệp vụ chạy đúng.
 - Khởi động thông thường dùng `SEED_DB=false`, `CLEAR_DB=false`. Chỉ chuỗi chính xác
   `CLEAR_DB=true` mới cho phép xoá trước khi seed; luôn dùng DB test riêng cho e2e.
+- Dữ liệu seed chỉnh tại `src/seed-db/data/*.json`, không hardcode thêm mảng TS.
+  Sau build chạy `pnpm run seed:check` để kiểm tra không cần DB; đọc hướng dẫn
+  `src/seed-db/data/README.md` về mã tham chiếu và hành vi khi DB đã có dữ liệu.
 
 ## 5. Git
 

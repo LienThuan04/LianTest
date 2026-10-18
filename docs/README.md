@@ -15,6 +15,10 @@ Bộ tài liệu **tự chứa** giúp bất kỳ agent/người nào clone repo
 | 05 | [05-anh-xa-va-nguon-php.md](./05-anh-xa-va-nguon-php.md) | Ánh xạ PHP↔NestJS, nơi có nguồn PHP, RBAC seed |
 | 06 | [06-luu-tru-file-supabase.md](./06-luu-tru-file-supabase.md) | Lưu ảnh trên Supabase Storage (DB chỉ lưu URL) |
 | 07 | [07-so-tay-agent.md](./07-so-tay-agent.md) | **Playbook**: các bước tiếp quản, thêm slice, bẫy hay gặp |
+| 13 | [13-frontend-ui-audit.md](./13-frontend-ui-audit.md) | Inventory 32 template và baseline trước migration |
+| 14 | [14-frontend-migration-verification.md](./14-frontend-migration-verification.md) | **Checkpoint frontend mới nhất**, kiểm chứng và giới hạn môi trường |
+| 15 | [15-media-audit.md](./15-media-audit.md) | Nhận diện LianTest, asset mới và danh sách dọn media |
+| Seed | [Hướng dẫn dữ liệu JSON](../src/seed-db/data/README.md) | Tùy chỉnh 11 file seed, quan hệ dữ liệu, kiểm tra và chạy seed |
 
 ## Quy tắc vàng cho agent tiếp quản
 

@@ -14,7 +14,7 @@ src/
 ├── prisma/            PrismaModule (@Global) + PrismaService
 ├── storage/           StorageModule (@Global) + SupabaseStorageService   ← lưu file
 ├── email/             EmailService (Nodemailer + EJS templates)
-├── seed-db/           seed quyền mẫu (exam-sample.ts)
+├── seed-db/           JSON data/ + loader/validation + hàm seed nền/nghiệp vụ
 │
 ├── exam-auth/         Auth JWT/Passport hệ thi (JwtStrategy, guard, IExamJwtPayload)
 ├── roles/             NhomQuyen + ChiTietQuyen (RBAC)                    path /roles

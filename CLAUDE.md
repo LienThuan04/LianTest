@@ -6,6 +6,18 @@
 
 ## Dự án này là gì?
 
+> **Checkpoint 2026-10-18:** website tên **LianTest**, người tạo là **LianHarman**.
+> User đã duyệt migration toàn bộ frontend theo `DESIGN.md`; bản triển khai đang
+> thuộc đợt cập nhật nhánh `NestJS` ngày 2026-10-18. Đọc `docs/14-frontend-migration-verification.md`
+> để tiếp tục đúng checkpoint, và `docs/15-media-audit.md` cho bộ media mới.
+> Phần QA browser luồng thi có giới hạn CDN; không coi tất cả M8 đã hoàn tất.
+>
+> **Seed JSON cùng ngày:** toàn bộ dữ liệu mẫu chuyển sang 11 file tại
+> `src/seed-db/data/*.json`; đọc `src/seed-db/data/README.md` trước khi chỉnh seed.
+> Startup và CLI dùng chung loader/hàm seed, kiểm tra trước clear; `pnpm run seed:check`
+> kiểm tra không cần DB sau khi build. Không tạo lại mảng hardcode trong TypeScript.
+> Sửa JSON không tự đồng bộ DB cũ; seed mặc định vẫn tắt. Kết quả mới ở `docs/03`.
+
 Port **hệ thi trắc nghiệm online `DHT_OneTest`** (viết bằng **PHP MVC thuần**) sang
 **NestJS SSR** (server render HTML bằng EJS), tái dùng hạ tầng có sẵn của khung
 NestJS (PostgreSQL + Prisma, JWT/Passport, guards, interceptors, bcrypt, email).
@@ -83,7 +95,7 @@ dompdf), `user/addExcel` + `user/addFileExcelGroup` (đọc `.xlsx`, thêm `.xls
 `public/filemau/danhsachsv_mau.xlsx`). Chi tiết + danh sách "KHÁC PHP": `docs/03`.
 
 **Phase 7 slice 2 XONG (2026-08-04):** seed dữ liệu mẫu nghiệp vụ —
-`src/seed-db/seed/exam-demo.data.ts` (dữ liệu thuần) + `exam-demo.seeder.ts`
+`src/seed-db/data/*.json` (dữ liệu thuần, thay file TS từ 2026-10-18) + `seed/exam-demo.seeder.ts`
 (`seedExamDemo`/`clearExamDemo`), nối vào `SeedDbService` qua biến **`SEED_DEMO_DATA`**
 (mặc định `false`) + script `node scripts/seed-demo.cjs [--clear|--force|--clear-only]`.
 Seed ra: 13 người dùng (mật khẩu `123456`), 4 môn + 14 chương, 9 phân công, 3 nhóm học
