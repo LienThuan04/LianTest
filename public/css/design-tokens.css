@@ -1,0 +1,58 @@
+/* Local Latin font files already shipped with the project; system fallback covers other glyphs. */
+@font-face { font-family: Inter; font-style: normal; font-weight: 400; font-display: swap; src: url('/public/fonts/inter/inter-v11-latin-regular.woff2') format('woff2'); unicode-range: U+0000-00FF; }
+@font-face { font-family: Inter; font-style: normal; font-weight: 600; font-display: swap; src: url('/public/fonts/inter/inter-v11-latin-600.woff2') format('woff2'); unicode-range: U+0000-00FF; }
+@font-face { font-family: Inter; font-style: normal; font-weight: 700; font-display: swap; src: url('/public/fonts/inter/inter-v11-latin-700.woff2') format('woff2'); unicode-range: U+0000-00FF; }
+/* Canonical values from DESIGN.md. One light theme for public and application UI. */
+:root,
+[data-bs-theme="dark"],
+.dark-mode {
+  color-scheme: light;
+  --color-iris-bolt: #4255ff;
+  --color-ink-charcoal: #282e3e;
+  --color-deep-indigo: #2e3856;
+  --color-slate-veil: #586380;
+  --color-fog-mist: #939bb4;
+  --color-pure-black: #000000;
+  --color-chalk-canvas: #f6f7fb;
+  --color-paper-white: #ffffff;
+  --color-lilac-wash: #edefff;
+  --color-mist-border: #d9dde8;
+  --font-hurme-geometric-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-hurmeno2-webfont: var(--font-hurme-geometric-sans);
+  --text-caption: 12px; --leading-caption: 18px;
+  --text-body-sm: 14px; --leading-body-sm: 20px;
+  --text-body: 16px; --leading-body: 24px;
+  --text-subheading: 20px; --leading-subheading: 28px;
+  --text-heading-sm: 24px; --leading-heading-sm: 32px;
+  --text-heading: 32px; --leading-heading: 41px;
+  --text-display: 44px; --leading-display: 55px;
+  --font-weight-regular: 400; --font-weight-semibold: 600; --font-weight-bold: 700;
+  --spacing-unit: 8px;
+  --spacing-8: 8px; --spacing-16: 16px; --spacing-24: 24px;
+  --spacing-32: 32px; --spacing-40: 40px; --spacing-48: 48px; --spacing-64: 64px;
+  --page-max-width: 1200px; --section-gap: 80px; --card-padding: 24px; --element-gap: 8px;
+  --radius-md: 4px; --radius-lg: 8px; --radius-3xl: 24px; --radius-full: 200px;
+  --radius-cards: 8px; --radius-pills: 200px; --radius-inputs: 4px;
+  --radius-buttons: 4px; --radius-featurecards: 24px;
+  --shadow-md: 0 4px 16px rgba(40, 46, 62, .1);
+  --shadow-sm: 0 2px 4px rgba(40, 46, 62, .1);
+  --shadow-subtle: inset 0 0 1px rgba(0, 0, 0, .3);
+  --surface-page-canvas: var(--color-chalk-canvas);
+  --surface-card-surface: var(--color-paper-white);
+  --surface-tinted-highlight: var(--color-lilac-wash);
+  --surface-feature-card-pastels: #dbdfff;
+  --transition-duration: 160ms;
+  --bs-primary: var(--color-iris-bolt); --bs-primary-rgb: 66, 85, 255;
+  --bs-secondary: var(--color-slate-veil); --bs-secondary-rgb: 88, 99, 128;
+  --bs-success: var(--color-deep-indigo); --bs-success-rgb: 46, 56, 86;
+  --bs-danger: var(--color-ink-charcoal); --bs-danger-rgb: 40, 46, 62;
+  --bs-warning: var(--color-slate-veil); --bs-warning-rgb: 88, 99, 128;
+  --bs-info: var(--color-iris-bolt); --bs-info-rgb: 66, 85, 255;
+  --bs-dark: var(--color-ink-charcoal); --bs-dark-rgb: 40, 46, 62;
+  --bs-light: var(--color-chalk-canvas); --bs-light-rgb: 246, 247, 251;
+  --bs-body-bg: var(--color-chalk-canvas); --bs-body-color: var(--color-ink-charcoal);
+  --bs-body-font-family: var(--font-hurme-geometric-sans);
+  --bs-font-sans-serif: var(--font-hurme-geometric-sans);
+  --bs-border-color: var(--color-mist-border); --bs-border-radius: var(--radius-lg);
+  --bs-link-color: var(--color-iris-bolt); --bs-link-hover-color: var(--color-deep-indigo);
+}

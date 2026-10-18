@@ -5,10 +5,11 @@
        từ gốc dù trang ở path sâu /test/select/:made. select_question.js dùng path
        tuyệt đối nên không bị ảnh hưởng. -->
   <base href="/" />
-  <%- include('../partials/head') %>
+
+<%- include('../partials/head') %>
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-select-question">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -222,21 +223,5 @@
   <script src="/public/js/pages/select_question.js"></script>
 
   <!-- CSS riêng (bê từ select_question.php) -->
-  <style>
-    .card-body { padding: 1rem 1.2rem !important; }
-    .card .badge { font-size: 0.8rem !important; padding: 6px 14px !important; }
-    .btn.btn-outline-success,
-    .btn.btn-outline-warning,
-    .btn.btn-outline-danger { padding: 6px 12px !important; font-size: 0.9rem; height: 42px; }
-    .btn .badge { font-size: 0.75rem !important; padding: 4px 10px !important; min-width: 48px; }
-    .btn span.fw-semibold { font-size: 0.85rem; }
-    .d-flex.flex-column.gap-3 { gap: 0.6rem !important; }
-    .card.shadow-sm.mb-4 { margin-bottom: 1.2rem !important; }
-    @media (max-width: 576px) {
-      .btn { height: 38px !important; padding: 4px 10px !important; }
-      .btn .badge { font-size: 0.7rem !important; padding: 3px 8px !important; }
-    }
-    #name-test { font-size: 2rem; color: #ff0000 !important; font-weight: bold; }
-  </style>
-</body>
+  </body>
 </html>

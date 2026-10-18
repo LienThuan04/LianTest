@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/flatpickr/flatpickr.min.css" />
+<link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<link rel="stylesheet" href="/public/js/plugins/flatpickr/flatpickr.min.css" />
+<%- include('../partials/head') %>
+
+
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-user">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -59,14 +62,14 @@
               <table class="table table-hover table-vcenter text-nowrap">
                 <thead class="table-dark">
                   <tr>
-                    <th class="text-center" style="width: 110px;">MSSV</th>
+                    <th class="text-center" style="width: 110px">MSSV</th>
                     <th>Họ và tên</th>
                     <th class="text-center">Giới tính</th>
                     <th class="text-center">Ngày sinh</th>
                     <th class="text-center">Nhóm quyền</th>
                     <th class="text-center">Tham gia</th>
                     <th class="text-center">Trạng thái</th>
-                    <th class="text-center" style="width: 120px;">Hành động</th>
+                    <th class="text-center" style="width: 120px">Hành động</th>
                   </tr>
                 </thead>
                 <tbody id="list-user"></tbody>

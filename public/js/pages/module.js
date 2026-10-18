@@ -89,7 +89,7 @@ $(document).ready(function () {
             </h4>
             ${htmlbtnhide}
           </div>
-          <table class="table table-bordered table-striped align-middle table-hover mb-0">
+          <div class="table-responsive"><table class="table table-bordered table-striped align-middle table-hover mb-0">
             <thead class="table-light">
               <tr>
                 <th style="min-width: 40%;">Tên nhóm</th>
@@ -139,7 +139,7 @@ $(document).ready(function () {
 
         html += `
             </tbody>
-          </table>
+          </table></div>
         </div>`;
       });
     }

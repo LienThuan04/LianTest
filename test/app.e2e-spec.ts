@@ -24,6 +24,7 @@ describe('Trang gốc (e2e)', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers['content-type']).toMatch(/html/);
-    expect(res.text).toContain('DHT');
+    expect(res.text).toContain('<title>LianTest');
+    expect(res.text).toContain('name="author" content="LianHarman"');
   });
 });

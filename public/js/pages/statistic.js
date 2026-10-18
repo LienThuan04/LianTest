@@ -364,8 +364,8 @@ function showChart(data) {
         {
           label: "Số lượng sinh viên",
           data: data,
-          backgroundColor: "rgba(6, 101, 208, 0.8)",
-          borderColor: "rgba(6, 101, 208, 1)",
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue("--color-iris-bolt").trim(),
+          borderColor: getComputedStyle(document.documentElement).getPropertyValue("--color-iris-bolt").trim(),
           borderWidth: 1,
         },
       ],

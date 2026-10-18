@@ -2,12 +2,14 @@
 <html lang="vi">
 <head>
   <base href="/">
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/flatpickr/flatpickr.min.css" />
+<link rel="stylesheet" href="/public/js/plugins/flatpickr/flatpickr.min.css" />
+<%- include('../partials/head') %>
+
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-class-detail">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -45,7 +47,7 @@
                 </div>
               </div>
               <div class="block-content">
-                <table class="table table-vcenter">
+                <div class="table-responsive" role="region" aria-label="Bảng dữ liệu" tabindex="0"><table class="table table-vcenter">
                   <thead>
                     <tr class="table-col-title">
                       <th class="text-center">STT</th>
@@ -53,11 +55,11 @@
                       <th class="text-center col-sort" data-sort-column="id" data-sort-order="default">Mã sinh viên</th>
                       <th class="text-center">Giới tính</th>
                       <th class="text-center">Ngày sinh</th>
-                      <th class="text-center" style="width: 150px;">Hành động</th>
+                      <th class="text-center" style="width: 150px">Hành động</th>
                     </tr>
                   </thead>
                   <tbody id="list-student"></tbody>
-                </table>
+                </table></div>
                 <!-- Pagination (port inc/pagination.php) -->
                 <div class="pagination-class-name" data-pagination-class-name='[]'></div>
                 <nav class="pagination-container">

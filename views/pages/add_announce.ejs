@@ -4,31 +4,23 @@
   <!-- Trang ở path sâu (/teacher_announcement/add|update/:matb) → base href để
        mọi URL tương đối resolve về gốc, như các trang chi tiết khác. -->
   <base href="/">
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<%- include('../partials/head') %>
+
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-add-announce">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
     <!-- Main Container -->
     <main id="main-container">
       <!-- Port từ DHT_OneTest/mvc/views/pages/add_announce.php -->
-      <style>
-        #page-footer { display: none }
-        .bg-gradient-teal { background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); }
-        .border-teal { border-color: #14b8a6 !important; }
-        .btn-teal { background-color: #0d6efd; color: #fff; box-shadow: 0 6px 18px rgba(13,110,253,0.12); border: none; }
-        .btn-teal:hover { background-color: #0b5ed7 }
-        .block-rounded { border-radius: .5rem }
-        .form-textarea-large { min-height: 140px; }
-      </style>
-
       <div class="content py-5 bg-light">
-        <div class="block block-rounded shadow-lg border-start border-5 border-teal">
-          <div class="block-header bg-gradient-teal text-white p-4 d-flex justify-content-between align-items-center">
+        <div class="block block-rounded shadow-lg border-start border-5 border-primary">
+          <div class="block-header bg-body-light text-white p-4 d-flex justify-content-between align-items-center">
             <h3 class="block-title mb-0">
               <i class="fa fa-paper-plane me-2"></i>
               <%= Action === 'create' ? 'Tạo mới và gửi thông báo' : 'Cập nhật thông báo' %>
@@ -48,14 +40,14 @@
                     <div class="block-header block-header-default d-flex align-items-center justify-content-between">
                       <h3 class="block-title mb-0">Thông báo cho</h3>
                       <div class="block-option">
-                        <select class="js-select2 form-select border-teal" id="nhom-hp" name="nhom-hp" style="width: 300px;" data-placeholder="Chọn nhóm học phần thông báo..." <%= Action === 'update' ? 'disabled' : '' %>>
+                        <select class="js-select2 form-select border-primary" id="nhom-hp" name="nhom-hp" style="width: 300px" data-placeholder="Chọn nhóm học phần thông báo..." <%= Action === 'update' ? 'disabled' : '' %>>
                         </select>
                       </div>
                     </div>
 
                     <div class="block-content pb-3">
                       <div class="row" id="list-group" name="list-group">
-                        <div class="text-center fs-sm"><img style="width:100px" src="/public/media/svg/empty_data.png" alt=""></div>
+                        <div class="text-center fs-sm"><img style="width:100px" src="/public/media/svg/empty-state.svg" alt=""></div>
                       </div>
                     </div>
                   </div>
@@ -63,9 +55,9 @@
 
                 <div class="mb-4">
                   <% if (Action === 'create') { %>
-                    <button type="submit" class="btn btn-teal px-4 py-2" id="btn-send-announcement"><i class="fa fa-plus me-1"></i> Gửi thông báo</button>
+                    <button type="submit" class="btn btn-primary px-4 py-2" id="btn-send-announcement"><i class="fa fa-plus me-1"></i> Gửi thông báo</button>
                   <% } else { %>
-                    <button type="submit" class="btn btn-teal px-4 py-2" id="btn-update-announce"><i class="fa fa-save me-1"></i> Cập nhật thông báo</button>
+                    <button type="submit" class="btn btn-primary px-4 py-2" id="btn-update-announce"><i class="fa fa-save me-1"></i> Cập nhật thông báo</button>
                   <% } %>
                 </div>
               </div>
@@ -90,9 +82,7 @@
 
   <!-- Y như add_announce.php: trang TẠO dùng announcement.js, trang SỬA dùng
        update_announce.js (mỗi file tự khởi tạo validate + nạp nhóm học phần).
-       LƯU Ý (giữ nguyên bản gốc): announcement.js kết thúc bằng `new Pagination(...)`
-       nhưng trang này không nạp pagination.js → 1 lỗi console vô hại sau khi mọi
-       binding đã chạy xong, đúng như bản PHP. -->
+       Pagination chỉ khởi tạo khi trang có container danh sách. -->
   <% if (Action === 'update') { %>
   <script src="/public/js/pages/update_announce.js"></script>
   <% } else { %>

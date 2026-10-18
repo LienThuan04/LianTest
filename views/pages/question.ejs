@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<%- include('../partials/head') %>
+
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-question">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -80,8 +82,8 @@
               <table class="table table-vcenter table-hover table-bordered align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th class="text-center" style="width: 100px;">ID</th>
-                    <th style="width: 700px;">Nội dung câu hỏi</th>
+                    <th class="text-center" style="width: 100px">ID</th>
+                    <th class="question-content-column">Nội dung câu hỏi</th>
                     <th class="d-none d-sm-table-cell">Môn học</th>
                     <th class="d-none d-xl-table-cell">Độ khó</th>
                     <th class="text-center">Hành động</th>
@@ -171,7 +173,7 @@
                       </div>
                     </div>
                     <!-- Passage Input for Reading Type -->
-                    <div class="mb-4" id="passage-area" style="display: none;">
+                    <div class="mb-4" id="passage-area" style="display: none">
                       <div class="mb-2">
                         <label class="form-label" for="passage-title">Tiêu đề đoạn văn <span class="text-danger">*</span></label>
                         <input type="text" id="passage-title" name="passage-title" class="form-control"
@@ -209,11 +211,11 @@
                         <table class="table table-vcenter table-hover">
                           <thead>
                             <tr>
-                              <th class="text-center" style="width: 50px;">STT</th>
+                              <th class="text-center" style="width: 50px">STT</th>
                               <th>Nội dung đáp án</th>
-                              <th class="text-center" style="width: 150px;">Hình ảnh</th>
-                              <th class="text-center" style="width: 150px;">Đáp án đúng</th>
-                              <th class="text-center" style="width: 150px;">Hành động</th>
+                              <th class="text-center" style="width: 150px">Hình ảnh</th>
+                              <th class="text-center" style="width: 150px">Đáp án đúng</th>
+                              <th class="text-center" style="width: 150px">Hành động</th>
                             </tr>
                           </thead>
                           <tbody id="list-options"></tbody>
@@ -247,24 +249,24 @@
                           </div>
                           <div class="mt-3">
                             <button type="button" class="btn btn-primary me-2" id="save-option">Lưu đáp án</button>
-                            <button type="button" class="btn btn-primary" id="update-option" style="display: none;">Cập nhật đáp án</button>
+                            <button type="button" class="btn btn-primary" id="update-option" style="display: none">Cập nhật đáp án</button>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <!-- Reading Questions -->
-                    <div class="mb-4" id="reading-questions-area" style="display: none;">
+                    <div class="mb-4" id="reading-questions-area" style="display: none">
                       <h6 class="mb-3">Danh sách câu hỏi đọc hiểu</h6>
                       <div class="table-responsive">
                         <table class="table table-vcenter table-hover">
                           <thead>
                             <tr>
-                              <th style="width: 60px;">STT</th>
-                              <th style="width: 400px;">Câu hỏi</th>
+                              <th style="width: 60px">STT</th>
+                              <th style="width: 400px">Câu hỏi</th>
                               <th>Phương án</th>
-                              <th class="text-center" style="width: 100px;">Đáp án</th>
-                              <th class="text-center" style="width: 150px;">Hành động</th>
+                              <th class="text-center" style="width: 100px">Đáp án</th>
+                              <th class="text-center" style="width: 150px">Hành động</th>
                             </tr>
                           </thead>
                           <tbody id="reading-questions-list"></tbody>
@@ -298,7 +300,7 @@
                       <button type="submit" class="btn btn-alt-success" id="add_question">
                         <i class="fa fa-save me-1"></i> Lưu
                       </button>
-                      <button type="button" class="btn btn-alt-primary" id="edit_question" style="display: none;">
+                      <button type="button" class="btn btn-alt-primary" id="edit_question" style="display: none">
                         <i class="fa fa-pencil-alt me-1"></i> Sửa câu hỏi
                       </button>
                       <input type="hidden" value="" id="question_id">
@@ -321,16 +323,16 @@
                           <div class="col-6">
                             <label class="form-label">Môn học <span class="text-danger">*</span></label>
                             <select id="monhocfile" class="js-select2 form-select data-monhoc" data-tab="2"
-                              style="width: 100%;" data-placeholder="Chọn môn học" required></select>
+                              style="width: 100%" data-placeholder="Chọn môn học" required></select>
                           </div>
                           <div class="col-6">
                             <label class="form-label">Chương <span class="text-danger">*</span></label>
                             <select id="chuongfile" class="js-select2 form-select data-chuong" data-tab="2"
-                              style="width: 100%;" data-placeholder="Chọn chương" required></select>
+                              style="width: 100%" data-placeholder="Chọn chương" required></select>
                           </div>
                           <div class="col-6">
                             <label class="form-label">Loại câu hỏi (file Word)</label>
-                            <select id="loaicauhoifile" class="js-select2 form-select" data-tab="2" style="width: 100%;">
+                            <select id="loaicauhoifile" class="js-select2 form-select" data-tab="2" style="width: 100%">
                               <option value="">Chọn loại câu hỏi</option>
                               <option value="mcq">Trắc nghiệm</option>
                               <option value="essay">Tự luận</option>
@@ -383,7 +385,7 @@
                           </div>
                         </div>
 
-                        <div id="preview-cau-hoi" class="mb-4" style="display: none; max-height: 500px; overflow-y: auto;"></div>
+                        <div id="preview-cau-hoi" class="mb-4" style="display: none; max-height: 500px; overflow-y: auto"></div>
 
                         <div class="d-flex justify-content-between align-items-center pt-3 border-top">
                           <button type="button" class="btn btn-alt-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
@@ -426,61 +428,5 @@
   <script src="/public/js/pages/question.js"></script>
 
   <!-- CSS riêng cho trang (bê nguyên từ question.php) -->
-  <style>
-    .reading-content {
-      display: block;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 300px;
-    }
-    .btn-search i { color: white; }
-    .table-hover tbody tr:hover { background-color: #f8f9fa; }
-    .shadow-sm { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
-    .js-select2 { width: 100% !important; }
-    .select2-container { width: 100% !important; }
-    .correct-radio {
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #6c757d;
-      border-radius: 50%;
-      outline: none;
-      cursor: default;
-      position: relative;
-      margin: 0;
-    }
-    .correct-radio.correct-answer { border-color: blue; }
-    .correct-radio.correct-answer::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 10px;
-      height: 10px;
-      background-color: blue;
-      border-radius: 50%;
-    }
-    .correct-radio:checked:not(.correct-answer) { border-color: #6c757d; }
-    .correct-radio:checked:not(.correct-answer)::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 10px;
-      height: 10px;
-      background-color: #6c757d;
-      border-radius: 50%;
-    }
-    #nhap-file.btn-success {
-      background: linear-gradient(90deg, #28a745, #5cd65c);
-      border-color: #28a745;
-      color: #fff;
-    }
-  </style>
-</body>
+  </body>
 </html>

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
+<%- include('../partials/head') %>
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-test">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -97,11 +98,5 @@
   <script src="/public/js/pagination.js"></script>
   <script src="/public/js/pages/test.js"></script>
 
-  <style>
-    .list-test .block-content { overflow-x: auto; }
-    .table-responsive { display: block; width: 100%; overflow-x: auto; }
-    .table thead th, .table tbody td { white-space: nowrap; vertical-align: middle; }
-    .table .btn { font-size: 0.85rem; padding: 0.35rem 0.7rem; }
-  </style>
-</body>
+  </body>
 </html>

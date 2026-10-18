@@ -1,43 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/flatpickr/flatpickr.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
-  <style>
-    #page-footer { display: none; }
-    .form-taodethi { display: flex; flex-wrap: wrap; background: #f8f9fa; }
-    .sidebar-config { padding: 16px; height: 100vh; overflow-y: auto; background: #fff; border-right: 1px solid #e9ecef; }
-    .sidebar-config h3 { color: #343a40; font-weight: 600; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #e9ecef; }
-    .sidebar-config .form-check { margin-bottom: 10px; }
-    .sidebar-config .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
-    .sidebar-config .form-check-input:focus { box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.25); }
-    .main-content { padding: 20px; flex-grow: 1; }
-    .block.form-tao-de { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 22px; }
-    .block-header { border-bottom: 1px solid #e9ecef; margin-bottom: 18px; padding-bottom: 10px; }
-    .block-title { font-weight: 700; font-size: 1.26rem; }
-    .form-label { font-weight: 500; margin-bottom: 6px; }
-    .form-control, .form-select { border-radius: 6px; border: 1px solid #ced4da; padding: 8px 12px; transition: .2s; }
-    .form-control:focus, .form-select:focus { border-color: #0d6efd; box-shadow: 0 0 4px rgba(13,110,253,0.25); }
-    .input-group-text { background: #e9ecef; border: 1px solid #ced4da; }
-    .socau-group { padding: 18px; border: 1px solid #e9ecef; border-radius: 10px; }
-    .btn-hero { border-radius: 8px; padding: 8px 14px; font-weight: 500; }
-    .btn-hero.btn-primary { background: #0d6efd; border-color: #0d6efd; }
-    .btn-hero.btn-primary:hover { background: #0b5ed7; }
-    .btn-hero.btn-success { background: #198754; border-color: #198754; }
-    .btn-hero.btn-success:hover { background: #157347; }
-    #loaicauhoi-container .form-check { display: flex; align-items: center; gap: 6px; }
-    #loaicauhoi-container .form-check-input:checked { background-color: #0d6efd; border-color: #0d6efd; }
-    .show-chap label { font-size: 1.1rem; font-weight: 600; margin-bottom: 10px; }
-    @media (max-width: 768px) {
-      .sidebar-config { height: auto; border-right: none; border-bottom: 1px solid #e9ecef; }
-      .main-content { padding: 15px; }
-      .block.form-tao-de { padding: 15px; }
-    }
-  </style>
-</head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<%- include('../partials/head') %>
+
+
+  </head>
+<body class="page-add-update-test">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -128,14 +99,14 @@
                     <div class="block-header block-header-default">
                       <h3 class="block-title"><i class="fa fa-users text-success"></i> Giao cho</h3>
                       <div class="block-option">
-                        <select class="js-select2 form-select" id="nhom-hp" name="manhom" style="width: 100%;" data-placeholder="Chọn nhóm học phần giảng dạy..." <%= Action === 'update' ? 'disabled' : '' %>></select>
+                        <select class="js-select2 form-select" id="nhom-hp" name="manhom" style="width: 100%" data-placeholder="Chọn nhóm học phần giảng dạy..." <%= Action === 'update' ? 'disabled' : '' %>></select>
                         <input type="hidden" name="mamonhoc" id="mamonhoc" value="">
                       </div>
                     </div>
                     <div class="block-content pb-3">
                       <div class="row" id="list-group">
                         <div class="text-center fs-sm">
-                          <img style="width:100px" src="/public/media/svg/empty_data.png" alt="">
+                          <img style="width:100px" src="/public/media/svg/empty-state.svg" alt="">
                         </div>
                       </div>
                     </div>

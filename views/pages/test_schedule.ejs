@@ -4,10 +4,11 @@
   <!-- base href="/" để pagination.js (dùng URL tương đối ./client/...) resolve
        đúng về gốc, vì trang ở path sâu /client/test. -->
   <base href="/" />
-  <%- include('../partials/head') %>
+
+<%- include('../partials/head') %>
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-test-schedule">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -19,7 +20,7 @@
         <div class="row mb-5 justify-content-center">
           <div class="col-12 col-lg-8 col-xl-7">
             <div class="search-filter-wrapper p-3 bg-white rounded-4 shadow-lg border-0"
-                 style="backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                 style="backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2)">
               <form id="search-form" onsubmit="return false;" class="d-flex flex-column flex-md-row gap-3 align-items-center">
                 <div class="dropdown flex-shrink-0">
                   <button class="btn btn-outline-primary dropdown-toggle btn-filtered-by-state px-4 py-2 fw-600 rounded-pill d-flex align-items-center gap-2"
@@ -66,7 +67,7 @@
           <table class="table table-hover align-middle mb-0 modern-table border-0">
             <thead>
               <tr class="text-white text-uppercase fw-bold fs-6 tracking-wider"
-                  style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                 >
                 <th class="py-4 ps-5">Tên đề thi</th>
                 <th class="py-4">Môn học</th>
                 <th class="py-4">TG bắt đầu</th>
@@ -103,19 +104,6 @@
     <%- include('../partials/footer') %>
   </div>
   <!-- END Page Container -->
-
-  <style>
-    .modern-table tbody tr { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-left: 4px solid transparent; position: relative; z-index: 1; }
-    .modern-table tbody tr:hover { background: linear-gradient(90deg, #f8f9ff 0%, #f0f4ff 100%) !important; border-left-color: #667eea; transform: translateY(-4px); box-shadow: 0 12px 30px rgba(102, 126, 234, 0.18); z-index: 10; }
-    @media (max-width: 768px) {
-      .modern-table thead { display: none; }
-      .modern-table tbody tr { display: block; margin: 1rem 0; padding: 1.5rem; border-radius: 20px; border: none; background: white; box-shadow: 0 8px 25px rgba(102, 126, 234, 0.1); border-left: 5px solid #667eea; }
-      .modern-table tbody td { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border: none; text-align: right; }
-      .modern-table tbody td::before { content: attr(data-label); font-weight: 600; color: #667eea; text-transform: uppercase; font-size: 0.8rem; flex: 1; text-align: left; }
-    }
-    .table-responsive { overflow-x: auto !important; }
-    .modern-table { min-width: 1000px; }
-  </style>
 
   <%- include('../partials/script') %>
   <!-- Phân trang lịch thi (bê từ DHT_OneTest) -->

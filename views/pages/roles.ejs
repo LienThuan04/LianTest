@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
+<%- include('../partials/head') %>
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-roles">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -70,7 +71,7 @@
                   <input type="text" class="form-control form-control-alt" id="ten-nhom-quyen"
                     name="ten-nhom-quyen" placeholder="VD: Giảng viên">
                 </div>
-                <table class="table table-vcenter table-role">
+                <div class="table-responsive" role="region" aria-label="Bảng dữ liệu" tabindex="0"><table class="table table-vcenter table-role">
                   <thead>
                     <tr>
                       <th>Tên quyền</th>
@@ -166,7 +167,7 @@
                       <td class="text-center"><input class="form-check-input" type="checkbox" name="thongbao" value="delete"></td>
                     </tr>
                   </tbody>
-                </table>
+                </table></div>
                 <div class="row justify-content-around">
                   <div class="col-6 form-check form-switch d-flex justify-content-center gap-2">
                     <input class="form-check-input" type="checkbox" value="join" id="join_dethi" name="tgthi">

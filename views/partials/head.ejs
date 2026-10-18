@@ -1,23 +1,44 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title><%= typeof Title !== 'undefined' ? Title : 'LianHarman – Hệ thống quản lý bài thi cá nhân hóa' %></title>
+<meta name="color-scheme" content="light" />
+<% const productTitle = typeof Title !== 'undefined' ? Title : 'Hệ thống thi trực tuyến'; %>
+<title><%= productTitle.includes('LianTest') ? productTitle : productTitle + ' | LianTest' %></title>
+<meta name="application-name" content="LianTest" />
 
 <!-- Meta SEO -->
-<meta name="description" content="LianHarman – Hệ thống hỗ trợ tạo đề, quản lý bài thi và thi trắc nghiệm cá nhân hóa hiệu quả, bảo mật và dễ sử dụng." />
-<meta name="author" content="LianHarman Dev Team" />
+<meta name="description" content="<%= typeof Description !== 'undefined' ? Description : 'LianTest — Hệ thống thi trực tuyến với ngân hàng câu hỏi, tổ chức bài thi, chấm điểm và quản lý kết quả.' %>" />
+<meta name="author" content="LianHarman" />
+<% const publicPage = typeof PublicPage !== 'undefined' && PublicPage; %>
+<% if (publicPage) { %>
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="LianTest" />
+<meta property="og:title" content="<%= Title %>" />
+<meta property="og:description" content="<%= Description %>" />
+<meta property="og:locale" content="vi_VN" />
+<% } %>
 
 <!-- Favicon -->
-<link rel="shortcut icon" href="/public/media/favicons/favicon.png" />
-<link rel="icon" type="image/png" sizes="192x192" href="/public/media/favicons/favicon-192x192.png" />
+<link rel="icon" type="image/svg+xml" href="/public/media/favicons/favicon.svg" />
+<link rel="alternate icon" type="image/png" sizes="32x32" href="/public/media/favicons/favicon.png?v=liantest-1" />
+<link rel="icon" type="image/png" sizes="192x192" href="/public/media/favicons/favicon-192x192.png?v=liantest-1" />
+<link rel="apple-touch-icon" sizes="180x180" href="/public/media/favicons/apple-touch-icon-180x180.png?v=liantest-1" />
 
 <!-- Font & Core CSS (theme Dashmix bê từ DHT_OneTest) -->
-<link rel="preconnect" href="https://fonts.googleapis.com" />
+<% if (!publicPage) { %>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link rel="stylesheet" id="css-main" href="/public/css/dashmix.css" />
 <link rel="stylesheet" href="/public/css/custom.css" />
+<% } %>
+<link rel="stylesheet" href="/public/css/design-tokens.css" />
+<link rel="stylesheet" href="/public/css/ui-components.css" />
+<% if (!publicPage) { %>
+<link rel="stylesheet" href="/public/css/app-shell.css" />
+<link rel="stylesheet" href="/public/css/feature-pages.css" />
+<link rel="stylesheet" href="/public/css/exam.css" />
 
 <!-- jQuery -->
 <script src="/public/js/lib/jquery.min.js"></script>
 
 <!-- Helper avatarUrl(): cột `avatar` có thể là tên file cũ HOẶC URL Supabase -->
 <script src="/public/js/avatar-url.js"></script>
+<% } %>

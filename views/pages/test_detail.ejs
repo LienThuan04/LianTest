@@ -4,10 +4,11 @@
   <!-- base href="/" để pagination.js / test_detail.js (URL tương đối ./test/...)
        resolve đúng từ gốc dù trang ở path sâu /test/detail/:made. -->
   <base href="/" />
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
+<%- include('../partials/head') %>
+
 </head>
-<body>
+<body class="page-test-detail">
 <%
   // Port từ DHT_OneTest/mvc/views/pages/test_detail.php
   function fmtDate(d) {
@@ -18,7 +19,7 @@
     return `${p(dt.getHours())}:${p(dt.getMinutes())} ${p(dt.getDate())}/${p(dt.getMonth() + 1)}/${dt.getFullYear()}`;
   }
 %>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -146,7 +147,7 @@
                     </div>
                   </div>
                   <div class="col-lg-8">
-                    <div class="block block-rounded" id="khu-vuc-cham-bai" style="display:none;">
+                    <div class="block block-rounded" id="khu-vuc-cham-bai" style="display:none">
                       <div class="block-header block-header-default d-flex justify-content-between align-items-center">
                         <span class="fw-bold fs-5 text-primary">Chi tiết câu trả lời</span>
                         <span class="mx-2 fw-bold">-</span>
@@ -160,7 +161,7 @@
                         <form id="form-cham-diem-tuluan">
                           <div class="mb-3">
                             <label class="form-label fw-bold">Điểm tự luận (tổng: <span id="tong-diem-tuluan">0</span> điểm)</label>
-                            <input type="number" step="0.25" min="0" class="form-control form-control-lg text-center fw-bold text-primary" id="diem-tuluan-input" value="0" style="font-size: 2rem;" readonly>
+                            <input type="number" step="0.25" min="0" class="form-control form-control-lg text-center fw-bold text-primary" id="diem-tuluan-input" value="0" readonly>
                           </div>
                           <div class="text-center">
                             <button type="submit" class="btn btn-success btn-lg px-5">
@@ -195,7 +196,7 @@
                 </div>
                 <div class="row g-3 mb-4">
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-success text-white">
+                    <div class="block block-rounded metric-card bg-success text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="da_nop">0</p><p class="text-white-75 mb-0">Thí sinh đã nộp</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-user-check text-white"></i></div>
@@ -203,7 +204,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-warning text-white">
+                    <div class="block block-rounded metric-card bg-warning text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="chua_nop">0</p><p class="text-white-75 mb-0">Thí sinh chưa nộp</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-user-pen text-white"></i></div>
@@ -211,7 +212,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-danger text-white">
+                    <div class="block block-rounded metric-card bg-danger text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="khong_thi">0</p><p class="text-white-75 mb-0">Thí sinh không thi</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-user-xmark text-white"></i></div>
@@ -219,7 +220,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-info text-white">
+                    <div class="block block-rounded metric-card bg-info text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="diem_trung_binh">0</p><p class="text-white-75 mb-0">Điểm trung bình</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-gauge text-white"></i></div>
@@ -227,7 +228,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-secondary text-white">
+                    <div class="block block-rounded metric-card bg-secondary text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="diem_duoi_1">0</p><p class="text-white-75 mb-0">Số thí sinh điểm &lt;= 1</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-face-sad-cry text-white"></i></div>
@@ -235,7 +236,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-warning text-white">
+                    <div class="block block-rounded metric-card bg-warning text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="diem_duoi_5">0</p><p class="text-white-75 mb-0">Số thí sinh điểm &lt;= 5</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-thumbs-down text-white"></i></div>
@@ -243,7 +244,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-success text-white">
+                    <div class="block block-rounded metric-card bg-success text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="diem_lon_5">0</p><p class="text-white-75 mb-0">Số thí sinh điểm &gt;= 5</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-award text-white"></i></div>
@@ -251,7 +252,7 @@
                     </div>
                   </div>
                   <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-fx-shadow bg-primary text-white">
+                    <div class="block block-rounded metric-card bg-primary text-white">
                       <div class="block-content block-content-full d-flex align-items-center justify-content-between p-3">
                         <div class="me-3"><p class="fs-lg fw-semibold mb-0" id="diem_cao_nhat">0</p><p class="text-white-75 mb-0">Điểm cao nhất</p></div>
                         <div class="item item-circle bg-white bg-opacity-10"><i class="fa fa-users text-white"></i></div>
@@ -259,7 +260,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="chart-container mt-4" style="position: relative; height: 40vh; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div class="chart-container mt-4" style="position: relative; height: 40vh; overflow: hidden">
                   <canvas id="myChart" class="bg-white rounded"></canvas>
                 </div>
               </div>
@@ -339,21 +340,5 @@
   <script src="/public/js/pagination.js"></script>
   <script src="/public/js/pages/test_detail.js"></script>
 
-  <style>
-    #danh-sach-sinhvien-tuluan .list-group-item { cursor: pointer; transition: all 0.2s; }
-    #danh-sach-sinhvien-tuluan .list-group-item:hover { background-color: #f8f9fa; }
-    #danh-sach-sinhvien-tuluan .list-group-item.active { background-color: #e3f2fd !important; border-left: 4px solid #1976d2; }
-    .student-item { transition: all 0.3s ease; cursor: pointer; }
-    .student-item:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.12)!important; }
-    .student-item.active { background-color: #cfe2ff !important; color: #0d6efd !important; border-left: 4px solid #0d6efd; }
-    .student-item.active * { color: white!important; }
-    .student-item.active .text-muted { opacity: 0.9; }
-    .hover-shadow { transition: box-shadow 0.3s; }
-    #khu-vuc-cham-bai { background: #fff; border: 1px solid #e3e3e3; border-radius: 12px; }
-    #noi-dung-tuluan .card { border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    #noi-dung-tuluan .diem-cau { max-width: 120px; }
-    .table-responsive { display: block; width: 100%; overflow-x: auto; }
-    .table thead th, .table tbody td { white-space: nowrap; vertical-align: middle; }
-  </style>
-</body>
+  </body>
 </html>

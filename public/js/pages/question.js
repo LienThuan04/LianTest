@@ -2066,7 +2066,7 @@ $(document).ready(function () {
       reader.onload = function (e) {
         $("#question-image-preview")
           .html(
-            `<img src="${e.target.result}" class="img-thumbnail" style="max-width:350px; max-height:220px; object-fit:contain; border:2px solid #28a745; border-radius:8px;">`
+            `<img src="${e.target.result}" class="img-thumbnail" style="max-width:350px; max-height:220px; object-fit:contain; border:1px solid var(--color-mist-border); border-radius:8px;">`
           )
           .show();
       };

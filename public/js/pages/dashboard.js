@@ -1,29 +1,8 @@
-// Bê từ DHT_OneTest/public/js/pages/dashboard.js — chỉ đổi "./dashboard/..."
-// thành "/dashboard/..." (NestJS phục vụ route ở path gốc).
+// Existing email onboarding; presentation no longer uses a stock-image carousel.
 $(document).ready(function () {
-  $.ajax({
-    type: "post",
-    url: "/dashboard/checkEmail",
-    success: function (response) {
-      if (response == "") {
-        let i = document.getElementById("modal-onboarding");
-        new bootstrap.Modal(i).show(),
-          i.addEventListener("shown.bs.modal", () => {
-            const $slider = $("#modal-onboarding .js-slider");
-
-            if ($slider.hasClass("slick-initialized")) {
-              $slider.slick("unslick");
-            }
-
-            $slider.removeClass("js-slider-enabled");
-
-            Dashmix.helpers("jq-slick");
-          });
-      } else {
-        Dashmix.helpers("jq-slick");
-      }
-    },
-  });
+  $.ajax({ type: "post", url: "/dashboard/checkEmail", success: function (response) {
+    if (response == "") new bootstrap.Modal(document.getElementById("modal-onboarding")).show();
+  }});
 });
 
 function validateEmail($email) {

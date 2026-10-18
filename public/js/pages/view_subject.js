@@ -100,7 +100,7 @@ $(document).ready(function () {
           });
         } else {
           html = `<tr><td colspan="3" class="text-center">
-                    <img style="width:180px" src="/public/media/svg/empty_data.png" alt=""/>
+                    <img style="width:180px" src="/public/media/svg/empty-state.svg" alt=""/>
                     <p class="text-center mt-3">Không có dữ liệu</p>
                   </td></tr>`;
         }

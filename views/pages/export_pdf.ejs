@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="application-name" content="LianTest" />
+<meta name="author" content="LianHarman" />
 <title><%= Title %></title>
 <%
   /*
@@ -12,25 +14,26 @@
    * chỉ thêm @page + @media print để bản in sạch (bỏ bóng đổ, không cắt ngang khối).
    */
 %>
+<link rel="stylesheet" href="/public/css/design-tokens.css">
 <style>
   @page { size: A4 portrait; margin: 12mm; }
   body { font-family: "Times New Roman", serif; padding: 30px 50px; line-height: 1.6; color: #000; }
   .header { text-align: center; margin-bottom: 30px; }
-  .header h1 { font-size: 28px; font-weight: bold; color: #1a5fb4; margin-bottom: 5px; }
+  .header h1 { font-size: 28px; font-weight: bold; color: var(--color-iris-bolt); margin-bottom: 5px; }
   .header p { font-size: 16px; color: #555; margin: 0; }
   table.info-table { width: 100%; border-collapse: separate; border-spacing: 0 15px; margin-bottom: 30px; }
-  table.info-table td { vertical-align: top; padding: 15px 20px; border: 1px solid #d0e0ff; border-radius: 8px; background-color: #f8fbff; width: 50%; }
-  .section-title { font-size: 18px; font-weight: bold; color: #1a5fb4; text-align: center; margin-bottom: 15px; border-bottom: 2px solid #1a5fb4; padding-bottom: 6px; }
+  table.info-table td { vertical-align: top; padding: 15px 20px; border: 1px solid var(--color-mist-border); border-radius: 8px; background-color: var(--color-chalk-canvas); width: 50%; }
+  .section-title { font-size: 18px; font-weight: bold; color: var(--color-iris-bolt); text-align: center; margin-bottom: 15px; border-bottom: 2px solid var(--color-iris-bolt); padding-bottom: 6px; }
   .info-row { margin-bottom: 10px; display: flex; }
   .label { font-weight: bold; width: 130px; flex-shrink: 0; color: #333; }
   .value { flex: 1; }
-  .highlight { font-size: 18px; color: #d32f2f; font-weight: bold; }
+  .highlight { font-size: 18px; color: var(--color-ink-charcoal); font-weight: bold; }
 
   /* Nhóm Reading */
   .reading-card { margin-bottom: 40px; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background: #fff; }
-  .reading-header { background: #e3f2fd; padding: 15px 20px; border-bottom: 1px solid #bbdefb; text-align: center; }
-  .reading-title { font-size: 18px; font-weight: bold; color: #1a5fb4; margin: 0; }
-  .reading-passage { padding: 20px; background: #f8fdff; font-size: 15px; line-height: 1.8; }
+  .reading-header { background: var(--color-lilac-wash); padding: 15px 20px; border-bottom: 1px solid var(--color-mist-border); text-align: center; }
+  .reading-title { font-size: 18px; font-weight: bold; color: var(--color-iris-bolt); margin: 0; }
+  .reading-passage { padding: 20px; background: var(--color-chalk-canvas); font-size: 15px; line-height: 1.8; }
   .reading-passage img { max-width: 100%; height: auto; margin: 10px 0; border-radius: 6px; }
 
   /* Câu hỏi chung */
@@ -42,31 +45,31 @@
   .answers-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px; }
   .answer-item { position: relative; border: 2px solid #eee; border-radius: 10px; padding: 8px; background: #fff; min-height: 60px; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; text-align: left; font-size: 14px; }
   .answer-item img { width: 100%; max-height: 120px; object-fit: contain; margin: 10px 0; border-radius: 6px; }
-  .answer-label { font-size: 14px; font-weight: bold; color: #1a5fb4; margin-right: 8px; }
+  .answer-label { font-size: 14px; font-weight: bold; color: var(--color-iris-bolt); margin-right: 8px; }
 
   /* Đúng / Sai */
-  .correct-item { border-color: #4caf50 !important; background: #fff !important; }
-  .wrong-item { border-color: #f44336 !important; background: #fff !important; }
-  .icon-check { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); font-size: 20px; color: #4caf50; font-weight: bold; }
-  .icon-cross { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); font-size: 20px; color: #f44336; font-weight: bold; }
+  .correct-item { border-color: var(--color-iris-bolt) !important; background: #fff !important; }
+  .wrong-item { border-color: var(--color-ink-charcoal) !important; background: #fff !important; }
+  .icon-check { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); font-size: 20px; color: var(--color-iris-bolt); font-weight: bold; }
+  .icon-cross { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); font-size: 20px; color: var(--color-ink-charcoal); font-weight: bold; }
 
   /* Tự luận */
-  .essay-block { margin-top: 20px; padding: 15px; background: #e8f4f8; border-left: 5px solid #1a5fb4; border-radius: 8px; }
-  .essay-title { font-weight: bold; color: #1a5fb4; margin-bottom: 10px; text-align: center; }
+  .essay-block { margin-top: 20px; padding: 15px; background: var(--color-chalk-canvas); border-left: 5px solid var(--color-iris-bolt); border-radius: 8px; }
+  .essay-title { font-weight: bold; color: var(--color-iris-bolt); margin-bottom: 10px; text-align: center; }
   .essay-content { background: #fff; padding: 15px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 15px; }
   .essay-images { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; justify-content: center; }
   .essay-images img { width: 200px; height: auto; object-fit: contain; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); }
-  .essay-score { margin-top: 15px; padding: 10px; background: #fff; border: 1px solid #4caf50; border-radius: 6px; text-align: center; font-size: 18px; font-weight: bold; color: #1a5fb4; }
-  .essay-score.ungraded { background: #fff3cd; border-color: #ffc107; color: #856404; }
+  .essay-score { margin-top: 15px; padding: 10px; background: #fff; border: 1px solid var(--color-iris-bolt); border-radius: 6px; text-align: center; font-size: 18px; font-weight: bold; color: var(--color-iris-bolt); }
+  .essay-score.ungraded { background: var(--color-chalk-canvas); border-color: var(--color-mist-border); color: var(--color-slate-veil); }
   .text-muted { color: #6c757d; text-align: center; }
 
-  .first-page-header { font-size: 17px; font-weight: bold; color: #d32f2f; background: white; padding: 12px 20px; border-left: 4px solid #ff5252; border-bottom: 4px solid #ff5252; border-bottom-left-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+  .first-page-header { font-size: 17px; font-weight: bold; color: var(--color-ink-charcoal); background: white; padding: 12px 20px; border-left: 4px solid var(--color-mist-border); border-bottom: 4px solid var(--color-mist-border); border-bottom-left-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
 
   img { max-width: 100%; max-height: 400px; height: auto; width: auto; display: block; margin: 10px auto; object-fit: contain; }
 
   /* Nút in (không xuất hiện trên bản in). */
   .print-bar { text-align: center; margin-bottom: 20px; }
-  .print-bar button { font-family: inherit; font-size: 15px; padding: 8px 20px; border: 1px solid #1a5fb4; border-radius: 6px; background: #1a5fb4; color: #fff; cursor: pointer; }
+  .print-bar button { font-family: inherit; font-size: 15px; padding: 8px 20px; border: 1px solid var(--color-iris-bolt); border-radius: 6px; background: var(--color-iris-bolt); color: #fff; cursor: pointer; }
 
   @media print {
     body { padding: 0; }
@@ -74,6 +77,8 @@
     .reading-card, .question-block, .essay-block { box-shadow: none; break-inside: avoid; page-break-inside: avoid; }
     .answer-item { break-inside: avoid; page-break-inside: avoid; }
   }
+@media screen { *, *::before, *::after { box-sizing: border-box; } body { max-width: 1200px; margin: 0 auto; font-family: var(--font-hurme-geometric-sans); color: var(--color-ink-charcoal); background: var(--color-chalk-canvas); } .info-table { table-layout: fixed; } .value { min-width: 0; overflow-wrap: anywhere; } .reading-card { border-radius: 8px; box-shadow: var(--shadow-sm); } .first-page-header { box-shadow: none; border-width: 1px; border-radius: 8px; } .print-bar button { border-radius: 200px; } }
+@media screen and (max-width: 767px) { body { padding: 24px 16px; } table.info-table, table.info-table tbody, table.info-table tr, table.info-table td { display: block; width: 100%; } .info-row { flex-wrap: wrap; gap: 8px; } .label { width: auto; min-width: 110px; } .answers-grid { grid-template-columns: minmax(0,1fr); } }
 </style>
 </head>
 <body>
@@ -84,7 +89,7 @@
 <div class="first-page-header"><%= Title %></div>
 
 <div class="header">
-  <h1>LianHarman</h1>
+  <h1>LianTest</h1>
   <p>WEBSITE TẠO VÀ QUẢN LÝ BÀI THI CÁ NHÂN HÓA</p>
 </div>
 

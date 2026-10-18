@@ -1,66 +1,35 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LianHarman - Quên mật khẩu</title>
-  <link rel="shortcut icon" href="/public/media/favicons/favicon.png" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <!-- Port từ DHT_OneTest/mvc/views/pages/auth/recover.php.
-       KHÁC PHP: dùng CSS/JS LOCAL của dự án (dashmix + font-awesome trong theme)
-       thay Tailwind/Font-Awesome qua CDN. -->
-  <link rel="stylesheet" href="/public/css/dashmix.css" />
-  <style>
-    * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    body, html { margin: 0; padding: 0; height: 100%; }
-    .bg-image { background-image: url('https://y7b6t9n6.delivery.rocketcdn.me/wp-content/uploads/2024/01/SVG-3.svg'); background-size: cover; background-position: center; min-height: 100vh; position: relative; }
-    .bg-overlay { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(8px); z-index: 0; }
-    .form-card { background: white; border-radius: 24px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1); text-align: center; z-index: 1; padding: 40px 30px; width: 100%; }
-    .form-card p { font-size: 15px; color: #555; margin-bottom: 20px; }
-    .input-group { position: relative; margin-bottom: 20px; }
-    .input-group .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #555; font-size: 16px; pointer-events: none; z-index: 2; }
-    .input-group input[type="email"] { width: 100%; padding: 14px 14px 14px 42px; border-radius: 12px; border: 1px solid #ddd; font-size: 15px; height: 50px; transition: border 0.3s; }
-    .input-group input:focus { border-color: #00C9A7; outline: none; box-shadow: 0 0 0 2px rgba(0,201,167,0.2); }
-    .btn-primary { width: 100%; padding: 10px; background: linear-gradient(45deg, #00C9A7, #1E90FF); border: none; border-radius: 12px; font-weight: 600; color: white; font-size: 16px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); height: 45px; }
-    .btn-primary:hover { transform: translateY(-2px); opacity: 0.95; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); }
-    .btn-secondary { width: 100%; padding: 10px; background: #f1f1f1; color: #333; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 14px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); height: 45px; display: inline-block; line-height: 20px; }
-    .btn-secondary:hover { background: #e2e2e2; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
-    label.error { color: #dc3545; font-size: 13px; display: block; margin: -12px 0 12px; text-align: left; }
-  </style>
+<%- include("../../partials/head") %>
+<link rel="stylesheet" href="/public/css/auth.css">
 </head>
-<body>
-  <div class="bg-image">
-    <div class="bg-overlay"></div>
-    <div class="row g-0 justify-content-center align-items-center min-vh-100 position-relative" style="z-index: 1;">
-      <div class="col-sm-10 col-md-8 col-lg-6 col-xl-4 d-flex align-items-center p-4">
-        <div class="form-card">
-          <div class="mb-4 text-center">
-            <a class="fw-bold fs-2 text-decoration-none" href="/">
-              <span class="text-dark">Lian</span><span class="text-primary">Harman</span>
-            </a>
-            <p class="text-uppercase fw-semibold text-muted mt-1 mb-2">Quên mật khẩu</p>
-          </div>
-          <form id="recoverForm" class="js-validation-reminder" method="POST" action="/auth/sendOptAuth" onsubmit="return false;">
-            <div class="input-group">
+<body class="auth-page">
+<a class="skip-link" href="#auth-main">Đến biểu mẫu</a>
+<div id="page-container" class="auth-layout">
+<%- include("../../partials/auth-intro") %>
+<main class="auth-panel" id="auth-main">
+<h1>Quên mật khẩu</h1><p>Nhập email của tài khoản để nhận mã xác minh.</p>
+<form id="recoverForm" class="js-validation-reminder" method="POST" action="/auth/sendOptAuth" onsubmit="return false;">
+            <label class="form-label" for="reminder-credential">Email tài khoản</label><div class="input-group">
               <span class="input-icon"><i class="fa fa-envelope"></i></span>
-              <input type="email" id="reminder-credential" name="reminder-credential"
+              <input type="email" id="reminder-credential" name="reminder-credential" autocomplete="email" class="form-control"
                 placeholder="Nhập email của tài khoản" required>
             </div>
 
             <div class="d-grid gap-3">
-              <button id="btnRecover" type="submit" class="btn-primary">
+              <button id="btnRecover" type="submit" class="btn btn-primary">
                 <i class="fa fa-reply me-1"></i> Khôi phục mật khẩu
               </button>
-              <a href="/auth/signin" class="btn-secondary">
+              <a href="/auth/signin" class="btn btn-secondary">
                 <i class="fa fa-sign-in-alt me-1"></i> Quay về đăng nhập
               </a>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <%- include('../../partials/auth-scripts') %>
-</body>
-</html>
+<p class="auth-footer"><a href="/">← Tìm hiểu LianTest</a></p>
+</main></div>
+<%- include("../../partials/auth-scripts") %>
+
+<script src="/public/js/auth-ui.js"></script>
+</body></html>

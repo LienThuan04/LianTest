@@ -74,8 +74,8 @@ function showData(data) {
           <div class="d-flex align-items-center py-1">
             <img
               class="img-avatar img-avatar48 me-3 rounded-circle flex-shrink-0"
-              src="${avatarUrl(item.avatar, "admin1-689ab11d45eea.jpg")}"
-              onerror="this.src='/public/media/avatars/admin1-689ab11d45eea.jpg'"
+              src="${avatarUrl(item.avatar, "avatar2.jpg")}"
+              onerror="this.src='/public/media/avatars/avatar2.jpg'"
               alt=""
             >
             <div class="min-w-0">
@@ -389,7 +389,7 @@ $(document).ready(function () {
           : "";
 
         const imageBlock = hasImage
-          ? `<div class="answer-image text-center mt-2"><img src="${op.hinhanh}" class="img-fluid rounded-4 shadow-sm border" style="max-height: 260px; object-fit: contain; background:#f8f9fa;"></div>`
+          ? `<div class="answer-image text-center mt-2"><img src="${op.hinhanh}" class="img-fluid rounded-4 shadow-sm border" style="max-height: 260px; object-fit: contain;background:var(--color-chalk-canvas)"></div>`
           : "";
 
         const content =
@@ -397,7 +397,7 @@ $(document).ready(function () {
 
         html += `
       <div class="col-12 col-md-6">
-        <div class="position-relative rounded-4 ${borderClass} bg-white overflow-hidden transition-all" style="min-height: 180px; box-shadow: 0 4px 15px rgba(0,0,0,0.08)!important;">
+        <div class="position-relative rounded-4 ${borderClass} bg-white overflow-hidden transition-all" style="min-height: 180px">
           <div class="p-4 d-flex flex-column justify-content-start align-items-center h-100 text-center">
             <div class="text-primary fw-bold fs-2 mb-3">${label}</div>
             ${content}
@@ -411,21 +411,21 @@ $(document).ready(function () {
       // === 6. THANH KẾT QUẢ ===
       let resultBar = "";
       if (notAnswered) {
-        resultBar = `<div class="mx-auto mt-5 rounded-4 overflow-hidden" style="max-width:500px;">
+        resultBar = `<div class="mx-auto mt-5 rounded-4 overflow-hidden" style="max-width:500px">
         <div class="bg-warning bg-opacity-15 text-dark py-4 px-5 d-flex align-items-center justify-content-center gap-3 border border-warning">
           <i class="fas fa-clock fa-2x"></i>
           <strong class="fs-4">Đáp án chưa được chọn!</strong>
         </div>
       </div>`;
       } else if (isCorrect) {
-        resultBar = `<div class="mx-auto mt-5 rounded-4 overflow-hidden" style="max-width:500px;">
+        resultBar = `<div class="mx-auto mt-5 rounded-4 overflow-hidden" style="max-width:500px">
         <div class="bg-success text-white py-4 px-5 d-flex align-items-center justify-content-center gap-3">
           <i class="fas fa-check-circle fa-3x"></i>
           <strong class="fs-3">Đáp án chọn chính xác!</strong>
         </div>
       </div>`;
       } else {
-        resultBar = `<div class="mx-auto mt-5 rounded-4 overflow-hidden" style="max-width:500px;">
+        resultBar = `<div class="mx-auto mt-5 rounded-4 overflow-hidden" style="max-width:500px">
         <div class="bg-danger text-white py-4 px-5 d-flex align-items-center justify-content-center gap-3">
           <i class="fas fa-times-circle fa-3x"></i>
           <strong class="fs-3">Đáp án chọn không đúng!</strong>
@@ -487,7 +487,7 @@ $(document).ready(function () {
             <div class="border rounded-3 overflow-hidden shadow-sm">
               <img src="${b64}"
                    class="img-fluid w-100"
-                   style="max-height:500px; object-fit:contain; background:#f8f9fa;">
+                   style="max-height:500px; object-fit:contain;background:var(--color-chalk-canvas)">
             </div>
           </div>`;
         });
@@ -893,8 +893,8 @@ function showChart(data) {
         {
           label: "Số lượng sinh viên",
           data: data,
-          backgroundColor: "rgba(6, 101, 208, 0.8)",
-          borderColor: "rgba(6, 101, 208, 1)",
+          backgroundColor: "rgba(66, 85, 255, 0.8)",
+          borderColor: "rgba(66, 85, 255, 1)",
           borderWidth: 1,
         },
       ],
@@ -1021,18 +1021,18 @@ function loadStudentsEssayToGrade(made, q, status) {
               
               <!-- Avatar + Tên + MSSV -->
               <!-- Avatar + Tên + MSSV -->
-<div class="d-flex align-items-center flex-grow-1" style="min-width: 0;">
+<div class="d-flex align-items-center flex-grow-1" style="min-width: 0">
   <!-- Avatar -->
   <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 me-3"
-       style="width:48px; height:48px; font-size:20px; font-weight:bold;">
+       style="width:48px; height:48px; font-size:20px; font-weight:bold">
     <img src="${avatarUrl(item.avatar, "ANHSV.png")}"
          alt="${hoten}"
          class="rounded-circle"
-         style="width:100%; height:100%; object-fit:cover;">
+         style="width:100%; height:100%; object-fit:cover">
   </div>
 
   <!-- Thông tin người dùng (ĐÃ FIX TRÀN TÊN HOÀN HẢO) -->
-  <div style="min-width: 0; flex: 1;">
+  <div style="min-width: 0; flex: 1">
     <h6 class="mb-1 fw-bold text-dark text-truncate" title="${hoten}">${hoten}</h6>
     <small class="text-muted text-truncate d-block" title="${item.manguoidung}">
       <i class="fas fa-id-card me-1"></i>${item.manguoidung}
@@ -1213,7 +1213,7 @@ $(document).on(
 
           html += `
       <div class="card border-0 shadow-sm mb-4">
-        <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #0d6efd, #0b5ed7);">
+        <div class="card-header bg-white" style="background:var(--color-chalk-canvas)">
           <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Câu ${
             i + 1
           } (Mã: ${c.macauhoi})</h5>
@@ -1243,7 +1243,7 @@ $(document).on(
                   .map(
                     (img) => `
             <div class="text-center mb-4">
-              <img src="${img}" class="img-fluid rounded shadow" style="max-height: 500px;">
+              <img src="${img}" class="img-fluid rounded shadow" style="max-height: 500px">
             </div>`
                   )
                   .join("")
@@ -1253,7 +1253,7 @@ $(document).on(
           <div class="mt-4 d-flex align-items-center">
             <label class="fw-bold text-primary me-3">Điểm câu này:</label>
             <input type="number" step="0.25" min="0" max="50"
-                   class="form-control diem-cau w-25" style="font-size:1.2rem;"
+                   class="form-control diem-cau w-25" style="font-size:1.2rem"
                    value="${diem.toFixed(2)}" data-macauhoi="${c.macauhoi}">
             <small class="text-muted ms-3"><i class="fas fa-clock"></i> ${
               c.thoigianlam || "—"

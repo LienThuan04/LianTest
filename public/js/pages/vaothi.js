@@ -183,12 +183,12 @@ $(document).ready(function () {
         }
 
         const content = op.hinhanh?.trim()
-          ? `<img src="${op.hinhanh}" class="img-fluid rounded-3" style="max-height:110px;">`
+          ? `<img src="${op.hinhanh}" class="img-fluid rounded-3" style="max-height:110px">`
           : op.noidungtl;
 
         html += `
         <div class="col-12 col-md-6">
-          <div class="position-relative rounded-4 ${borderClass} bg-white" style="min-height:90px;">
+          <div class="position-relative rounded-4 ${borderClass} bg-white" style="min-height:90px">
             <div class="p-4 d-flex align-items-center h-100">
               <span class="text-primary fw-bold fs-4 me-3">${label}.</span>
               <div class="fs-5">${content}</div>
@@ -201,13 +201,13 @@ $(document).ready(function () {
 
       let resultBar = "";
       if (notAnswered) {
-        resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px;">
+        resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px">
         <div class="bg-warning bg-opacity-10 text-white py-3 px-4 text-center fw-bold">
           <i class="fas fa-clock me-2"></i>Đáp án chưa được chọn!
         </div>
       </div>`;
       } else if (isCorrect) {
-        resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px;">
+        resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px">
         <div class="bg-success text-white py-3 px-4 d-flex align-items-center justify-content-center gap-3">
           <i class="fas fa-check-circle fa-2x"></i>
           <strong class="fs-5 mb-0">Đáp án chọn chính xác!</strong>
@@ -220,7 +220,7 @@ $(document).ready(function () {
         const correctLabel = String.fromCharCode(
           65 + item.cautraloi.indexOf(correctOp)
         );
-        resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px;">
+        resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px">
         <div class="bg-danger text-white py-3 px-4 d-flex align-items-center justify-content-center gap-3">
           <i class="fas fa-times-circle fa-2x"></i>
           <div class="text-center">
@@ -284,7 +284,7 @@ $(document).ready(function () {
         <div class="border rounded-3 overflow-hidden shadow-sm">
           <img src="${b64}"
                class="img-fluid w-100"
-               style="max-height:500px; object-fit:contain; background:#f8f9fa;">
+               style="max-height:500px; object-fit:contain;background:var(--color-chalk-canvas)">
         </div>
       </div>`;
         });
@@ -388,7 +388,7 @@ $(document).ready(function () {
             <div class="border rounded-3 overflow-hidden shadow-sm">
               <img src="${b64}"
                    class="img-fluid w-100"
-                   style="max-height:500px; object-fit:contain; background:#f8f9fa;">
+                   style="max-height:500px; object-fit:contain;background:var(--color-chalk-canvas)">
             </div>
           </div>`;
         });

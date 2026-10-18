@@ -39,7 +39,7 @@ function showListAnnounce(announces) {
     html += `
       <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
         <!-- Header xanh lá đúng tone của anh -->
-        <div class="card-header bg-success bg-gradient text-white border-0 py-4 px-4">
+        <div class="card-header bg-white border-0 py-4 px-4">
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
               <i class="fa fa-bullhorn fa-lg me-3"></i>
@@ -293,7 +293,7 @@ $(document).ready(function () {
                 </div>`;
       });
     } else {
-      html += `<div class="text-center fs-sm"><img style="width:100px" src="/public/media/svg/empty_data.png" alt=""></div>`;
+      html += `<div class="text-center fs-sm"><img style="width:100px" src="/public/media/svg/empty-state.svg" alt=""></div>`;
     }
     $("#list-group").html(html);
   }
@@ -473,6 +473,8 @@ $(document).ready(function () {
     }
   });
 
+  // The create page reuses form helpers but has no list pagination.
+  if (!document.querySelector(".pagination-container")) return;
   const container = document.querySelector(".content");
   const currentUser = container.dataset.id;
   delete container.dataset.id;

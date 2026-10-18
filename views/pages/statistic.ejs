@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
+<%- include('../partials/head') %>
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-statistic">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -74,7 +75,7 @@
               <%- include('../partials/statistic_cards') %>
 
               <!-- Biểu đồ -->
-              <div class="chart-container mt-4" style="position: relative; height: 40vh; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+              <div class="chart-container mt-4" style="position: relative; height: 40vh; overflow: hidden">
                 <canvas id="myChart" class="bg-white rounded"></canvas>
               </div>
 
@@ -114,7 +115,7 @@
                       </div>
                     </div>
                     <%- include('../partials/statistic_cards') %>
-                    <div class="chart-container mt-4" style="position: relative; height: 40vh; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="chart-container mt-4" style="position: relative; height: 40vh; overflow: hidden">
                       <canvas id="myChart" class="bg-white rounded"></canvas>
                     </div>
                   </div>

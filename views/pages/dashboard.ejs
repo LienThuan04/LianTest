@@ -1,70 +1,39 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <%- include('../partials/head') %>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css" />
-  <style>
-    .content { max-width: 960px; margin: 0 auto; }
-    .fixed-slider-img { width: 100%; height: 400px; object-fit: cover; border-radius: 10px; }
-    .slick-prev:before, .slick-next:before { color: white !important; font-size: 30px; }
-    .slick-dots li button:before { color: #999; }
-    .slick-dots li.slick-active button:before { color: #333; }
-  </style>
-</head>
-<body>
-  <!-- Page Container (lớp class này để Dashmix dựng layout sidebar + header cố định) -->
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
-    <%- include('../partials/navbar') %>
-    <%- include('../partials/header') %>
-
-    <!-- Main Container -->
-    <main id="main-container">
-      <div class="content py-4">
-        <h2 id="slider-title" style="text-align:center; margin-bottom:20px;">Hệ thống tạo và quản lý bài thi cá nhân hóa</h2>
-        <!-- js-slider-enabled: đánh dấu ĐÃ khởi tạo thủ công (script cuối trang) để
-             helper `jq-slick` của Dashmix — dashboard.js gọi sau khi checkEmail —
-             bỏ qua, tránh init slick hai lần. -->
-        <div class="js-slider js-slider-enabled">
-          <div><img class="img-fluid fixed-slider-img" src="https://png.pngtree.com/png-clipart/20240412/original/pngtree-online-test-with-laptop-and-stopwatch-vector-illustration-png-image_14794593.png" alt="Top phần mềm thi online" /></div>
-          <div><img class="img-fluid fixed-slider-img" src="https://file.unica.vn/storage/fc2ee9cfd8f54fd092257c83fa8d328ec9fbcefa/cong-cu-tao-de-thi-online-1.jpeg" alt="Tạo đề thi online" /></div>
-          <div><img class="img-fluid fixed-slider-img" src="https://phubinh.vn/uploads/news/2022_10/phan-mem-thi-trac-nghiem-online.jpg" alt="Công cụ tạo bài thi" /></div>
-        </div>
-      </div>
-    </main>
-    <!-- END Main Container -->
-
-    <%- include('../partials/footer') %>
-  </div>
-  <!-- END Page Container -->
-
-  <!-- Modal onboarding: nhắc cập nhật email khi tài khoản chưa có email
-       (bê từ dashboard.php; ảnh nền photo23.jpg không có trong bộ media nên
-       dùng bg_dashboard.jpg sẵn có). -->
-  <div class="modal fade" id="modal-onboarding" tabindex="-1" role="dialog" aria-labelledby="modal-onboarding" aria-hidden="true">
+<!DOCTYPE html><html lang="vi"><head><%- include('../partials/head') %></head><body>
+<div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
+<%- include('../partials/navbar') %><%- include('../partials/header') %>
+<main id="main-container"><div class="content"><div class="workspace-welcome"><p class="page-eyebrow">KHÔNG GIAN CỦA BẠN</p><h1>Chào <%= user.hoten %>.</h1><p class="text-muted">Chọn một tác vụ để tiếp tục. Các chức năng được hiển thị theo quyền của tài khoản.</p><a href="/account">Xem và cập nhật tài khoản →</a></div>
+<div class="page-heading"><div><h2>Bắt đầu từ đây</h2><p>Câu hỏi, bài thi và lớp học trong cùng một không gian.</p></div></div><div class="workspace-grid"><a class="workspace-card" data-role="cauhoi" data-action="view" href="/question"><i class="fa fa-question-circle" aria-hidden="true"></i><h2>Ngân hàng câu hỏi</h2><p>Soạn câu hỏi trắc nghiệm, tự luận và đọc hiểu.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="dethi" data-action="view" href="/test"><i class="fa fa-file-alt" aria-hidden="true"></i><h2>Quản lý đề thi</h2><p>Tạo đề, giao nhóm và theo dõi bài làm.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="hocphan" data-action="view" href="/module"><i class="fa fa-users" aria-hidden="true"></i><h2>Nhóm học phần</h2><p>Quản lý nhóm, sinh viên và lời mời tham gia.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="tgthi" data-action="join" href="/client/test"><i class="fa fa-calendar-check" aria-hidden="true"></i><h2>Lịch kiểm tra</h2><p>Theo dõi các bài kiểm tra được giao cho bạn.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="tghocphan" data-action="join" href="/client/group"><i class="fa fa-user-graduate" aria-hidden="true"></i><h2>Nhóm của tôi</h2><p>Tham gia nhóm và xem đề thi, thông báo.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="nguoidung" data-action="view" href="/user"><i class="fa fa-user-shield" aria-hidden="true"></i><h2>Người dùng</h2><p>Quản lý thông tin và trạng thái tài khoản.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="thongbao" data-action="view" href="/teacher_announcement"><i class="fa fa-bell" aria-hidden="true"></i><h2>Thông báo</h2><p>Gửi nội dung đến các nhóm học phần.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a>
+<a class="workspace-card" data-role="thongke" data-action="view" href="/statistic"><i class="fa fa-chart-bar" aria-hidden="true"></i><h2>Thống kê kết quả</h2><p>Xem điểm theo đề và bộ lọc học vụ.</p><span class="text-primary fs-sm">Mở chức năng <span aria-hidden="true">→</span></span></a></div>
+</div></main><%- include('../partials/footer') %></div>  <div class="modal fade" id="modal-onboarding" tabindex="-1" role="dialog" aria-labelledby="onboarding-title" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-      <div class="modal-content rounded overflow-hidden bg-image bg-image-bottom border-0"
-        style="background-image: url('/public/media/various/bg_dashboard.jpg');">
+      <div class="modal-content rounded overflow-hidden  border-0"
+       >
         <div class="row">
           <div class="col-md-5">
             <div class="p-3 text-end text-md-start">
-              <a class="fw-semibold text-white" href="#" data-bs-dismiss="modal" aria-label="Close">
+              <a class="fw-semibold text-primary" href="#" data-bs-dismiss="modal" aria-label="Close">
                 Chuyển tiếp
               </a>
             </div>
           </div>
           <div class="col-md-7 mx-auto">
-            <div class="bg-body-extra-light shadow-lg rounded-4 p-4">
-              <div class="slick-dotted-inner text-center" data-dots="true" data-arrows="false" data-infinite="false">
+            <div class="bg-body-extra-light p-4">
+              <div class="text-center" data-dots="true" data-arrows="false" data-infinite="false">
                 <div class="p-5">
                   <i class="fa fa-user-check fa-3x text-primary my-4"></i>
-                  <h3 class="fs-2 fw-bold mb-2">Chào mừng bạn đến với <span class="text-success">LianHarman</span></h3>
+                  <h3 id="onboarding-title" class="fs-2 fw-bold mb-2">Chào mừng bạn đến với <span class="text-success">LianTest</span></h3>
                   <p class="fs-5 text-muted mb-4">Vui lòng cập nhật địa chỉ email của bạn để tiếp tục</p>
 
                   <form class="mb-4">
                     <div class="mb-3">
                       <input type="email" class="form-control form-control-lg form-control-alt text-center" id="email"
-                        placeholder="Nhập địa chỉ email của bạn" required>
+                        placeholder="Nhập địa chỉ email của bạn" aria-label="Email tài khoản" required>
                     </div>
                   </form>
 
@@ -80,29 +49,5 @@
     </div>
   </div>
 
-  <%- include('../partials/script') %>
-  <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    $(function () {
-      const titles = [
-        'Khám phá các phần mềm thi trắc nghiệm online hiệu quả',
-        'Tạo đề thi cá nhân hóa nhanh chóng và dễ dàng',
-        'Quản lý bài thi chuyên nghiệp với công cụ hiện đại',
-      ];
-      $('.js-slider').slick({
-        dots: true, arrows: true, autoplay: true, autoplaySpeed: 2000, infinite: true, fade: false,
-        prevArrow: '<button type="button" class="slick-prev">‹</button>',
-        nextArrow: '<button type="button" class="slick-next">›</button>',
-      });
-      const updateTitle = (i) => $('#slider-title').text(titles[i] || 'Hệ thống tạo và quản lý bài thi cá nhân hóa');
-      updateTitle(0);
-      $('.js-slider').on('beforeChange', (e, slick, cur, next) => updateTitle(next));
-    });
-  </script>
 
-  <!-- Onboarding email (dashboard.php + dashboard.js): notify của Dashmix + script trang -->
-  <script src="/public/js/plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
-  <script src="/public/js/pages/dashboard.js"></script>
-</body>
-</html>
+<%- include('../partials/script') %><script src="/public/js/plugins/bootstrap-notify/bootstrap-notify.min.js"></script><script src="/public/js/pages/dashboard.js"></script></body></html>

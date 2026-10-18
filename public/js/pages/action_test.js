@@ -260,7 +260,7 @@ function showListGroup(index) {
                 </div>`;
     });
   } else {
-    html += `<div class="text-center fs-sm"><img style="width:100px" src="/public/media/svg/empty_data.png" alt=""></div>`;
+    html += `<div class="text-center fs-sm"><img style="width:100px" src="/public/media/svg/empty-state.svg" alt=""></div>`;
   }
   $("#list-group").html(html);
 }

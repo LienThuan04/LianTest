@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180" viewBox="0 0 240 180" fill="none">
+  <title>Chưa có nội dung</title>
+  <ellipse cx="120" cy="157" rx="80" ry="7" fill="#edefff"/>
+  <rect x="53" y="36" width="96" height="111" rx="8" transform="rotate(-10 53 36)" fill="#edefff" stroke="#d9dde8" stroke-width="2"/>
+  <rect x="81" y="22" width="106" height="127" rx="8" fill="#fff" stroke="#d9dde8" stroke-width="2"/>
+  <rect x="98" y="40" width="30" height="7" rx="3.5" fill="#4255ff"/>
+  <path d="M100 65h65M100 81h48M100 117h65M100 132h42" stroke="#d9dde8" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="135" cy="96" r="11" fill="#edefff"/>
+  <path d="M130 96h10" stroke="#4255ff" stroke-width="2" stroke-linecap="round"/>
+  <path d="M47 93h12m-6-6v12M201 55h10m-5-5v10" stroke="#939bb4" stroke-width="2" stroke-linecap="round"/>
+</svg>

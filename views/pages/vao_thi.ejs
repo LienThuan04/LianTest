@@ -4,9 +4,10 @@
   <!-- base href="/" để vaothi.js (URL tương đối) resolve đúng từ gốc dù trang ở
        path sâu /test/start/:made. -->
   <base href="/" />
-  <%- include('../partials/head') %>
+
+<%- include('../partials/head') %>
 </head>
-<body>
+<body class="page-vao-thi">
 <%
   // Port từ DHT_OneTest/mvc/views/pages/vao_thi.php — helper & logic.
   function fmtDate(d) {
@@ -69,7 +70,7 @@
   const diemCuoiCung = daChamTuLuan ? (Math.round((diemTong + diemTuLuan) * 100) / 100) : null;
   const fmt2 = (n) => Number(n).toFixed(2);
 %>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -201,7 +202,7 @@
                     <strong class="d-block mt-3">Điểm chính thức sẽ được cập nhật ngay khi chấm xong!</strong>
                   </p>
                   <div class="mt-4">
-                    <img src="/public/media/avatars/ChamDiem.gif" alt="Đang chờ..." style="width: 300px; height: 300px;">
+                    <img src="/public/media/svg/awaiting-review.svg" alt="Đang chờ..." style="width: 300px; height: 300px">
                   </div>
                 </div>
               <% } %>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <title>LianTest</title>
+  <rect width="40" height="40" rx="11" fill="#4255ff"/>
+  <path d="M10 10h4v16h11v4H10z" fill="#fff"/>
+  <path d="m21 15 4 4 7-9" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

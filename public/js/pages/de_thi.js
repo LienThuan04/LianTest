@@ -142,7 +142,7 @@ $(document).ready(function () {
       src = imageCache.get(src);
     }
     return `<div class="text-center my-3">
-      <img src="${src}" class="img-fluid rounded shadow-sm border" style="max-height:340px; object-fit:contain; cursor:pointer;" loading="lazy" onclick="window.open(this.src,'_blank')">
+      <img src="${src}" class="img-fluid rounded shadow-sm border" style="max-height:340px; object-fit:contain; cursor:pointer" loading="lazy" onclick="window.open(this.src,'_blank')">
     </div>`;
   };
 
@@ -158,12 +158,9 @@ $(document).ready(function () {
     }" id="q-${idx + 1}">
       <div class="card-body p-5">
         <h4 class="fw-bold mb-4"  style="
-        display:inline-block;
-        background:#e8f3ff;
-        color:#1a73e8;
+        display:inline-block;background:var(--color-chalk-canvas);color:var(--color-ink-charcoal);
         padding:6px 12px;
-        border-radius:8px;
-    ">Câu ${idx + 1}: ${q.noidung}</h4>
+        border-radius:8px">Câu ${idx + 1}: ${q.noidung}</h4>
         ${renderImage(q.hinhanh)}`;
 
     if (isEssay) {
@@ -175,8 +172,8 @@ $(document).ready(function () {
         const img = ctl.hinhanhtl || ctl.hinhanh || "";
         html += `
         <div class="col-12 col-md-6">
-          <div class="border rounded-4 p-4 bg-white shadow-sm h-100 d-flex align-items-center gap-4 hover-shadow-lg" style="border:2px solid #e0e0e0; min-height:140px;">
-            <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold fs-4 shadow" style="width:56px;height:56px;">
+          <div class="border rounded-4 p-4 bg-white shadow-sm h-100 d-flex align-items-center gap-4 hover-shadow-lg" style="border:2px solid var(--color-mist-border); min-height:140px">
+            <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold fs-4 shadow" style="width:56px;height:56px">
               ${String.fromCharCode(65 + i)}
             </div>
             <div class="flex-grow-1">
@@ -278,7 +275,7 @@ $(document).ready(function () {
 
     const nav = `
     <div class="one-mode-nav position-fixed bottom-0 start-50 translate-middle-x bg-white shadow-sm border-top px-3 py-2"
-         style="max-width: 420px; min-width: 300px; z-index: 1050; border-radius: 16px 16px 0 0;">
+         style="max-width: 420px; min-width: 300px; z-index: 1050; border-radius: 16px 16px 0 0">
       <div class="d-flex justify-content-between align-items-center">
         
         <button class="btn btn-outline-primary btn-sm px-4 ${
@@ -399,12 +396,12 @@ $(document).ready(function () {
       container.html(`
       <div class="mb-4">
         <label class="form-label fw-bold text-dark fs-5">Trả lời của bạn:</label>
-        <div id="${editorId}" class="border rounded bg-white p-3" style="min-height:280px;">${userEssayText}</div>
+        <div id="${editorId}" class="border rounded bg-white p-3" style="min-height:280px">${userEssayText}</div>
       </div>
       <div class="border rounded p-4 bg-light">
         <label class="form-label fw-bold text-success mb-3">Hình ảnh (nếu có)</label>
         <input type="file" class="form-control" id="${fileInputId}" accept="image/*" multiple>
-        <div id="${thumbId}" class="image-preview-container mt-3 d-flex flex-wrap gap-3 p-3 border rounded bg-white" style="min-height:120px;">
+        <div id="${thumbId}" class="image-preview-container mt-3 d-flex flex-wrap gap-3 p-3 border rounded bg-white" style="min-height:120px">
           <small class="text-muted w-100 text-center">Chưa có ảnh nào được chọn</small>
         </div>
       </div>
@@ -444,7 +441,7 @@ $(document).ready(function () {
                 const tags = saved
                   .map(
                     (i) =>
-                      `<p><img src="${i.base64}" style="max-width:100%;height:auto;display:block;margin:15px auto;"></p>`
+                      `<p><img src="${i.base64}" style="max-width:100%;height:auto;display:block;margin:15px auto"></p>`
                   )
                   .join("");
                 //setTimeout(() => editor.setData(editor.getData() + tags), 300);
@@ -528,7 +525,7 @@ $(document).ready(function () {
                   const compressed = await compressImage(ev.target.result);
                   // editor.setData(
                   //   editor.getData() +
-                  //     `<p><img src="${compressed}" style="max-width:100%;height:auto;display:block;margin:15px auto;"></p>`
+                  //     `<p><img src="${compressed}" style="max-width:100%;height:auto;display:block;margin:15px auto"></p>`
                   // );
                   await saveImageToDB(idx, compressed);
                   await renderImages(idx);
@@ -641,7 +638,7 @@ $(document).ready(function () {
     <div class="text-center my-3">
       <img src="${src}" 
            class="img-fluid rounded shadow-sm border" 
-           style="max-height: 320px; max-width: 100%; object-fit: contain; cursor: pointer;"
+           style="max-height: 320px; max-width: 100%; object-fit: contain; cursor: pointer"
            loading="lazy"
            onclick="window.open(this.src, '_blank')"
            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtc2l6ZT0iMTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmaWxsPSIjOTk5Ij5M4buVaSB0YWkg4bqhbmg8L3RleHQ+PC9zdmc+'; this.onerror=null;">
@@ -688,7 +685,7 @@ $(document).ready(function () {
                                     ? "btn-warning text-dark"
                                     : "btn-outline-primary"
                                 }"
-                         style="min-width:52px; min-height:52px; font-size:1.4rem; padding:0.5rem 1rem;">
+                         style="min-width:52px; min-height:52px; font-size:1.4rem; padding:0.5rem 1rem">
                     ${letter}
                   </label>
                 </div>`;
@@ -725,12 +722,9 @@ $(document).ready(function () {
         groupHtml += `
         <div class="p-4 bg-white" id="reading-q${quesNum}">
           <p class="fw-bold mb-3 fs-5"  style="
-        display:inline-block;
-        background:#e8f3ff;
-        color:#1a73e8;
+        display:inline-block;background:var(--color-chalk-canvas);color:var(--color-ink-charcoal);
         padding:6px 12px;
-        border-radius:8px;
-    ">${quesNum}. ${question.noidung}</p>
+        border-radius:8px">${quesNum}. ${question.noidung}</p>
           ${renderImage(question.hinhanh)}`; // Ảnh câu hỏi
 
         if (question.cautraloi && question.cautraloi.length > 0) {
@@ -741,17 +735,17 @@ $(document).ready(function () {
             groupHtml += `
 <div class="col-12 col-md-6">
   <div class="border border-2 rounded-4 p-4 bg-white shadow-sm h-100 d-flex flex-column transition-all hover-shadow-lg"
-       style="border-color: #e0e0e0 !important; min-height: 120px;">
+       style="border-color: var(--color-mist-border) !important; min-height: 120px">
     <div class="d-flex align-items-center gap-4 flex-grow-1">
       <!-- Badge A B C D tròn, căn giữa tuyệt đối -->
       <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold fs-4 shadow"
-           style="width: 52px; height: 52px; min-width: 52px;">
+           style="width: 52px; height: 52px; min-width: 52px">
         ${String.fromCharCode(65 + i)}
       </div>
       
       <!-- Nội dung + ảnh -->
       <div class="flex-grow-1">
-        <div class="mb-3 lh-base text-dark" style="font-size: 1.05rem;">
+        <div class="mb-3 lh-base text-dark" style="font-size: 1.05rem">
           ${content}
         </div>
         ${renderImage(img)}
@@ -782,12 +776,9 @@ $(document).ready(function () {
           <div class="card-body p-4">
          <h5 class="card-title fw-bold mb-3"
     style="
-        display:inline-block;
-        background:#e8f3ff;
-        color:#1a73e8;
+        display:inline-block;background:var(--color-chalk-canvas);color:var(--color-ink-charcoal);
         padding:6px 12px;
-        border-radius:8px;
-    ">
+        border-radius:8px">
   ${index + 1}. ${question.noidung}
 </h5>
 
@@ -799,12 +790,12 @@ $(document).ready(function () {
           html += `
           <div class="mb-4">
             <label class="form-label fw-bold text-dark fs-5">Trả lời của bạn:</label>
-            <div id="${editorId}" class="border rounded bg-white p-3" style="min-height:280px;">${userEssayText}</div>
+            <div id="${editorId}" class="border rounded bg-white p-3" style="min-height:280px">${userEssayText}</div>
           </div>
           <div class="border rounded p-4 bg-light">
             <label class="form-label fw-bold text-success mb-3">Hình ảnh (nếu có)</label>
             <input type="file" class="form-control" id="${fileInputId}" accept="image/*" multiple>
-            <div id="${thumbId}" class="image-preview-container mt-3 d-flex flex-wrap gap-3 p-3 border rounded bg-white" style="min-height:120px;">
+            <div id="${thumbId}" class="image-preview-container mt-3 d-flex flex-wrap gap-3 p-3 border rounded bg-white" style="min-height:120px">
               <small class="text-muted w-100 text-center">Chưa có ảnh nào được chọn</small>
             </div>
           </div>
@@ -921,7 +912,7 @@ $(document).ready(function () {
                     const compressed = await compressImage(ev.target.result);
                     // editor.setData(
                     //   editor.getData() +
-                    //     `<p><img src="${compressed}" style="max-width:100%;height:auto;display:block;margin:15px auto;"></p>`
+                    //     `<p><img src="${compressed}" style="max-width:100%;height:auto;display:block;margin:15px auto"></p>`
                     // );
                     await saveImageToDB(index, compressed);
                     await renderImages(index);
@@ -939,7 +930,7 @@ $(document).ready(function () {
                   const tags = saved
                     .map(
                       (i) =>
-                        `<p><img src="${i.base64}" style="max-width:100%;height:auto;display:block;margin:15px auto;"></p>`
+                        `<p><img src="${i.base64}" style="max-width:100%;height:auto;display:block;margin:15px auto"></p>`
                     )
                     .join("");
                   setTimeout(
@@ -963,17 +954,17 @@ $(document).ready(function () {
               html += `
               <div class="col-12 col-md-6">
   <div class="border border-2 rounded-4 p-4 bg-white shadow-sm h-100 d-flex flex-column transition-all hover-shadow-lg"
-       style="border-color: #e0e0e0 !important; min-height: 120px;">
+       style="border-color: var(--color-mist-border) !important; min-height: 120px">
     <div class="d-flex align-items-center gap-4 flex-grow-1">
       <!-- Badge A B C D tròn, căn giữa tuyệt đối -->
       <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded-circle bg-primary text-white fw-bold fs-4 shadow"
-           style="width: 52px; height: 52px; min-width: 52px;">
+           style="width: 52px; height: 52px; min-width: 52px">
         ${String.fromCharCode(65 + i)}
       </div>
       
       <!-- Nội dung + ảnh -->
       <div class="flex-grow-1">
-        <div class="mb-3 lh-base text-dark" style="font-size: 1.05rem;">
+        <div class="mb-3 lh-base text-dark" style="font-size: 1.05rem">
           ${content}
         </div>
         ${renderImage(img)}
@@ -1170,7 +1161,7 @@ $(document).ready(function () {
   function showAnswerToast(cau, dapan) {
     $("#answer-toast").remove();
     const toastHtml = `
-    <div id="answer-toast" class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 9999; margin-top: 20px;">
+    <div id="answer-toast" class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 9999; margin-top: 20px">
       <div class="toast show align-items-center text-white bg-success border-0 shadow-lg" role="alert">
         <div class="d-flex">
           <div class="toast-body fw-bold fs-5 text-center">
@@ -1616,9 +1607,9 @@ $(document).ready(function () {
   //     return "";
   //   }
   // });
-});
-// Dọn dẹp Blob URL khi rời trang để tránh rò rỉ bộ nhớ
-window.addEventListener("beforeunload", () => {
-  imageCache.forEach((url) => URL.revokeObjectURL(url));
-  imageCache.clear();
+  // Giữ cleanup trong cùng scope với cache ảnh của lượt thi.
+  window.addEventListener("beforeunload", () => {
+    imageCache.forEach((url) => URL.revokeObjectURL(url));
+    imageCache.clear();
+  });
 });

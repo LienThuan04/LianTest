@@ -474,7 +474,7 @@ $(document).ready(function () {
           });
         } else {
           html += `<tr><td class="text-center fs-sm" colspan="3">
-                    <img style="width:180px" src="/public/media/svg/empty_data.png" alt=""/>
+                    <img style="width:180px" src="/public/media/svg/empty-state.svg" alt=""/>
                     <p class="text-center mt-3">Không có dữ liệu</p>
                     </td>
                     </tr>`;

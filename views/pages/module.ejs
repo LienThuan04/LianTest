@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <%- include('../partials/head') %>
   <link rel="stylesheet" href="/public/js/plugins/sweetalert2/sweetalert2.min.css" />
-  <link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<link rel="stylesheet" href="/public/js/plugins/select2/css/select2.min.css" />
+<%- include('../partials/head') %>
+
+
 </head>
-<body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+<body class="page-module">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -70,19 +72,19 @@
 
                 <div class="mb-3">
                   <label for="mon-hoc" class="form-label">Môn học</label>
-                  <select class="js-select2 form-select" id="mon-hoc" name="mon-hoc" style="width: 100%;" data-placeholder="Chọn môn học">
+                  <select class="js-select2 form-select" id="mon-hoc" name="mon-hoc" style="width: 100%" data-placeholder="Chọn môn học">
                   </select>
                 </div>
 
                 <div class="mb-3 row">
                   <div class="col-6">
                     <label for="nam-hoc" class="form-label">Năm học</label>
-                    <select class="js-select2 form-select" id="nam-hoc" name="nam-hoc" style="width: 100%;" data-placeholder="Chọn năm học">
+                    <select class="js-select2 form-select" id="nam-hoc" name="nam-hoc" style="width: 100%" data-placeholder="Chọn năm học">
                     </select>
                   </div>
                   <div class="col-6">
                     <label for="hoc-ky" class="form-label">Học kỳ</label>
-                    <select class="js-select2 form-select" id="hoc-ky" name="hoc-ky" style="width: 100%;" data-placeholder="Chọn học kỳ">
+                    <select class="js-select2 form-select" id="hoc-ky" name="hoc-ky" style="width: 100%" data-placeholder="Chọn học kỳ">
                     </select>
                   </div>
                 </div>

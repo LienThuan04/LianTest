@@ -5,7 +5,7 @@
   <link rel="stylesheet" href="/public/js/plugins/flatpickr/flatpickr.min.css" />
 </head>
 <body>
-  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow remember-theme">
+  <div id="page-container" class="sidebar-o sidebar-light enable-page-overlay side-scroll page-header-fixed main-content-narrow">
     <%- include('../partials/navbar') %>
     <%- include('../partials/header') %>
 
@@ -15,9 +15,9 @@
       <div class="content content-full content-boxed account_ID" data-id="<%= profile.id %>">
         <!-- Hero -->
         <div class="rounded border overflow-hidden push">
-          <div class="bg-image pt-9" style="background-image: url('https://aztest.vn/uploads/news/2022/thi-online_1.jpg')"></div>
+          <div class="account-banner"></div>
           <div class="px-4 py-3 bg-body-extra-light d-flex flex-column flex-md-row align-items-center load-profile">
-            <a class="d-block img-link mt-n5 avatar-Profile" href="javascript:void(0)">
+            <a class="d-block img-link avatar-Profile" href="javascript:void(0)">
               <%# avatarUrl đã chuẩn hoá: tên file cũ → /public/media/avatars/..., ảnh mới → URL Supabase %>
               <img class="img-avatar img-avatar128 img-avatar-thumb" src="<%= profile.avatarUrl %>" alt="">
             </a>

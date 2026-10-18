@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <title>Bài làm đang chờ giảng viên chấm</title>
+  <circle cx="150" cy="150" r="125" fill="#edefff"/>
+  <rect x="79" y="60" width="128" height="171" rx="12" fill="#fff" stroke="#d9dde8" stroke-width="2"/>
+  <rect x="110" y="49" width="65" height="24" rx="8" fill="#4255ff"/>
+  <path d="m101 109 7 7 12-15m-19 45 7 7 12-15" stroke="#4255ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M133 110h47m-47 36h37m-69 36h44M101 199h30" stroke="#d9dde8" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="203" cy="211" r="42" fill="#fff" stroke="#4255ff" stroke-width="3"/>
+  <path d="M203 188v24l15 9" stroke="#4255ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="203" cy="211" r="3" fill="#4255ff"/>
+</svg>

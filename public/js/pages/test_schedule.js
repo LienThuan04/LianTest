@@ -88,7 +88,7 @@ function showData(data) {
 <tr class="transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md hover:-translate-y-1 border-l-4 border-transparent hover:border-primary">
 
   <!-- Tên đề thi + Môn -->
-  <td class="py-5 ps-5">
+  <td data-label="Bài kiểm tra" class="py-5 ps-5">
   <div class="d-flex align-items-center gap-3">
 
     <!-- Icon -->
@@ -111,12 +111,12 @@ function showData(data) {
 
 
   <!-- Môn học (ẩn trên mobile nếu cần) -->
-  <td class="py-5 text-muted fw-600 d-none d-lg-table-cell">
+  <td data-label="Môn học" class="py-5 text-muted fw-600">
     ${test.tenmonhoc?.substring(0, 20) || "-"}
   </td>
 
 <!-- Bắt đầu -->
-<td class="py-5 text-center">
+<td data-label="Bắt đầu" class="py-5 text-center">
   <div class="d-flex flex-column align-items-center">
     <div class="text-dark fw-bold">${open.toLocaleDateString("vi-VN")}</div>
     <div class="text-primary small fw-600">
@@ -129,7 +129,7 @@ function showData(data) {
 </td>
 
 <!-- Kết thúc -->
-<td class="py-5 text-center">
+<td data-label="Kết thúc" class="py-5 text-center">
   <div class="d-flex flex-column align-items-center">
     <div class="text-dark fw-bold">${close.toLocaleDateString("vi-VN")}</div>
     <div class="text-danger small fw-600">
@@ -143,14 +143,14 @@ function showData(data) {
 
 
   <!-- Nhóm -->
-  <td class="py-5">
+  <td data-label="Nhóm" class="py-5">
     <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-600">
       ${tennhomArray[0] || "Chưa gán"}
     </span>
   </td>
 
   <!-- Điểm -->
-  <td class="py-5 text-center">
+  <td data-label="Điểm" class="py-5 text-center">
     ${
       daThi
         ? test.xemdiemthi == 0
@@ -168,7 +168,7 @@ function showData(data) {
   </td>
 
   <!-- Trạng thái -->
-  <td class="py-5 text-center">
+  <td data-label="Trạng thái" class="py-5 text-center">
     <span class="badge rounded-pill px-4 py-2 fw-bold text-white ${
       daThi
         ? "bg-success"
@@ -183,7 +183,7 @@ function showData(data) {
   </td>
 
   <!-- Hành động -->
-<td class="py-5 text-end pe-5">
+<td data-label="Thao tác" class="py-5 text-end pe-5">
   ${
     daThi
       ? `<a href="./test/start/${test.made}" class="btn btn-success rounded-pill px-4 shadow-sm hover:shadow-lg d-flex flex-column align-items-center">
