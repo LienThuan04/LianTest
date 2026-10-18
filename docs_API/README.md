@@ -2,9 +2,7 @@
 
 [README chính](../README.md) · [README tiếng Việt](../README.vi.md)
 
-Tài liệu này mô tả hệ thi hiện tại. Khung BaseAuth cũ đã được gỡ; tài liệu cũ được
-lưu ở [legacy-baseauth.md](legacy-baseauth.md) để tham khảo lịch sử, không dùng làm
-hợp đồng API của sản phẩm hiện tại.
+Tài liệu này mô tả các route và hợp đồng dữ liệu của hệ thi LianTest hiện tại.
 
 ## Địa chỉ và định dạng phản hồi
 
@@ -24,7 +22,6 @@ hợp đồng API của sản phẩm hiện tại.
 JWT của hệ thi chứa mã tài khoản và nhóm quyền. `PermissionsGuard` kiểm tra quyền
 động trong `chitietquyen`; nhóm seed mặc định: 1=Giáo viên, 2=Sinh viên, 3=Admin.
 Quyền thông báo/thống kê mặc định của giáo viên phụ thuộc dữ liệu quyền đã cấp.
-Không có endpoint Google OAuth, refresh token hay session theo thiết bị của BaseAuth cũ.
 
 Đăng ký công khai dùng `POST /auth/addUser`, nhận `masinhvien`, `hoten`, `email`,
 `password`, `confirm_password` và thông tin hồ sơ tuỳ chọn; luôn tạo nhóm Sinh viên.
@@ -33,20 +30,19 @@ Cookie `recover_ticket` có thời hạn 10 phút; chỉ vé đã xác minh OTP 
 
 ## Nhóm route chính
 
-| Path | Nội dung | Controller |
-|------|----------|------------|
-| `/`, `/dashboard` | Landing, tổng quan và onboarding email | `pages` |
-| `/account` | Hồ sơ, mật khẩu, avatar, bản đồ quyền | `account` |
-| `/roles`, `/user` | Nhóm quyền và người dùng; nhập danh sách `.xlsx`/`.xls` | `roles`, `users` |
-| `/namhoc`, `/subject`, `/view_subject` | Năm học, môn/chương và môn được phân công | `academic-years`, `subjects`, `view-subject` |
-| `/question` | Câu hỏi, phân trang, nhập Word/Excel | `questions` |
-| `/assignment`, `/module`, `/client` | Phân công, nhóm GV/SV và lịch thi | `assignments`, `class-modules`, `client` |
-| `/test` | Tạo/giao đề, làm bài/nộp, kết quả, chấm tự luận, export | `exams` |
-| `/teacher_announcement`, `/statistic` | Thông báo, chuông và thống kê | `announcements`, `statistic` |
+| Path                                   | Nội dung                                                | Controller                                   |
+| -------------------------------------- | ------------------------------------------------------- | -------------------------------------------- |
+| `/`, `/dashboard`                      | Landing, tổng quan và onboarding email                  | `pages`                                      |
+| `/account`                             | Hồ sơ, mật khẩu, avatar, bản đồ quyền                   | `account`                                    |
+| `/roles`, `/user`                      | Nhóm quyền và người dùng; nhập danh sách `.xlsx`/`.xls` | `roles`, `users`                             |
+| `/namhoc`, `/subject`, `/view_subject` | Năm học, môn/chương và môn được phân công               | `academic-years`, `subjects`, `view-subject` |
+| `/question`                            | Câu hỏi, phân trang, nhập Word/Excel                    | `questions`                                  |
+| `/assignment`, `/module`, `/client`    | Phân công, nhóm GV/SV và lịch thi                       | `assignments`, `class-modules`, `client`     |
+| `/test`                                | Tạo/giao đề, làm bài/nộp, kết quả, chấm tự luận, export | `exams`                                      |
+| `/teacher_announcement`, `/statistic`  | Thông báo, chuông và thống kê                           | `announcements`, `statistic`                 |
 
-Tên route giữ theo PHP/JS gốc (ví dụ `getStatictical`, `editQuesion`). Không tự đổi
-sang cách viết REST khi gọi từ giao diện đang có. DTO và controller trong `src/`
-là nguồn chính xác cho từng request.
+Dùng đúng tên route hiện có (ví dụ `getStatictical`, `editQuesion`) khi gọi từ
+giao diện. DTO và controller trong `src/` là nguồn chính xác cho từng request.
 
 ## Nhập câu hỏi Excel
 
@@ -76,5 +72,5 @@ trang HTML mở hộp thoại in; người dùng chọn lưu PDF trên trình du
 
 `pnpm run build`, `pnpm run lint`, `pnpm test`, `pnpm run test:e2e --runInBand`.
 E2e nghiệp vụ cần DB/Storage test và dữ liệu mẫu; thiếu điều kiện tiên quyết phải
-báo lỗi. Các kết quả lịch sử và kiểm chứng mới nằm trong
-[sổ tiến độ](../docs/03-tien-do.md).
+báo lỗi. Điều kiện chạy được mô tả trong [hướng dẫn kiểm thử](../docs/07-so-tay-agent.md);
+kết quả đã ghi nhận nằm trong [trạng thái dự án](../docs/03-tien-do.md).

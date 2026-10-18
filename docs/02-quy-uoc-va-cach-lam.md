@@ -1,88 +1,80 @@
-# 02 — Cách làm & quy ước bắt buộc
+# 02 — Quy ước phát triển
 
-Đây là "tinh thần" của dự án. Làm sai những điều này = phá vỡ tính nhất quán và có
-thể làm hỏng hành vi so với bản PHP gốc. (Tóm tắt luật cứng ở `../CLAUDE.md`.)
+[Chỉ mục tài liệu](README.md) · [Hướng dẫn agent](../CLAUDE.md)
 
-## 1. Quyết định nền tảng (đã chốt)
+## Nền tảng
 
-| Vấn đề | Quyết định | Ghi chú |
-|--------|-----------|---------|
-| CSDL | **PostgreSQL** (KHÔNG MySQL) | Tái dùng hạ tầng khung NestJS. Bảng mới = **migration Prisma**, KHÔNG `db pull`. |
-| Stack nền demo | **Đã gỡ hẳn** (User/Role/Session/File…) | Hệ thi là stack DUY NHẤT. `JwtStrategy` ở `exam-auth/passport/`. Role hệ thi = `src/roles/` (NhomQuyen). |
-| View engine | **EJS** (`@Render`) | View ở `views/pages/*.ejs`, partial ở `views/partials/`. |
-| Lưu file/ảnh | **Supabase Storage**, DB lưu **public URL** | Xem [06](./06-luu-tru-file-supabase.md). |
-| Quản lý gói | **pnpm** | `pnpm-lock.yaml`/`pnpm-workspace.yaml` chỉ lưu local theo yêu cầu user; KHÔNG `npm install`. |
+| Thành phần        | Quy ước                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| Quản lý gói       | **pnpm**; `pnpm-lock.yaml` và `pnpm-workspace.yaml` chỉ lưu local theo quy ước repo        |
+| CSDL              | **PostgreSQL/Prisma**; tạo migration mới khi sửa schema, không `db pull`                   |
+| Giao diện         | **EJS SSR** trong `views/`, CSS/JS/plugin trong `public/`; theo [DESIGN.md](../DESIGN.md)  |
+| Xác thực và quyền | JWT/Passport tại `exam-auth/`, RBAC qua `chitietquyen` và `PermissionsGuard`               |
+| File ảnh          | **Supabase Storage public bucket**, DB lưu URL; xem [Storage](06-luu-tru-file-supabase.md) |
 
-## 2. Quy ước port (theo NGHIÊM NGẶT)
+## Hợp đồng HTTP và dữ liệu
 
-1. **Additive** vào repo — KHÔNG dựng lại module demo nền đã gỡ.
-2. **AJAX route** (jQuery gọi) → `@SkipTransform()` để trả **raw** (mảng/object/
-   boolean) đúng shape JS gốc, KHÔNG bọc `{statusCode,message,data}` của
-   `TransformInterceptor`.
-3. **Route path gốc** (vd `/test/...`, `/question/...`) dùng
-   `@Controller({ path, version: VERSION_NEUTRAL })` VÀ phải thêm vào mảng
-   `exclude` trong `src/config/app-setup.config.ts` — nếu không sẽ bị prefix
-   `/api/v1` và JS gốc gọi 404.
-4. **Giữ URL cũ** mà JS gốc gọi (vd `/test/start/:made`, `/question/pagination`).
-   KHÔNG đổi sang REST lý tưởng. Mục tiêu: bê JS/CSS/view gốc, sửa tối thiểu.
-5. **JS gốc bê nguyên**, chỉ đổi URL tương đối `./x` → `/x`. Trang ở **path sâu**
-   (vd `/test/detail/:made`) thêm **`<base href="/">`** trong `<head>` để
-   `pagination.js` (dùng `./controller/...`) resolve về gốc.
-6. **Truy vấn phức tạp** (STRING_AGG/GROUP_CONCAT, UNION, GROUP BY, JOIN nhiều
-   bảng) → **`prisma.$queryRaw`** với `Prisma.sql`. CRUD đơn giản → Prisma client.
-   Dùng `COUNT(*)::int` để tránh BigInt.
-7. **An toàn hơn PHP:** `userId` lấy từ **JWT** (`req.user`), KHÔNG tin
-   `args.id`/`$_POST` client gửi. Search/filter tham số hoá (chống SQLi).
-8. **Giữ quirk PHP** khi vô hại — ghi chú `// KHÁC PHP` hoặc `// QUIRK` trong code
-   để hành vi khớp bản gốc; sửa những chỗ rõ ràng là lỗi (vd search bị bỏ ràng buộc).
-9. **Thời gian**: trả **ISO** (`toISOString`) cho đếm ngược / so sánh tuyệt đối.
-10. **Ảnh**: upload lên Supabase → lưu **URL**; đọc trả thẳng URL. Xem [06](./06-luu-tru-file-supabase.md).
+1. Giữ URL, tên field và shape response mà JavaScript giao diện đang gọi.
+   Khi cần thay đổi, sửa đồng bộ controller/DTO, client và tài liệu API.
+2. AJAX dùng `@SkipTransform()` để trả raw object/mảng/boolean. SSR dùng
+   `@Render()`; `TransformInterceptor` tự bỏ qua response được render.
+3. Route ở path gốc như `/test/...` dùng `VERSION_NEUTRAL` và khai báo loại khỏi
+   prefix `/api/v1` trong `src/config/app-setup.config.ts`.
+4. Giữ cách resolve URL nhất quán. Trang có path sâu cần `<base href="/">`
+   nếu sử dụng helper phân trang gọi URL tương đối từ gốc.
+5. Danh tính và quyền sở hữu lấy từ JWT (`req.user`); kiểm tra tài nguyên thuộc
+   người dùng hiện tại trước khi cho đọc/sửa/xoá. `@Public()` dành cho route khách.
+   Nhóm seed: 1=Giáo viên, 2=Sinh viên, 3=Admin; đăng ký công khai luôn tạo Sinh viên.
+6. CRUD dùng Prisma client. Raw SQL phải tham số hoá với `Prisma.sql`;
+   `COUNT(*)::int` tránh BigInt trong JSON. Thời gian tuyệt đối trả ISO khi cần
+   so sánh hoặc đếm ngược trên client.
+7. Upload ảnh trước transaction. Chỉ dọn ảnh thay thế sau khi DB ghi thành công
+   và không còn tham chiếu; render avatar qua helper chuẩn.
 
-## 3. Khung 1 module nghiệp vụ
+## Cấu trúc module
 
-```
+```text
 src/<module>/
-├── <module>.module.ts       khai báo (PrismaModule tự có qua @Global; StorageModule @Global)
-├── <module>.controller.ts    route MỎNG (@Render cho SSR, @SkipTransform cho AJAX)
-├── <module>.service.ts       logic + Prisma (thay *Model.php)
-├── dto/                       class-validator (form urlencoded → ép kiểu)
-└── interfaces/                types trả về (I...)
+├── <module>.module.ts        đăng ký provider/controller
+├── <module>.controller.ts    HTTP, quyền, DTO, render/response
+├── <module>.service.ts       nghiệp vụ và Prisma
+├── dto/                     class-validator và chuyển kiểu đầu vào
+└── interfaces/              kiểu dữ liệu trả về
 ```
-Đăng ký module vào `src/app.module.ts`. Gắn `@Permissions('<chucnang>','<hanhdong>')`
-theo bảng quyền (xem [05](./05-anh-xa-va-nguon-php.md)). Guard mặc định = cần đăng nhập;
-`@Public()` cho route khách.
 
-## 4. Lệnh & quy trình
+Đăng ký module trong `src/app.module.ts`. Dùng `@Permissions('<chucnang>', '<hanhdong>')`
+theo dữ liệu `chitietquyen`; không thay phân quyền động bằng việc chỉ ẩn nút trên UI.
+Dùng kiểu dữ liệu cụ thể, helper `plainText()`/`errorMessage()` khi xử lý dữ liệu chưa rõ kiểu.
+
+## Lệnh và cấu hình
+
+Chạy các lệnh từ gốc repo `NestJS/`:
 
 ```bash
-# LUÔN đứng ở thư mục NestJS trước khi git/prisma (Bash & PowerShell chung cwd!)
-pnpm install                 # cài deps
-pnpm add <pkg>               # thêm gói (KHÔNG npm)
-npx prisma migrate dev --name <ten>   # tạo + áp migration (cần DB)
-npx prisma migrate deploy    # áp migration đang chờ (deploy/CI)
-npx prisma generate          # sinh lại client sau khi đổi schema
-pnpm run build               # build (BẮT BUỘC kiểm sau mỗi thay đổi)
-node dist/src/main.js        # boot: xem log "Mapped ... route"
+pnpm install
+pnpm exec prisma migrate dev --name <ten>
+pnpm exec prisma generate
+pnpm run build
+pnpm run lint
+pnpm test --runInBand
+pnpm run start:prod
 ```
 
-- **Bash & PowerShell DÙNG CHUNG cwd.** `cd` ở Bash sang `DHT_OneTest` sẽ làm lệnh
-  git PowerShell chạy nhầm repo → luôn về `.../NestJS` trước khi git/prisma.
-- Môi trường có thể **không có DB local** — kiểm bằng `pnpm run build` + route
-  mapping trong log boot. DB thật có thể là remote (Prisma Postgres/Supabase).
-- `pnpm run start:prod` chạy `node dist/src/main.js`. Prisma chọn driver theo URL
-  và chạy `SELECT 1` trước khi báo kết nối thành công; DB không truy cập được thì
-  startup thất bại. Không coi log route mapping là bằng chứng nghiệp vụ chạy đúng.
-- Khởi động thông thường dùng `SEED_DB=false`, `CLEAR_DB=false`. Chỉ chuỗi chính xác
-  `CLEAR_DB=true` mới cho phép xoá trước khi seed; luôn dùng DB test riêng cho e2e.
-- Dữ liệu seed chỉnh tại `src/seed-db/data/*.json`, không hardcode thêm mảng TS.
-  Sau build chạy `pnpm run seed:check` để kiểm tra không cần DB; đọc hướng dẫn
-  `src/seed-db/data/README.md` về mã tham chiếu và hành vi khi DB đã có dữ liệu.
+Khi triển khai, áp các migration có sẵn bằng `pnpm exec prisma migrate deploy`.
+`start:prod` chạy `node dist/src/main.js`; cần giữ `views/`, `public/` và template
+email tại đường dẫn tương ứng từ gốc repo. Prisma chọn transport theo URL DB và
+chạy `SELECT 1` trước khi ứng dụng sẵn sàng.
 
-## 5. Git
+Khởi động thông thường: `SEED_DB=false`, `CLEAR_DB=false`, `SEED_DEMO_DATA=false`.
+Chỉ seed/clear trên DB được chỉ định cho dữ liệu mẫu hoặc kiểm thử. Chỉnh dữ liệu
+ở `src/seed-db/data/*.json`; sau build chạy `pnpm run seed:check` để kiểm tra không
+cần DB. JSON không tự đồng bộ các bản ghi đã tồn tại; xem [hướng dẫn seed](../src/seed-db/data/README.md).
 
-- **Commit hạt mịn** (1 file/concern). Message **tiếng Việt** conventional:
-  `feat(exams): ...`, `chore(config): ...`, `feat(prisma): ...`.
-- **TUYỆT ĐỐI KHÔNG** `Co-Authored-By` / tên Claude trong commit message.
-- **Chỉ commit/push khi user yêu cầu.** Nhánh làm việc = `NestJS`.
-- File vendored (vd `public/js/dashmix.app.min.js`) đôi khi bị build đổi — KHÔNG
-  commit lẫn vào commit nghiệp vụ nếu không phải mình sửa.
+## Git và tài liệu
+
+- Commit theo từng nội dung, message conventional bằng tiếng Việt, ví dụ
+  `feat(exams): bổ sung bộ lọc đề thi`; không thêm `Co-Authored-By`.
+- Chỉ commit/push khi người dùng yêu cầu. Nhánh làm việc hiện tại là `NestJS`.
+- Kiểm tra diff để không đưa `.env`, dữ liệu test hoặc thay đổi vendor ngoài ý muốn vào commit.
+- Cập nhật tài liệu cùng thay đổi hợp đồng; ghi kiểm chứng thực tế và phần còn
+  thiếu vào [trạng thái dự án](03-tien-do.md).

@@ -17,7 +17,7 @@ An online examination system for students, teachers and administrators, built wi
 
 ## Overview
 
-LianTest brings question preparation, exam delivery and grading into one application. It migrates `DHT_OneTest` from PHP MVC to NestJS, retaining its examination workflows and route contracts. The current interface follows [DESIGN.md](DESIGN.md).
+LianTest brings question preparation, exam delivery and grading into one NestJS application. The current interface follows [DESIGN.md](DESIGN.md).
 
 - **Accounts and permissions:** administrator, teacher and student roles, dynamic RBAC, profiles and email OTP password recovery.
 - **Academic management:** years, semesters, subjects, chapters, teaching assignments and class groups.
@@ -199,7 +199,7 @@ NestJS/
 ├── public/                 # CSS, JavaScript, icons and local plugins
 ├── scripts/                # Seed/check utilities
 ├── test/                   # HTTP E2E and frontend behavior tests
-├── docs/                   # Architecture, handover and screenshots
+├── docs/                   # Architecture, project guides and screenshots
 └── docs_API/               # Current API reference
 ```
 
@@ -295,7 +295,7 @@ node --test test/frontend/landing-demo.test.cjs test/frontend/signup.test.cjs
 
 `lint` includes `--fix`. Unit tests use Jest; E2E tests exercise HTTP routes with Supertest. Business E2E tests need a separate PostgreSQL database, test Storage and demo accounts/groups/questions/exams; they create temporary data and clean it up. Missing prerequisites must fail tests. The `app`, `public-pages` and `setup-app` suites cover public pages and the harness without a database connection.
 
-Historical results: [progress log](docs/03-tien-do.md). Full browser verification of the live exam image-draft/submission flow still has external CDN limitations, recorded in the [frontend report](docs/14-frontend-migration-verification.md).
+See [project status](docs/03-tien-do.md) for recorded checks. Browser verification of the live exam image-draft/submission flow requires external CDN assets; see the [development and testing guide](docs/07-so-tay-agent.md).
 
 <!-- rg:end:testing -->
 
@@ -308,12 +308,11 @@ Examination pages and AJAX endpoints use root paths such as `/auth/signin`, `/da
 - **Swagger:** `/swagger`, enabled only with `MODE=development`.
 - [Current API and Excel question import contract](docs_API/README.md).
 - [Seed JSON reference and customization](src/seed-db/data/README.md).
-- [Handover index](docs/README.md) and [development conventions](CLAUDE.md).
-- [Progress and verification history](docs/03-tien-do.md).
-- [Module architecture](docs/04-kien-truc-module.md) and [PHP migration mapping](docs/05-anh-xa-va-nguon-php.md).
+- [Documentation index](docs/README.md) and [development conventions](CLAUDE.md).
+- [Project status and verification](docs/03-tien-do.md).
+- [Module architecture](docs/04-kien-truc-module.md).
 - [Supabase image storage and cleanup](docs/06-luu-tru-file-supabase.md).
-- [Frontend verification and remaining limitations](docs/14-frontend-migration-verification.md).
-- [LianTest media audit](docs/15-media-audit.md).
+- [Development, testing and current limitations](docs/07-so-tay-agent.md).
 <!-- rg:end:api-docs -->
 
 <!-- rg:start:authors -->
@@ -324,4 +323,4 @@ Created by **LianHarman** (`LienThuan04`), as credited in [package.json](package
 
 <!-- rg:end:authors -->
 
-<!-- readme-generator: mode=project commit=69c1cd6d4f76c14872c4567f7b0e407ed60b3464 date=2026-10-18T07:12:06Z sections=hero,overview,toc,showcase,tech-stack,prerequisites,setup,env-vars,project-structure,architecture,how-it-works,testing,api-docs,authors -->
+<!-- readme-generator: mode=project commit=7b62ca2fb117c5149a290445f9a45313f61fdb98 date=2026-10-18T07:20:20Z sections=hero,overview,toc,showcase,tech-stack,prerequisites,setup,env-vars,project-structure,architecture,how-it-works,testing,api-docs,authors -->

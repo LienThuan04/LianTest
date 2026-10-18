@@ -17,7 +17,7 @@ Hệ thống thi trực tuyến dành cho sinh viên, giảng viên và quản t
 
 ## Tổng quan
 
-LianTest tập trung việc chuẩn bị câu hỏi, tổ chức thi và chấm điểm trong cùng một ứng dụng. Dự án chuyển hệ `DHT_OneTest` từ PHP MVC sang NestJS, giữ các luồng nghiệp vụ thi và hợp đồng đường dẫn. Giao diện hiện tại triển khai theo [DESIGN.md](DESIGN.md).
+LianTest tập trung việc chuẩn bị câu hỏi, tổ chức thi và chấm điểm trong cùng một ứng dụng NestJS. Giao diện hiện tại triển khai theo [DESIGN.md](DESIGN.md).
 
 - **Tài khoản và phân quyền:** quản trị viên, giảng viên, sinh viên; RBAC động, hồ sơ và khôi phục mật khẩu bằng OTP email.
 - **Quản lý đào tạo:** năm học, học kỳ, môn, chương, phân công giảng dạy và nhóm học phần.
@@ -199,7 +199,7 @@ NestJS/
 ├── public/                 # CSS, JavaScript, icon và plugin local
 ├── scripts/                # Tiện ích seed/kiểm tra
 ├── test/                   # HTTP E2E và kiểm thử hành vi frontend
-├── docs/                   # Kiến trúc, bàn giao và ảnh giao diện
+├── docs/                   # Kiến trúc, hướng dẫn và ảnh giao diện
 └── docs_API/               # Tài liệu API hiện tại
 ```
 
@@ -295,7 +295,7 @@ node --test test/frontend/landing-demo.test.cjs test/frontend/signup.test.cjs
 
 Script `lint` có `--fix`. Unit test dùng Jest; E2E kiểm tra HTTP bằng Supertest. E2E nghiệp vụ cần PostgreSQL riêng, Storage test và dữ liệu tài khoản/nhóm/câu hỏi/đề mẫu; các ca tạo dữ liệu tạm rồi tự dọn. Thiếu điều kiện tiên quyết phải làm test thất bại. Các bộ `app`, `public-pages`, `setup-app` kiểm tra trang công khai và harness mà không cần kết nối DB.
 
-Kết quả lịch sử: [sổ tiến độ](docs/03-tien-do.md). Kiểm chứng đầy đủ trên trình duyệt cho luồng ảnh nháp/nộp bài thi vẫn có giới hạn CDN bên ngoài, ghi tại [báo cáo frontend](docs/14-frontend-migration-verification.md).
+Xem [trạng thái dự án](docs/03-tien-do.md) để biết các kiểm tra đã ghi nhận. Kiểm chứng trình duyệt cho luồng ảnh nháp/nộp bài thi cần tài nguyên CDN bên ngoài; xem [hướng dẫn phát triển và kiểm thử](docs/07-so-tay-agent.md).
 
 <!-- rg:end:testing -->
 
@@ -308,12 +308,11 @@ Trang nghiệp vụ và AJAX hệ thi dùng path gốc như `/auth/signin`, `/da
 - **Swagger:** `/swagger`, chỉ bật khi `MODE=development`.
 - [API hiện tại và hợp đồng nhập câu hỏi Excel](docs_API/README.md).
 - [Hướng dẫn và tùy chỉnh dữ liệu seed JSON](src/seed-db/data/README.md).
-- [Sổ tay tiếp quản](docs/README.md) và [quy ước phát triển](CLAUDE.md).
-- [Tiến độ và lịch sử kiểm chứng](docs/03-tien-do.md).
-- [Kiến trúc module](docs/04-kien-truc-module.md) và [ánh xạ chuyển đổi PHP](docs/05-anh-xa-va-nguon-php.md).
+- [Chỉ mục tài liệu](docs/README.md) và [quy ước phát triển](CLAUDE.md).
+- [Trạng thái dự án và kiểm chứng](docs/03-tien-do.md).
+- [Kiến trúc module](docs/04-kien-truc-module.md).
 - [Lưu ảnh Supabase và dọn ảnh hết tham chiếu](docs/06-luu-tru-file-supabase.md).
-- [Kiểm chứng frontend và giới hạn còn lại](docs/14-frontend-migration-verification.md).
-- [Audit media LianTest](docs/15-media-audit.md).
+- [Phát triển, kiểm thử và giới hạn hiện tại](docs/07-so-tay-agent.md).
 <!-- rg:end:api-docs -->
 
 <!-- rg:start:authors -->
@@ -324,4 +323,4 @@ Phát triển bởi **LianHarman** (`LienThuan04`), theo thông tin trong [packa
 
 <!-- rg:end:authors -->
 
-<!-- readme-generator: mode=project commit=69c1cd6d4f76c14872c4567f7b0e407ed60b3464 date=2026-10-18T07:12:06Z sections=hero,overview,toc,showcase,tech-stack,prerequisites,setup,env-vars,project-structure,architecture,how-it-works,testing,api-docs,authors -->
+<!-- readme-generator: mode=project commit=7b62ca2fb117c5149a290445f9a45313f61fdb98 date=2026-10-18T07:20:20Z sections=hero,overview,toc,showcase,tech-stack,prerequisites,setup,env-vars,project-structure,architecture,how-it-works,testing,api-docs,authors -->

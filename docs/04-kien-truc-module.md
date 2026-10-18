@@ -1,5 +1,7 @@
 # 04 — Kiến trúc & module
 
+[Chỉ mục tài liệu](README.md) · [README tiếng Việt](../README.vi.md)
+
 ## Cây `src/`
 
 ```
@@ -33,12 +35,12 @@ src/
 └── exams/             Đề thi & làm bài & chấm + export                    path /test
 ```
 
-## Hạ tầng tái dùng (KHÔNG dựng lại)
+## Thành phần hạ tầng
 
 - **RBAC**: bảng `chitietquyen` → `@Permissions('<chucnang>','<hanhdong>')` +
   `PermissionsGuard` (global). JWT payload `IExamJwtPayload` có `id`, `manhomquyen`.
 - **Response**: `TransformInterceptor` bọc `{statusCode,message,data}` cho API;
-  route AJAX/SSR dùng `@SkipTransform()` để trả raw / render.
+  AJAX dùng `@SkipTransform()` để trả raw; SSR `@Render()` tự bỏ qua bước bọc response.
 - **Global prefix** `/api/v1` (config/app-setup) — route hệ thi ở path gốc phải nằm
   trong `exclude`. `VERSION_NEUTRAL` cho controller path gốc.
 - **Static**: `public/` phục vụ trực tiếp (theme + plugin + JS trang). View EJS ở
@@ -52,6 +54,7 @@ SSR (`@Render`): `GET /test`, `/test/add`, `/test/update/:made`, `/test/select/:
 `/test/detail/:made`, `/test/start/:made`, `/test/taketest/:made`.
 
 AJAX (`@SkipTransform`, POST trừ khi ghi rõ):
+
 - Danh sách/chung: `pagination`, `getTotalPages` (phân nhánh theo `args.model` /
   `args.custom.function`), `get_subjects` (GET), `get_groups` (GET), `getDetail`, `delete`.
 - Tạo/sửa: `addTest`, `updateTest`.
@@ -65,9 +68,10 @@ AJAX (`@SkipTransform`, POST trừ khi ghi rõ):
 > **Pagination.js dùng chung**: gửi `args` JSON (controller, model, made, manhom,
 > filter, custom, input/content, page, limit). Server phân nhánh trong
 > `getTotalPages`/`pagination`:
-> - `args.model==='KetQuaModel'` → bảng điểm thí sinh (slice 5).
-> - `args.custom.function==='getQuestionsForTest'` → câu hỏi để chọn (slice 3).
-> - mặc định → danh sách đề GV (slice 1).
+>
+> - `args.model==='KetQuaModel'` → bảng điểm thí sinh.
+> - `args.custom.function==='getQuestionsForTest'` → câu hỏi để chọn.
+> - mặc định → danh sách đề GV.
 
 ## Schema Prisma (bảng chính hệ thi)
 
@@ -85,4 +89,4 @@ bản ghi ẩn hoặc đã soft-delete. Lỗi dọn Storage không làm đảo n
 với Word. `POST /question/addExcel` chỉ parse; `POST /question/addQuesFile` kiểm
 toàn bộ preview trước khi lưu. `GET /question/excelTemplate` tải mẫu Excel.
 
-→ Ánh xạ chi tiết PHP↔NestJS + nguồn PHP: [05-anh-xa-va-nguon-php.md](./05-anh-xa-va-nguon-php.md).
+Xem [quy ước phát triển](02-quy-uoc-va-cach-lam.md) và [tài liệu API](../docs_API/README.md).

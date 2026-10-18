@@ -1,81 +1,63 @@
-# 06 — Lưu file ảnh: Supabase Storage (DB chỉ lưu URL)
+# 06 — Lưu ảnh bằng Supabase Storage
 
-**Quyết định 2026-07-22 (yêu cầu user):** ảnh KHÔNG lưu blob trong CSDL nữa. Toàn bộ
-file lưu ở **Supabase Storage** (bucket **PUBLIC**); DB chỉ lưu **public URL** → DB nhẹ.
+[Chỉ mục tài liệu](README.md) · [Biến môi trường](../README.vi.md#biến-môi-trường)
 
-## Cấu hình (.env)
+## Cấu hình
 
-| Biến | Ý nghĩa |
-|------|---------|
-| `SUPABASE_URL` | URL dự án Supabase |
-| `SUPABASE_KEY` | API key |
-| `SUPABASE_NAME_BUCKET` | Tên bucket — **PHẢI là PUBLIC** (dùng `getPublicUrl`) |
-| `LIMIT_UPLOAD_FILE_SIZEMB` | Giới hạn 1 file upload (MB), mặc định 50 |
+Ứng dụng dùng **public bucket** và lưu URL ảnh trong PostgreSQL. Khóa service role
+chỉ dùng phía server; không đưa vào JavaScript trình duyệt hoặc commit.
 
-## Thành phần code
+| Biến                       | Ý nghĩa                                            |
+| -------------------------- | -------------------------------------------------- |
+| `SUPABASE_URL`             | URL dự án Supabase                                 |
+| `SUPABASE_KEY`             | Khóa server dùng để upload/xoá object              |
+| `SUPABASE_NAME_BUCKET`     | Tên bucket public đã tạo                           |
+| `LIMIT_UPLOAD_FILE_SIZEMB` | Giới hạn một file upload tính bằng MB, mặc định 50 |
 
-- **`src/storage/supabase-storage.service.ts`** (`SupabaseStorageService`) trong
-  **`StorageModule` (@Global)** → inject khắp nơi. Dùng `@supabase/supabase-js`.
-  - `uploadImage(buffer, folder) → publicUrl | null`
-  - `uploadBase64(b64, folder) → publicUrl | null` (giải mã data-URI/base64 rồi upload)
-  - `getPublicUrl(path)`, `remove(url)` (trích path từ URL để xoá)
-  - Nhận diện MIME magic-bytes (png/gif/webp/jpeg); tên file UUID tránh trùng.
-- **`src/common/config/upload.config.ts`**: `MULTER_LIMITS = { fileSize: ... }` đọc
-  `LIMIT_UPLOAD_FILE_SIZEMB`. Gắn vào `FileInterceptor/AnyFilesInterceptor` ở
-  `questions.controller` (thêm/sửa câu hỏi, import .docx) và `exams.controller` (submit).
+`StorageModule` là global module. `SupabaseStorageService` tại
+`src/storage/supabase-storage.service.ts` cung cấp `uploadImage()`, `uploadBase64()`,
+`getPublicUrl()`, `ownedObjectPath()` và `remove()`. Service nhận diện MIME từ
+magic bytes PNG/GIF/WebP, mặc định JPEG, và dùng tên UUID. Giới hạn Multer nằm trong
+`src/common/config/upload.config.ts`.
 
-## Schema
+## Luồng upload và ghi dữ liệu
 
-3 cột `hinhanh` đổi `Bytes` → `String` (lưu URL): `cauhoi`, `cautraloi`,
-`hinhanh_traloi_tuluan`. Migration **`20260722030000_hinhanh_to_supabase_url`**
-(đã deploy). Blob cũ (nếu có) → NULL (không chuyển được sang URL).
+Upload cần I/O mạng nên thực hiện **trước `$transaction`**, lấy URL rồi ghi DB.
+Không giữ transaction DB trong lúc chờ Storage.
 
-## Luồng GHI (upload TRƯỚC transaction)
+| Nội dung                | Xử lý                                                                                | Thư mục bucket |
+| ----------------------- | ------------------------------------------------------------------------------------ | -------------- |
+| Ảnh câu hỏi/đáp án      | `QuestionsService` upload file multipart; giữ URL hiện có nếu client yêu cầu giữ ảnh | `questions/`   |
+| Ảnh câu trả lời tự luận | `ExamsService` đọc base64, upload trước transaction rồi lưu URL                      | `essays/`      |
+| Avatar                  | `AccountService` upload, ghi URL vào `nguoidung.avatar`, sau đó xét dọn ảnh thay thế | `avatars/`     |
 
-Upload có I/O mạng → **không được nằm trong `$transaction`** (tránh giữ giao dịch DB
-trong lúc chờ mạng). Nên upload trước, lấy URL rồi mới ghi DB.
+Các cột `hinhanh` trong `cauhoi`, `cautraloi`, `hinhanh_traloi_tuluan` là chuỗi URL.
+Trình duyệt dùng trực tiếp URL trong `<img src="...">`. Chi tiết kết quả tự luận
+có thể trả danh sách URL hoặc ghép các URL bằng `||` theo hợp đồng endpoint;
+không thêm tiền tố base64 khi render URL.
 
-- **`questions.service`** (thêm/sửa câu hỏi, multipart):
-  - `mainImageUrl(files)` — upload ảnh câu hỏi chính (field `hinhanh`) → URL.
-  - `uploadQueue(files, 'option_hinhanh[]')` — upload sẵn hàng đợi ảnh đáp án → URL[].
-  - `pickImageUrl(queue, item)` — sync: xoá→null; **giữ ảnh cũ** = client gửi lại URL
-    trong `item.image` → trả nguyên; else lấy URL mới kế tiếp trong queue.
-  - Thư mục bucket: `questions/`.
-- **`exams.service`** (nộp bài tự luận): `collectEssayAnswers(body)` parse
-  `essay_{i}_image_{j}` (base64) + `uploadBase64` → URL[] TRƯỚC tx; `saveEssayAnswers`
-  chỉ ghi URL. Thư mục bucket: `essays/`.
-- **`account.service`** (ảnh đại diện, từ 2026-08-14): `uploadAvatar` →
-  `uploadImage(file.buffer, 'avatars')`, cột `nguoidung.avatar` lưu URL, rồi
-  `remove(avatar cũ)`. Thư mục bucket: `avatars/`.
-  ⚠️ Cột `avatar` là chỗ DUY NHẤT còn **2 dạng giá trị**: URL bucket (ảnh mới) và TÊN
-  FILE trong `public/media/avatars/` (dữ liệu seed + bản PHP cũ). Mọi chỗ render phải
-  đi qua helper `avatarSrc()` (server, `src/common/utils/avatar.util.ts`) hoặc
-  `window.avatarUrl()` (client, `public/js/avatar-url.js` — nạp ở `partials/head.ejs`).
+## Avatar
 
-## Luồng ĐỌC (trả thẳng URL)
+`nguoidung.avatar` chấp nhận URL public hoặc tên file trong `public/media/avatars/`
+(ví dụ dữ liệu seed). Render qua `avatarSrc()` ở server
+(`src/common/utils/avatar.util.ts`) hoặc `window.avatarUrl()` ở client
+(`public/js/avatar-url.js`). Helper client được nạp qua `views/partials/head.ejs`.
+Không tự ghép tiền tố thư mục vào giá trị có thể đã là URL.
 
-Trước đây nhiều chỗ trả base64/data-URI; nay trả **URL** để `<img src=url>` dùng trực
-tiếp:
-- Chỗ trước là **data-URI** (ảnh câu hỏi/đáp án ở nhiều endpoint) → thay bằng URL là
-  **trong suốt** (URL vẫn hợp lệ làm `src`), frontend không cần đổi.
-- Chỗ trước là **base64 THUẦN** (ảnh tự luận): `getResultDetail.ds_hinhanh` (gộp URL
-  bằng `||`) và `getEssayDetail.hinhanh[]` → đã sửa `public/js/pages/test_detail.js`
-  và `vaothi.js` bỏ tiền tố `data:image/...;base64,`, dùng URL trực tiếp.
+## Dọn ảnh thay thế
 
-## Dọn ảnh sau khi thay thế (2026-10-17)
+`src/storage/image-cleanup.ts` chỉ xử lý sau khi DB ghi thành công:
 
-- `storage/image-cleanup.ts` chỉ chạy sau khi DB ghi thành công, dùng chung cho
-  sửa câu hỏi, thay ảnh bài tự luận và avatar. URL phải khớp chính xác origin,
-  đường dẫn public của bucket cấu hình; bỏ qua URL ngoài, tên file local và path lỗi.
-- Các URL trùng được gom theo object path. Trước khi xoá, đối chiếu mọi tham chiếu
-  trong `cauhoi`, `cautraloi`, `hinhanh_traloi_tuluan`, `nguoidung`, kể cả bản ghi ẩn
-  và soft-delete. Câu hỏi xoá mềm vẫn giữ ảnh. Ảnh dùng lại trong đáp án mới cũng giữ.
-- Nộp lại một mục tự luận thay bộ ảnh của chính mục đó trong transaction, không
-  nối thêm ảnh cũ; chỉ dọn ảnh cũ hết tham chiếu sau commit.
-- Lỗi truy vấn tham chiếu hoặc Storage chỉ ghi cảnh báo, không làm thao tác đã ghi
-  DB báo thất bại. Không dọn hàng loạt ảnh lịch sử hoặc ảnh mới upload khi DB rollback.
+- URL phải thuộc đúng origin và đường dẫn public của bucket cấu hình.
+  Bỏ qua URL bên ngoài, tên file local hoặc đường dẫn không hợp lệ.
+- Gom URL trùng theo object path; kiểm tra tham chiếu ở câu hỏi, đáp án, ảnh tự
+  luận và người dùng, kể cả bản ghi ẩn hoặc đã xoá mềm. Ảnh còn tham chiếu được giữ lại.
+- Nộp lại một mục tự luận thay bộ ảnh của chính mục đó trong transaction;
+  chỉ xét xoá các ảnh thay thế hết tham chiếu sau commit.
+- Lỗi kiểm tra tham chiếu hoặc xoá Storage chỉ ghi cảnh báo, không làm thao tác
+  đã ghi DB báo thất bại. Cơ chế này không quét hàng loạt object mồ côi hoặc tự
+  dọn ảnh mới upload khi transaction DB rollback.
 
-## Trường hợp cấu hình khác
-
-- Nếu bucket đổi sang **private**: phải dùng **signed URL** (DB lưu path, server ký
-  URL khi trả) — hiện code giả định bucket **public** + `getPublicUrl`.
+Ứng dụng hiện giả định bucket public. Chuyển bucket thành private cần thay cơ chế
+lưu path/phát signed URL đồng bộ với backend và giao diện; chỉ đổi quyền bucket
+sẽ làm URL ảnh hiện tại không truy cập được.
