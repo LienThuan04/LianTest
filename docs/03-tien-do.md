@@ -1,7 +1,62 @@
 # 03 — Tiến độ (LIVING DOC — cập nhật mỗi phiên)
 
-> Cập nhật gần nhất: **2026-10-18** (seed JSON; frontend, LianTest và media). Đây là "sổ tay tiến độ" — mỗi phiên làm xong
+> Cập nhật gần nhất: **2026-10-18** (README song ngữ và ảnh giao diện; seed JSON; frontend, LianTest và media). Đây là "sổ tay tiến độ" — mỗi phiên làm xong
 > nhớ sửa file này (đánh dấu đã làm gì, còn gì) để phiên/agent sau không mất mạch.
+
+## Checkpoint README song ngữ 2026-10-18
+
+Theo khảo sát đã trả lời, tạo [README tiếng Anh](../README.md) và
+[README tiếng Việt](../README.vi.md), bố cục ứng dụng với 11 mục nội dung được
+chọn, bổ sung ảnh chụp theo yêu cầu. Bản backup tạm đã được kiểm tra khớp file
+gốc rồi xóa theo yêu cầu dọn tài liệu; nội dung README cũ vẫn nằm trong lịch sử
+Git. Skill `readme-skill` chỉ được đọc và dùng trong
+phiên, không cài vào cấu hình agent hoặc thêm vào repo ứng dụng.
+
+- README đối chiếu manifest, controller, cấu hình mẫu và service hiện tại; nêu
+  rõ SMTP/Storage cần khi startup, route SSR ở path gốc, entrypoint production,
+  11 file JSON seed, điều kiện E2E và các giới hạn browser đã ghi ở docs/14.
+- Tự chạy bản build với PostgreSQL/PGlite riêng (22 migration), seed nền/demo
+  từ JSON và Storage fixture cục bộ. HTTP trang chủ trả 200; đăng nhập qua form
+  thật bằng ba tài khoản mẫu `admin`, `gv001`, `sv001`.
+- Chụp mới 5 ảnh PNG trong `docs/images`: trang chủ desktop/mobile, dashboard,
+  ngân hàng câu hỏi (10 dòng đã tải) và lịch thi sinh viên (2 dòng đã tải).
+  Desktop 1440×1000, mobile 430×932. Đã mở kiểm tra cả 5 ảnh; không có ảnh lỗi,
+  tràn ngang document hoặc JavaScript exception trên các trang chụp. Không coi
+  lần chụp này là kiểm chứng toàn bộ luồng thi/nộp bài.
+- Browser tích hợp không có kết nối; dùng Chrome headless với profile tạm riêng.
+  Các tiến trình app/DB/Chrome dùng để chụp đã dừng; không ghi vào DB/Storage
+  đang dùng của người dùng. Báo cáo chụp và câu trả lời form ở thư mục workspace
+  `.tmp/readme-f041ac491ecf4d519cd13bcc19d647f4`, ngoài repo Git NestJS.
+- Kiểm chứng cuối phiên: build và ESLint chỉ đọc exit 0 (gọi CLI Node local vì
+  terminal thiếu `pnpm`); Prettier check hai README đạt. Kiểm tra Markdown xác nhận
+  mỗi bản có 13 block hợp lệ, 43 liên kết/ảnh nội bộ tồn tại và 4 bảng đúng số cột;
+  mục lục khớp heading, code fence đóng đủ, metadata khớp Git HEAD. Lệnh, biến môi
+  trường và ảnh của hai bản tương đương; cả 5 PNG đúng kích thước. SHA-256 bản sao
+  ban đầu khớp bản gốc, `git diff --check` sạch. Lần kiểm tra tài liệu này không
+  chạy lại toàn bộ unit/E2E; kiểm chứng trước xuất bản được ghi bên dưới.
+- Bổ sung sơ đồ kiến trúc theo yêu cầu: giao diện HTML/CSS và JavaScript/jQuery
+  → HTTP/guard/DTO → controller → service → Prisma ORM → PostgreSQL. Chiều trả
+  về tách SSR (EJS render ở backend rồi trả HTML) và AJAX (JSON → cập nhật DOM).
+  Thể hiện thêm tài nguyên `public/`, ảnh ở Supabase Storage và URL ảnh lưu DB.
+  Các tầng backend thuộc cùng ứng dụng NestJS/Express, không phải microservice.
+  Đối chiếu `src/main.ts`, `src/app.module.ts`, Prisma service và Storage service;
+  cập nhật cả README Anh–Việt, mục lục và metadata.
+  Kiểm tra sau cập nhật: mỗi bản có 14 block và 48 liên kết/ảnh nội bộ hợp lệ;
+  sơ đồ gồm 3 nhóm, 10 nút, 13 cạnh, cấu trúc hai ngôn ngữ khớp nhau. Prettier
+  check và `git diff --check` đạt. Đã soát cấu trúc nguồn Mermaid; chưa render
+  cục bộ vì môi trường không có Mermaid renderer.
+- Dọn tài liệu theo yêu cầu tiếp theo: xóa backup README không còn dùng; giữ
+  README tiếng Việt, chỉ mục `docs/`, tài liệu API và hướng dẫn seed vì còn nội
+  dung riêng. Thêm liên kết hai chiều với README chính, đồng bộ tên LianTest ở
+  tiêu đề API. README của plugin bên thứ ba giữ nguyên cùng mã nguồn thư viện.
+  User yêu cầu commit toàn bộ thay đổi và push lên `origin/NestJS`.
+- Kiểm chứng trước xuất bản: 120/120 unit (9 bộ), build và ESLint chỉ đọc đạt;
+  Prettier check hai README và `git diff --check` đạt. Kiểm tra cả 5 README của
+  dự án: liên kết nội bộ tồn tại, các README giữ lại có đường quay về hai bản
+  chính; mỗi bản chính có 49 liên kết/ảnh. Review độc lập xác nhận không còn
+  phát hiện Critical/Important/Minor trong phạm vi tài liệu. Terminal không kết
+  nối được GitHub nên dùng connector GitHub để xuất bản commit và đồng bộ về
+  local; chỉ đưa 11 file tài liệu/ảnh vào commit, giữ skill và file tạm ngoài repo.
 
 ## Checkpoint seed JSON 2026-10-18
 

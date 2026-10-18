@@ -1,5 +1,7 @@
 # Dữ liệu seed LianTest
 
+[README chính](../../../README.md) · [README tiếng Việt](../../../README.vi.md)
+
 Sửa các file JSON trong thư mục này để thay dữ liệu mẫu. Không cần sửa TypeScript,
 SQL hay logic nghiệp vụ. Tên website là **LianTest**, người tạo **LianHarman**.
 

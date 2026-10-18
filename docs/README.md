@@ -1,5 +1,7 @@
 # docs/ — Sổ tay dự án (đọc để tiếp quản)
 
+[README chính](../README.md) · [README tiếng Việt](../README.vi.md)
+
 Bộ tài liệu **tự chứa** giúp bất kỳ agent/người nào clone repo về là hiểu được dự
 án và **tiếp tục làm mà không quên gì**. Đây là "bộ nhớ dài hạn" đi kèm mã nguồn.
 

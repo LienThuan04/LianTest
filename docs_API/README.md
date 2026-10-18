@@ -1,4 +1,6 @@
-# API hệ thi LianHarman — NestJS SSR
+# API hệ thi LianTest — NestJS SSR
+
+[README chính](../README.md) · [README tiếng Việt](../README.vi.md)
 
 Tài liệu này mô tả hệ thi hiện tại. Khung BaseAuth cũ đã được gỡ; tài liệu cũ được
 lưu ở [legacy-baseauth.md](legacy-baseauth.md) để tham khảo lịch sử, không dùng làm
