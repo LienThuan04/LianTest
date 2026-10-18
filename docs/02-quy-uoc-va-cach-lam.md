@@ -10,7 +10,7 @@
 | CSDL              | **PostgreSQL/Prisma**; tạo migration mới khi sửa schema, không `db pull`                   |
 | Giao diện         | **EJS SSR** trong `views/`, CSS/JS/plugin trong `public/`; theo [DESIGN.md](../DESIGN.md)  |
 | Xác thực và quyền | JWT/Passport tại `exam-auth/`, RBAC qua `chitietquyen` và `PermissionsGuard`               |
-| File ảnh          | **Supabase Storage public bucket**, DB lưu URL; xem [Storage](06-luu-tru-file-supabase.md) |
+| File ảnh          | **Supabase Storage public bucket**, DB lưu URL; xem [Storage](05-luu-tru-file-supabase.md) |
 
 ## Hợp đồng HTTP và dữ liệu
 

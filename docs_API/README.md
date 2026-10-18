@@ -72,5 +72,5 @@ trang HTML mở hộp thoại in; người dùng chọn lưu PDF trên trình du
 
 `pnpm run build`, `pnpm run lint`, `pnpm test`, `pnpm run test:e2e --runInBand`.
 E2e nghiệp vụ cần DB/Storage test và dữ liệu mẫu; thiếu điều kiện tiên quyết phải
-báo lỗi. Điều kiện chạy được mô tả trong [hướng dẫn kiểm thử](../docs/07-so-tay-agent.md);
+báo lỗi. Điều kiện chạy được mô tả trong [hướng dẫn kiểm thử](../docs/06-so-tay-agent.md);
 kết quả đã ghi nhận nằm trong [trạng thái dự án](../docs/03-tien-do.md).

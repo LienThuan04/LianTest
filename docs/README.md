@@ -11,8 +11,8 @@ Cài đặt, biến môi trường, sơ đồ hoạt động và ảnh giao di�
 | [Quy ước phát triển](02-quy-uoc-va-cach-lam.md) | Cấu trúc module, route/response, quyền, DB và Git        |
 | [Trạng thái dự án](03-tien-do.md)               | Các kiểm chứng đã ghi nhận và phạm vi còn cần kiểm tra   |
 | [Kiến trúc và module](04-kien-truc-module.md)   | Cấu trúc mã nguồn, hạ tầng, route và bảng dữ liệu        |
-| [Supabase Storage](06-luu-tru-file-supabase.md) | Upload, URL ảnh, avatar và dọn ảnh thay thế              |
-| [Phát triển và kiểm thử](07-so-tay-agent.md)    | Quy trình làm việc, fixture và kiểm tra bằng trình duyệt |
+| [Supabase Storage](05-luu-tru-file-supabase.md) | Upload, URL ảnh, avatar và dọn ảnh thay thế              |
+| [Phát triển và kiểm thử](06-so-tay-agent.md)    | Quy trình làm việc, fixture và kiểm tra bằng trình duyệt |
 | [API hiện tại](../docs_API/README.md)           | Xác thực, nhóm route, nhập Excel và hợp đồng dữ liệu     |
 | [Dữ liệu seed](../src/seed-db/data/README.md)   | Bộ JSON, kiểm tra dữ liệu và cách seed                   |
 | [Thiết kế giao diện](../DESIGN.md)              | Phong cách và thành phần giao diện                       |

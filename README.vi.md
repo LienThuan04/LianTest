@@ -295,7 +295,7 @@ node --test test/frontend/landing-demo.test.cjs test/frontend/signup.test.cjs
 
 Script `lint` có `--fix`. Unit test dùng Jest; E2E kiểm tra HTTP bằng Supertest. E2E nghiệp vụ cần PostgreSQL riêng, Storage test và dữ liệu tài khoản/nhóm/câu hỏi/đề mẫu; các ca tạo dữ liệu tạm rồi tự dọn. Thiếu điều kiện tiên quyết phải làm test thất bại. Các bộ `app`, `public-pages`, `setup-app` kiểm tra trang công khai và harness mà không cần kết nối DB.
 
-Xem [trạng thái dự án](docs/03-tien-do.md) để biết các kiểm tra đã ghi nhận. Kiểm chứng trình duyệt cho luồng ảnh nháp/nộp bài thi cần tài nguyên CDN bên ngoài; xem [hướng dẫn phát triển và kiểm thử](docs/07-so-tay-agent.md).
+Xem [trạng thái dự án](docs/03-tien-do.md) để biết các kiểm tra đã ghi nhận. Kiểm chứng trình duyệt cho luồng ảnh nháp/nộp bài thi cần tài nguyên CDN bên ngoài; xem [hướng dẫn phát triển và kiểm thử](docs/06-so-tay-agent.md).
 
 <!-- rg:end:testing -->
 
@@ -311,8 +311,8 @@ Trang nghiệp vụ và AJAX hệ thi dùng path gốc như `/auth/signin`, `/da
 - [Chỉ mục tài liệu](docs/README.md) và [quy ước phát triển](CLAUDE.md).
 - [Trạng thái dự án và kiểm chứng](docs/03-tien-do.md).
 - [Kiến trúc module](docs/04-kien-truc-module.md).
-- [Lưu ảnh Supabase và dọn ảnh hết tham chiếu](docs/06-luu-tru-file-supabase.md).
-- [Phát triển, kiểm thử và giới hạn hiện tại](docs/07-so-tay-agent.md).
+- [Lưu ảnh Supabase và dọn ảnh hết tham chiếu](docs/05-luu-tru-file-supabase.md).
+- [Phát triển, kiểm thử và giới hạn hiện tại](docs/06-so-tay-agent.md).
 <!-- rg:end:api-docs -->
 
 <!-- rg:start:authors -->

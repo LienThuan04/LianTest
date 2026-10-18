@@ -295,7 +295,7 @@ node --test test/frontend/landing-demo.test.cjs test/frontend/signup.test.cjs
 
 `lint` includes `--fix`. Unit tests use Jest; E2E tests exercise HTTP routes with Supertest. Business E2E tests need a separate PostgreSQL database, test Storage and demo accounts/groups/questions/exams; they create temporary data and clean it up. Missing prerequisites must fail tests. The `app`, `public-pages` and `setup-app` suites cover public pages and the harness without a database connection.
 
-See [project status](docs/03-tien-do.md) for recorded checks. Browser verification of the live exam image-draft/submission flow requires external CDN assets; see the [development and testing guide](docs/07-so-tay-agent.md).
+See [project status](docs/03-tien-do.md) for recorded checks. Browser verification of the live exam image-draft/submission flow requires external CDN assets; see the [development and testing guide](docs/06-so-tay-agent.md).
 
 <!-- rg:end:testing -->
 
@@ -311,8 +311,8 @@ Examination pages and AJAX endpoints use root paths such as `/auth/signin`, `/da
 - [Documentation index](docs/README.md) and [development conventions](CLAUDE.md).
 - [Project status and verification](docs/03-tien-do.md).
 - [Module architecture](docs/04-kien-truc-module.md).
-- [Supabase image storage and cleanup](docs/06-luu-tru-file-supabase.md).
-- [Development, testing and current limitations](docs/07-so-tay-agent.md).
+- [Supabase image storage and cleanup](docs/05-luu-tru-file-supabase.md).
+- [Development, testing and current limitations](docs/06-so-tay-agent.md).
 <!-- rg:end:api-docs -->
 
 <!-- rg:start:authors -->

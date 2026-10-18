@@ -18,7 +18,7 @@ và [chỉ mục tài liệu](docs/README.md).
    trong `src/config/app-setup.config.ts`.
 5. Ảnh upload lưu ở **Supabase Storage public bucket**, DB lưu URL. Upload trước
    transaction; chỉ dọn ảnh thay thế sau khi DB ghi thành công và hết tham chiếu.
-   Xem [hướng dẫn Storage](docs/06-luu-tru-file-supabase.md).
+   Xem [hướng dẫn Storage](docs/05-luu-tru-file-supabase.md).
 6. Dữ liệu mẫu ở `src/seed-db/data/*.json`; không thêm mảng seed hardcode trong TS.
    Đọc [hướng dẫn seed](src/seed-db/data/README.md) trước khi sửa.
    `SEED_DB=false`, `CLEAR_DB=false`, `SEED_DEMO_DATA=false` khi chạy thông thường.
@@ -36,6 +36,6 @@ và [chỉ mục tài liệu](docs/README.md).
 - E2E nghiệp vụ cần DB/Storage test riêng và đủ fixture. Không bỏ qua test để che
   điều kiện tiên quyết bị thiếu. Log route mapping không chứng minh nghiệp vụ đúng.
 - Khi thay đổi giao diện, kiểm tra trang liên quan trên desktop/mobile và các request
-  phát sinh. Xem [hướng dẫn phát triển và kiểm thử](docs/07-so-tay-agent.md).
+  phát sinh. Xem [hướng dẫn phát triển và kiểm thử](docs/06-so-tay-agent.md).
 - Cập nhật [trạng thái dự án](docs/03-tien-do.md) với kết quả thực tế và phần chưa
   kiểm chứng; cập nhật tài liệu liên quan khi thay đổi hợp đồng hoặc cấu hình.

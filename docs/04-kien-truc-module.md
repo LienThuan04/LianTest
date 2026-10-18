@@ -46,7 +46,7 @@ src/
 - **Static**: `public/` phục vụ trực tiếp (theme + plugin + JS trang). View EJS ở
   `views/pages/` + `views/partials/` (head/navbar/header/footer/script).
 - **Config**: `ConfigModule` global (đọc `.env`), inject `ConfigService`.
-- **Storage**: `SupabaseStorageService` (@Global) — xem [06](./06-luu-tru-file-supabase.md).
+- **Storage**: `SupabaseStorageService` (@Global) — xem [05](./05-luu-tru-file-supabase.md).
 
 ## Route inventory `exams` (path `/test`) — module lớn nhất
 

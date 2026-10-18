@@ -1,4 +1,4 @@
-# 06 — Lưu ảnh bằng Supabase Storage
+# 05 — Lưu ảnh bằng Supabase Storage
 
 [Chỉ mục tài liệu](README.md) · [Biến môi trường](../README.vi.md#biến-môi-trường)
 

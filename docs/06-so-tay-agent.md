@@ -1,4 +1,4 @@
-# 07 — Phát triển và kiểm thử
+# 06 — Phát triển và kiểm thử
 
 [Chỉ mục tài liệu](README.md) · [Quy ước](02-quy-uoc-va-cach-lam.md) · [Trạng thái dự án](03-tien-do.md)
 
@@ -36,7 +36,7 @@ khi app sẵn sàng; log route mapping chỉ xác nhận routing/DI.
 4. SSR dùng `@Render()`; AJAX dùng `@SkipTransform()`. Route ở path gốc cần cấu
    hình prefix exclusion và `VERSION_NEUTRAL` như [quy ước](02-quy-uoc-va-cach-lam.md).
 5. Upload ảnh trước transaction, đọc/render URL, dọn ảnh thay thế theo
-   [hướng dẫn Storage](06-luu-tru-file-supabase.md).
+   [hướng dẫn Storage](05-luu-tru-file-supabase.md).
 6. Kiểm tra phù hợp với phạm vi sửa, xem lại diff và cập nhật tài liệu/hợp đồng
    cùng [trạng thái kiểm chứng](03-tien-do.md).
 

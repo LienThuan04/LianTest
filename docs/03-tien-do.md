@@ -40,4 +40,4 @@ tra này dùng fixture riêng, không xác nhận cấu hình DB/Storage/SMTP tr
 - **Dịch vụ bên ngoài:** kiểm tra gửi OTP/email và upload/dọn ảnh bằng cấu hình
   môi trường mục tiêu trước khi triển khai.
 
-Quy trình và lệnh kiểm tra nằm trong [hướng dẫn phát triển và kiểm thử](07-so-tay-agent.md).
+Quy trình và lệnh kiểm tra nằm trong [hướng dẫn phát triển và kiểm thử](06-so-tay-agent.md).
