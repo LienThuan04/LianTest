@@ -1,0 +1,56 @@
+[
+  {
+    "key": "LTW-N01",
+    "tennhom": "Lập trình Web - Nhóm 01",
+    "mamonhoc": "LTW001",
+    "giangvien": "gv001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1,
+    "mamoi": "ltw0001",
+    "ghichu": "Lớp thực hành sáng thứ 2",
+    "sinhvien": [
+      "sv001",
+      "sv002",
+      "sv003",
+      "sv004",
+      "sv005",
+      "sv006"
+    ]
+  },
+  {
+    "key": "CSDL-N01",
+    "tennhom": "Cơ sở dữ liệu - Nhóm 01",
+    "mamonhoc": "CSDL01",
+    "giangvien": "gv001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1,
+    "mamoi": "csdl001",
+    "ghichu": "Lớp lý thuyết chiều thứ 4",
+    "sinhvien": [
+      "sv004",
+      "sv005",
+      "sv006",
+      "sv007",
+      "sv008",
+      "sv009",
+      "sv010"
+    ]
+  },
+  {
+    "key": "MMT-N01",
+    "tennhom": "Mạng máy tính - Nhóm 01",
+    "mamonhoc": "MMT001",
+    "giangvien": "gv002",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1,
+    "mamoi": "mmt0001",
+    "ghichu": "Lớp ghép 2 khoa",
+    "sinhvien": [
+      "sv001",
+      "sv002",
+      "sv003",
+      "sv007",
+      "sv008"
+    ]
+  }
+]

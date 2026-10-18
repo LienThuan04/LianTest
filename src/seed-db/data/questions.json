@@ -1,0 +1,893 @@
+[
+  {
+    "key": "ltw-mcq-01",
+    "mamonhoc": "LTW001",
+    "chuong": "Tổng quan Web và HTML",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "HTML là viết tắt của cụm từ nào?",
+    "dapan": [
+      {
+        "noidungtl": "HyperText Markup Language",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "HighText Machine Language",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "HyperTool Multi Language",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Home Tool Markup Language",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-02",
+    "mamonhoc": "LTW001",
+    "chuong": "Tổng quan Web và HTML",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Thẻ HTML nào dùng để tạo liên kết đến một trang khác?",
+    "dapan": [
+      {
+        "noidungtl": "&lt;link&gt;",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "&lt;a&gt;",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "&lt;href&gt;",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "&lt;nav&gt;",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-03",
+    "mamonhoc": "LTW001",
+    "chuong": "Tổng quan Web và HTML",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Thẻ nào dùng để chèn hình ảnh vào trang web?",
+    "dapan": [
+      {
+        "noidungtl": "&lt;image&gt;",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "&lt;picture&gt;",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "&lt;img&gt;",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "&lt;figure&gt;",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-04",
+    "mamonhoc": "LTW001",
+    "chuong": "CSS và giao diện",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Thuộc tính CSS nào dùng để đổi màu chữ?",
+    "dapan": [
+      {
+        "noidungtl": "font-color",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "text-color",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "color",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "foreground",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-05",
+    "mamonhoc": "LTW001",
+    "chuong": "CSS và giao diện",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Bộ chọn (selector) nào trong CSS chọn phần tử theo thuộc tính id?",
+    "dapan": [
+      {
+        "noidungtl": ".ten",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "#ten",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "*ten",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "ten",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-06",
+    "mamonhoc": "LTW001",
+    "chuong": "CSS và giao diện",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Trong Flexbox, thuộc tính nào canh các phần tử con theo trục chính (main axis)?",
+    "dapan": [
+      {
+        "noidungtl": "align-items",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "justify-content",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "align-content",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "flex-wrap",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-07",
+    "mamonhoc": "LTW001",
+    "chuong": "CSS và giao diện",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv001",
+    "noidung": "Thuộc tính z-index chỉ có tác dụng khi phần tử có position là gì?",
+    "dapan": [
+      {
+        "noidungtl": "static",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "relative, absolute, fixed hoặc sticky",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Mọi giá trị position",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Chỉ khi position là fixed",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-08",
+    "mamonhoc": "LTW001",
+    "chuong": "JavaScript cơ bản",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Từ khoá nào khai báo biến có phạm vi khối (block scope) trong JavaScript?",
+    "dapan": [
+      {
+        "noidungtl": "var",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "let",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "function",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "global",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-09",
+    "mamonhoc": "LTW001",
+    "chuong": "JavaScript cơ bản",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Biểu thức typeof null trong JavaScript trả về giá trị nào?",
+    "dapan": [
+      {
+        "noidungtl": "\"null\"",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "\"undefined\"",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "\"object\"",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "\"number\"",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-10",
+    "mamonhoc": "LTW001",
+    "chuong": "JavaScript cơ bản",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv001",
+    "noidung": "Phương thức nào đăng ký một trình xử lý sự kiện cho phần tử DOM?",
+    "dapan": [
+      {
+        "noidungtl": "attachEvent",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "addEventListener",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "onEvent",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "bindEvent",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-11",
+    "mamonhoc": "LTW001",
+    "chuong": "Lập trình phía máy chủ",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Mã trạng thái HTTP 404 có ý nghĩa gì?",
+    "dapan": [
+      {
+        "noidungtl": "Máy chủ gặp lỗi nội bộ",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Không tìm thấy tài nguyên",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Truy cập bị từ chối",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Yêu cầu được chuyển hướng",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-mcq-12",
+    "mamonhoc": "LTW001",
+    "chuong": "Lập trình phía máy chủ",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv001",
+    "noidung": "Phương thức HTTP nào sau đây KHÔNG phải là idempotent?",
+    "dapan": [
+      {
+        "noidungtl": "GET",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "PUT",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "POST",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "DELETE",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ltw-essay-01",
+    "mamonhoc": "LTW001",
+    "chuong": "Lập trình phía máy chủ",
+    "loai": "essay",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Trình bày sự khác nhau giữa hai phương thức GET và POST. Nêu ví dụ tình huống nên dùng mỗi phương thức."
+  },
+  {
+    "key": "ltw-essay-02",
+    "mamonhoc": "LTW001",
+    "chuong": "JavaScript cơ bản",
+    "loai": "essay",
+    "dokho": 3,
+    "nguoitao": "gv001",
+    "noidung": "Giải thích khái niệm bất đồng bộ (asynchronous) trong JavaScript và vai trò của Promise trong việc xử lý bất đồng bộ."
+  },
+  {
+    "key": "csdl-mcq-01",
+    "mamonhoc": "CSDL01",
+    "chuong": "Mô hình quan hệ",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Khoá chính (primary key) của một quan hệ có tính chất nào sau đây?",
+    "dapan": [
+      {
+        "noidungtl": "Có thể nhận giá trị NULL",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Xác định duy nhất mỗi bộ và không NULL",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Luôn gồm đúng một thuộc tính",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Có thể trùng lặp nếu bảng nhỏ",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-02",
+    "mamonhoc": "CSDL01",
+    "chuong": "Mô hình quan hệ",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Khoá ngoại (foreign key) dùng để làm gì?",
+    "dapan": [
+      {
+        "noidungtl": "Tăng tốc độ truy vấn",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Mã hoá dữ liệu nhạy cảm",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Liên kết và ràng buộc toàn vẹn giữa hai quan hệ",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Đánh số thứ tự các bộ",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-03",
+    "mamonhoc": "CSDL01",
+    "chuong": "Ngôn ngữ SQL",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv001",
+    "noidung": "Câu lệnh SQL nào dùng để lấy dữ liệu từ bảng?",
+    "dapan": [
+      {
+        "noidungtl": "SELECT",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "GET",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "FETCH",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "OPEN",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-04",
+    "mamonhoc": "CSDL01",
+    "chuong": "Ngôn ngữ SQL",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Mệnh đề nào dùng để lọc dữ liệu SAU khi đã gom nhóm bằng GROUP BY?",
+    "dapan": [
+      {
+        "noidungtl": "WHERE",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "HAVING",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "FILTER",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "ORDER BY",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-05",
+    "mamonhoc": "CSDL01",
+    "chuong": "Ngôn ngữ SQL",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Phép nối nào giữ lại tất cả các dòng của bảng bên trái kể cả khi không khớp?",
+    "dapan": [
+      {
+        "noidungtl": "INNER JOIN",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "LEFT JOIN",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "CROSS JOIN",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "SELF JOIN",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-06",
+    "mamonhoc": "CSDL01",
+    "chuong": "Chuẩn hoá dữ liệu",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv001",
+    "noidung": "Một quan hệ ở dạng chuẩn 2 (2NF) khi và chỉ khi nào?",
+    "dapan": [
+      {
+        "noidungtl": "Ở 1NF và mọi thuộc tính không khoá phụ thuộc đầy đủ vào khoá chính",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Ở 1NF và không có phụ thuộc bắc cầu",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Mọi thuộc tính đều là khoá",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Không còn thuộc tính đa trị",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-07",
+    "mamonhoc": "CSDL01",
+    "chuong": "Chuẩn hoá dữ liệu",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv001",
+    "noidung": "Dạng chuẩn 3 (3NF) loại bỏ loại phụ thuộc hàm nào?",
+    "dapan": [
+      {
+        "noidungtl": "Phụ thuộc bộ phận",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Phụ thuộc bắc cầu",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Phụ thuộc đa trị",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Phụ thuộc nối",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-mcq-08",
+    "mamonhoc": "CSDL01",
+    "chuong": "Giao dịch và toàn vẹn",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Bốn tính chất ACID của giao dịch gồm những gì?",
+    "dapan": [
+      {
+        "noidungtl": "Atomicity, Consistency, Isolation, Durability",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Accuracy, Concurrency, Integrity, Durability",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Atomicity, Concurrency, Indexing, Distribution",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Availability, Consistency, Isolation, Denormalization",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "csdl-essay-01",
+    "mamonhoc": "CSDL01",
+    "chuong": "Giao dịch và toàn vẹn",
+    "loai": "essay",
+    "dokho": 2,
+    "nguoitao": "gv001",
+    "noidung": "Nêu ý nghĩa của tính nguyên tố (Atomicity) và tính bền vững (Durability) trong giao dịch. Cho ví dụ minh hoạ bằng nghiệp vụ chuyển khoản ngân hàng."
+  },
+  {
+    "key": "mmt-mcq-01",
+    "mamonhoc": "MMT001",
+    "chuong": "Mô hình OSI và TCP/IP",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv002",
+    "noidung": "Mô hình OSI gồm bao nhiêu tầng?",
+    "dapan": [
+      {
+        "noidungtl": "4",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "5",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "7",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "8",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "mmt-mcq-02",
+    "mamonhoc": "MMT001",
+    "chuong": "Mô hình OSI và TCP/IP",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv002",
+    "noidung": "Giao thức HTTP hoạt động ở tầng nào của mô hình OSI?",
+    "dapan": [
+      {
+        "noidungtl": "Tầng mạng",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Tầng giao vận",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Tầng phiên",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Tầng ứng dụng",
+        "ladapan": 1
+      }
+    ]
+  },
+  {
+    "key": "mmt-mcq-03",
+    "mamonhoc": "MMT001",
+    "chuong": "Tầng mạng và địa chỉ IP",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv002",
+    "noidung": "Địa chỉ IPv4 có độ dài bao nhiêu bit?",
+    "dapan": [
+      {
+        "noidungtl": "16",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "32",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "64",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "128",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "mmt-mcq-04",
+    "mamonhoc": "MMT001",
+    "chuong": "Tầng mạng và địa chỉ IP",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv002",
+    "noidung": "Mạng 192.168.1.0/26 có bao nhiêu địa chỉ host sử dụng được?",
+    "dapan": [
+      {
+        "noidungtl": "30",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "62",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "64",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "126",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "mmt-mcq-05",
+    "mamonhoc": "MMT001",
+    "chuong": "Tầng giao vận",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv002",
+    "noidung": "Điểm khác biệt cơ bản giữa TCP và UDP là gì?",
+    "dapan": [
+      {
+        "noidungtl": "TCP nhanh hơn UDP trong mọi trường hợp",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "TCP hướng kết nối và tin cậy, UDP không kết nối và không bảo đảm",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "UDP có kiểm soát tắc nghẽn còn TCP thì không",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "TCP chỉ dùng cho mạng LAN",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "mmt-mcq-06",
+    "mamonhoc": "MMT001",
+    "chuong": "Tầng giao vận",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv002",
+    "noidung": "Cổng (port) mặc định của dịch vụ HTTPS là bao nhiêu?",
+    "dapan": [
+      {
+        "noidungtl": "21",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "80",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "443",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "8080",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ctdl-mcq-01",
+    "mamonhoc": "CTDL01",
+    "chuong": "Danh sách và ngăn xếp",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv002",
+    "noidung": "Ngăn xếp (stack) hoạt động theo nguyên tắc nào?",
+    "dapan": [
+      {
+        "noidungtl": "FIFO",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "LIFO",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Ưu tiên theo khoá",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Ngẫu nhiên",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ctdl-mcq-02",
+    "mamonhoc": "CTDL01",
+    "chuong": "Danh sách và ngăn xếp",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv002",
+    "noidung": "Độ phức tạp của thao tác chèn vào đầu danh sách liên kết đơn là bao nhiêu?",
+    "dapan": [
+      {
+        "noidungtl": "O(1)",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "O(log n)",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "O(n)",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "O(n log n)",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ctdl-mcq-03",
+    "mamonhoc": "CTDL01",
+    "chuong": "Cây và bảng băm",
+    "loai": "mcq",
+    "dokho": 2,
+    "nguoitao": "gv002",
+    "noidung": "Duyệt cây nhị phân tìm kiếm theo thứ tự giữa (in-order) cho kết quả nào?",
+    "dapan": [
+      {
+        "noidungtl": "Dãy khoá tăng dần",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Dãy khoá giảm dần",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Dãy khoá theo mức",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Dãy khoá ngẫu nhiên",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ctdl-mcq-04",
+    "mamonhoc": "CTDL01",
+    "chuong": "Cây và bảng băm",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv002",
+    "noidung": "Trong bảng băm dùng dò tuyến tính, hiện tượng nhiều khoá dồn thành cụm liên tiếp gọi là gì?",
+    "dapan": [
+      {
+        "noidungtl": "Tràn bảng",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Gom cụm sơ cấp (primary clustering)",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Băm kép",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Va chạm hoàn hảo",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ctdl-mcq-05",
+    "mamonhoc": "CTDL01",
+    "chuong": "Sắp xếp và tìm kiếm",
+    "loai": "mcq",
+    "dokho": 1,
+    "nguoitao": "gv002",
+    "noidung": "Tìm kiếm nhị phân yêu cầu điều kiện nào với dãy đầu vào?",
+    "dapan": [
+      {
+        "noidungtl": "Dãy đã được sắp xếp",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "Dãy chỉ chứa số nguyên",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Dãy không có phần tử trùng",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "Dãy có kích thước là luỹ thừa của 2",
+        "ladapan": 0
+      }
+    ]
+  },
+  {
+    "key": "ctdl-mcq-06",
+    "mamonhoc": "CTDL01",
+    "chuong": "Sắp xếp và tìm kiếm",
+    "loai": "mcq",
+    "dokho": 3,
+    "nguoitao": "gv002",
+    "noidung": "Độ phức tạp trung bình của thuật toán Quick Sort là bao nhiêu?",
+    "dapan": [
+      {
+        "noidungtl": "O(n)",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "O(n log n)",
+        "ladapan": 1
+      },
+      {
+        "noidungtl": "O(n²)",
+        "ladapan": 0
+      },
+      {
+        "noidungtl": "O(log n)",
+        "ladapan": 0
+      }
+    ]
+  }
+]

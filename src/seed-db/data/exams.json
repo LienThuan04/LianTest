@@ -1,0 +1,141 @@
+[
+  {
+    "key": "ltw-cuoiky",
+    "tende": "Thi cuối kỳ - Lập trình Web",
+    "mamonhoc": "LTW001",
+    "nguoitao": "gv001",
+    "loaide": 0,
+    "thoigianthi": 45,
+    "batdauOffsetHours": -1,
+    "ketthucOffsetHours": 168,
+    "hienthibailam": 1,
+    "xemdiemthi": 1,
+    "xemdapan": 1,
+    "troncauhoi": 1,
+    "trondapan": 1,
+    "nopbaichuyentab": 0,
+    "diem_tracnghiem": 10,
+    "diem_tuluan": 0,
+    "diem_dochieu": 0,
+    "nhom": [
+      "LTW-N01"
+    ],
+    "chuong": [
+      "Tổng quan Web và HTML",
+      "CSS và giao diện",
+      "JavaScript cơ bản",
+      "Lập trình phía máy chủ"
+    ],
+    "cauhoi": [
+      "ltw-mcq-01",
+      "ltw-mcq-02",
+      "ltw-mcq-03",
+      "ltw-mcq-04",
+      "ltw-mcq-05",
+      "ltw-mcq-06",
+      "ltw-mcq-08",
+      "ltw-mcq-09",
+      "ltw-mcq-11",
+      "ltw-mcq-12"
+    ]
+  },
+  {
+    "key": "csdl-tudong",
+    "tende": "Kiểm tra tự động - Cơ sở dữ liệu",
+    "mamonhoc": "CSDL01",
+    "nguoitao": "gv001",
+    "loaide": 1,
+    "thoigianthi": 30,
+    "batdauOffsetHours": -1,
+    "ketthucOffsetHours": 336,
+    "hienthibailam": 1,
+    "xemdiemthi": 1,
+    "xemdapan": 0,
+    "troncauhoi": 1,
+    "trondapan": 1,
+    "nopbaichuyentab": 1,
+    "diem_tracnghiem": 10,
+    "diem_tuluan": 0,
+    "diem_dochieu": 0,
+    "nhom": [
+      "CSDL-N01"
+    ],
+    "chuong": [
+      "Mô hình quan hệ",
+      "Ngôn ngữ SQL",
+      "Chuẩn hoá dữ liệu",
+      "Giao dịch và toàn vẹn"
+    ],
+    "socau": {
+      "mcq": {
+        "de": 2,
+        "tb": 2,
+        "kho": 1
+      }
+    }
+  },
+  {
+    "key": "ltw-giuaky",
+    "tende": "Kiểm tra giữa kỳ - Lập trình Web",
+    "mamonhoc": "LTW001",
+    "nguoitao": "gv001",
+    "loaide": 0,
+    "thoigianthi": 30,
+    "batdauOffsetHours": -336,
+    "ketthucOffsetHours": -334,
+    "hienthibailam": 1,
+    "xemdiemthi": 1,
+    "xemdapan": 1,
+    "troncauhoi": 0,
+    "trondapan": 0,
+    "nopbaichuyentab": 0,
+    "diem_tracnghiem": 8,
+    "diem_tuluan": 2,
+    "diem_dochieu": 0,
+    "nhom": [
+      "LTW-N01"
+    ],
+    "chuong": [
+      "Tổng quan Web và HTML",
+      "CSS và giao diện",
+      "Lập trình phía máy chủ"
+    ],
+    "cauhoi": [
+      "ltw-mcq-01",
+      "ltw-mcq-02",
+      "ltw-mcq-03",
+      "ltw-mcq-04",
+      "ltw-essay-01"
+    ],
+    "ketqua": [
+      {
+        "manguoidung": "sv001",
+        "socaudung": 4,
+        "thoigianlambai": 18,
+        "solanchuyentab": 0,
+        "baituluan": "GET dùng để lấy dữ liệu, tham số nằm trên URL, có thể được lưu bộ nhớ đệm và đánh dấu trang. POST dùng để gửi dữ liệu làm thay đổi trạng thái máy chủ, tham số nằm trong phần thân yêu cầu. Ví dụ: tìm kiếm sản phẩm dùng GET, đăng ký tài khoản dùng POST."
+      },
+      {
+        "manguoidung": "sv002",
+        "socaudung": 3,
+        "thoigianlambai": 25,
+        "solanchuyentab": 1,
+        "baituluan": "GET lấy dữ liệu còn POST gửi dữ liệu lên máy chủ. GET để lộ tham số trên thanh địa chỉ nên không nên dùng cho mật khẩu. POST an toàn hơn khi gửi biểu mẫu đăng nhập."
+      },
+      {
+        "manguoidung": "sv003",
+        "socaudung": 2,
+        "thoigianlambai": 30,
+        "solanchuyentab": 3,
+        "baituluan": "GET là lấy dữ liệu, POST là gửi dữ liệu."
+      },
+      {
+        "manguoidung": "sv004",
+        "socaudung": 4,
+        "thoigianlambai": 12,
+        "solanchuyentab": 0,
+        "baituluan": "Hai phương thức khác nhau ở mục đích và cách truyền tham số. GET là idempotent, gọi nhiều lần cho cùng kết quả; POST không idempotent nên gọi lại có thể tạo trùng bản ghi. Dùng GET cho trang danh sách, POST cho biểu mẫu thêm mới."
+      }
+    ]
+  }
+]

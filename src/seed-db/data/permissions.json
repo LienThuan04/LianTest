@@ -1,0 +1,337 @@
+[
+  {
+    "manhomquyen": 1,
+    "chucnang": "cauhoi",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "cauhoi",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "cauhoi",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "cauhoi",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "chuong",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "chuong",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "chuong",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "chuong",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "dethi",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "dethi",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "dethi",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "dethi",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "hocphan",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "hocphan",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "hocphan",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "hocphan",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "nguoidung",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "nguoidung",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "nguoidung",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "nguoidung",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 1,
+    "chucnang": "xem_monhoc",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 2,
+    "chucnang": "tghocphan",
+    "hanhdong": "join"
+  },
+  {
+    "manhomquyen": 2,
+    "chucnang": "tgthi",
+    "hanhdong": "join"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "cauhoi",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "cauhoi",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "cauhoi",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "cauhoi",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "chuong",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "chuong",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "chuong",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "chuong",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "dethi",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "dethi",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "dethi",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "dethi",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "hocphan",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "hocphan",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "hocphan",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "hocphan",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "monhoc",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "monhoc",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "monhoc",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "monhoc",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "namhoc",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "namhoc",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "namhoc",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "namhoc",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nguoidung",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nguoidung",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nguoidung",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nguoidung",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nhomquyen",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nhomquyen",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nhomquyen",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "nhomquyen",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "phancong",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "phancong",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "phancong",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "phancong",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongbao",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongbao",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongbao",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongbao",
+    "hanhdong": "view"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongke",
+    "hanhdong": "create"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongke",
+    "hanhdong": "delete"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongke",
+    "hanhdong": "update"
+  },
+  {
+    "manhomquyen": 3,
+    "chucnang": "thongke",
+    "hanhdong": "view"
+  }
+]

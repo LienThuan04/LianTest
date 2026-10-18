@@ -5,7 +5,7 @@
 //   2. script một lần `scripts/seed-demo.cjs` (require bản build trong `dist/`).
 //
 // Các khoá tự tăng (manamhoc/mahocky/machuong/macauhoi/madv/manhom/made) được tạo tuần
-// tự rồi tra ngược qua Map theo `key`/tên khai báo trong `exam-demo.data.ts` — nhờ vậy
+// tự rồi tra ngược qua Map theo `key`/tên khai báo trong `data/*.json` — nhờ vậy
 // file dữ liệu không phải hardcode id.
 //
 // KHÔNG bọc toàn bộ trong 1 $transaction: dữ liệu khá nhiều và kết nối qua Prisma
@@ -13,18 +13,17 @@
 // chấp nhận ghi tuần tự, có thể dọn bằng `clearExamDemo` rồi chạy lại.
 
 import { PrismaClient } from '@prisma/client';
-import {
-  demoCauHoi,
-  demoDeThi,
-  demoDoanVan,
-  demoMonHoc,
-  demoNamHoc,
-  demoNhom,
-  demoPhanCong,
+import { loadSeedData } from '../seed-data.loader';
+import { seedExamTimes } from '../seed-exam-times';
+import type {
   IDemoDeThi,
-} from '@/seed-db/seed/exam-demo.data';
+  IDemoSeedData,
+  ISeedDataset,
+} from './seed-data.types';
 
 export interface ISeedDemoOptions {
+  /** A dataset prevalidated by loadSeedData, e.g. before explicit clear-and-seed. */
+  dataset?: ISeedDataset;
   /** Hàm ghi log (mặc định `console.log`). */
   log?: (message: string) => void;
   /** Bỏ qua kiểm tra "DB đã có dữ liệu nghiệp vụ" (dùng ngay sau clearExamDemo). */
@@ -100,6 +99,18 @@ export async function seedExamDemo(
   prisma: PrismaClient,
   opts: ISeedDemoOptions = {},
 ): Promise<ISeedDemoResult> {
+  const dataset = opts.dataset ?? loadSeedData({ includeDemo: true });
+  if (!dataset.demo) throw new Error('Demo seed data was not loaded.');
+  const referenceTime = dataset.referenceTime ?? Date.now();
+  const {
+    academicYears: demoNamHoc,
+    subjects: demoMonHoc,
+    assignments: demoPhanCong,
+    groups: demoNhom,
+    questions: demoCauHoi,
+    readingPassages: demoDoanVan,
+    exams: demoDeThi,
+  } = dataset.demo;
   const log = opts.log ?? ((m: string) => console.log(m));
   const empty: ISeedDemoResult = {
     skipped: true,
@@ -129,13 +140,13 @@ export async function seedExamDemo(
     }
   }
 
-  // Người dùng phải được seed trước (exam-sample.ts) vì nhóm/phân công/bài làm đều
-  // trỏ tới id cố định. FK để scalar nên DB không báo lỗi — phải tự cảnh báo.
-  await canhBaoThieuNguoiDung(prisma, log);
+  // Người dùng phải được seed trước (data/users.json) vì nhóm/phân công/bài làm đều
+  // All referenced users must exist before writing any demo rows.
+  await assertDemoUsersExist(prisma, dataset.demo);
 
   // ── 1. Năm học + học kỳ ────────────────────────────────────────────────────
   const namhocIds = new Map<string, number>();
-  const hockyIds = new Map<string, number>(); // `${tennamhoc}#${sohocky}`
+  const hockyIds = new Map<string, number>();
   for (const y of demoNamHoc) {
     const nh = await prisma.namHoc.create({
       data: { tennamhoc: y.tennamhoc, trangthai: 1 },
@@ -145,13 +156,13 @@ export async function seedExamDemo(
       const hk = await prisma.hocKy.create({
         data: { tenhocky: `Học kỳ ${i}`, manamhoc: nh.manamhoc, sohocky: i },
       });
-      hockyIds.set(`${y.tennamhoc}#${i}`, hk.mahocky);
+      hockyIds.set(JSON.stringify([y.tennamhoc, i]), hk.mahocky);
     }
   }
   log(`Năm học: ${namhocIds.size}, học kỳ: ${hockyIds.size}.`);
 
   // ── 2. Môn học + chương ────────────────────────────────────────────────────
-  const chuongIds = new Map<string, number>(); // `${mamonhoc}#${tenchuong}`
+  const chuongIds = new Map<string, number>();
   for (const m of demoMonHoc) {
     await prisma.monHoc.create({
       data: {
@@ -167,11 +178,11 @@ export async function seedExamDemo(
       const c = await prisma.chuong.create({
         data: { tenchuong: ten, mamonhoc: m.mamonhoc, trangthai: 1 },
       });
-      chuongIds.set(`${m.mamonhoc}#${ten}`, c.machuong);
+      chuongIds.set(JSON.stringify([m.mamonhoc, ten]), c.machuong);
     }
   }
   const machuongOf = (mamonhoc: string, tenchuong: string): number => {
-    const id = chuongIds.get(`${mamonhoc}#${tenchuong}`);
+    const id = chuongIds.get(JSON.stringify([mamonhoc, tenchuong]));
     if (id == null) {
       throw new Error(
         `Không tìm thấy chương "${tenchuong}" của môn ${mamonhoc}.`,
@@ -183,7 +194,7 @@ export async function seedExamDemo(
 
   // ── 3. Phân công giảng dạy ─────────────────────────────────────────────────
   const mahockyOf = (tennamhoc: string, sohocky: number): number => {
-    const id = hockyIds.get(`${tennamhoc}#${sohocky}`);
+    const id = hockyIds.get(JSON.stringify([tennamhoc, sohocky]));
     if (id == null) {
       throw new Error(
         `Không tìm thấy học kỳ ${sohocky} của năm học ${tennamhoc}.`,
@@ -315,6 +326,7 @@ export async function seedExamDemo(
   let soKetQua = 0;
   for (const t of demoDeThi) {
     soKetQua += await taoDeThi(prisma, t, {
+      referenceTime,
       log,
       machuongOf,
       nhomIds,
@@ -339,6 +351,7 @@ export async function seedExamDemo(
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface ITaoDeThiCtx {
+  referenceTime: number;
   log: (message: string) => void;
   machuongOf: (mamonhoc: string, tenchuong: string) => number;
   nhomIds: Map<string, number>;
@@ -355,8 +368,7 @@ async function taoDeThi(
   t: IDemoDeThi,
   ctx: ITaoDeThiCtx,
 ): Promise<number> {
-  const now = Date.now();
-  const gio = (h: number) => new Date(now + h * 3600 * 1000);
+  const times = seedExamTimes(t, undefined, ctx.referenceTime);
   const machuong = t.chuong.map((ten) => ctx.machuongOf(t.mamonhoc, ten));
 
   const created = await prisma.deThi.create({
@@ -365,8 +377,8 @@ async function taoDeThi(
       nguoitao: t.nguoitao,
       tende: t.tende,
       thoigianthi: t.thoigianthi,
-      thoigianbatdau: gio(t.batdauOffsetHours),
-      thoigianketthuc: gio(t.ketthucOffsetHours),
+      thoigianbatdau: times.start,
+      thoigianketthuc: times.end,
       hienthibailam: t.hienthibailam,
       xemdiemthi: t.xemdiemthi,
       xemdapan: t.xemdapan,
@@ -432,7 +444,7 @@ async function taoDeThi(
   await taoThongBaoDeThi(prisma, made, t, manhom);
 
   if (!t.ketqua?.length) return 0;
-  return taoKetQuaMau(prisma, made, t, macauhoi, gio(t.batdauOffsetHours));
+  return taoKetQuaMau(prisma, made, t, macauhoi, times);
 }
 
 /**
@@ -533,7 +545,7 @@ async function taoKetQuaMau(
   made: number,
   t: IDemoDeThi,
   macauhoi: number[],
-  batdau: Date,
+  times: ReturnType<typeof seedExamTimes>,
 ): Promise<number> {
   // Nạp loại câu + đáp án để biết chọn đáp án đúng/sai cho từng câu.
   const cauhoi = await prisma.cauHoi.findMany({
@@ -560,7 +572,7 @@ async function taoKetQuaMau(
   const cauChamTuDong = macauhoi.filter((id) => loaiOf.get(id) !== 'essay');
 
   let dem = 0;
-  for (const kq of t.ketqua ?? []) {
+  for (const [index, kq] of (t.ketqua ?? []).entries()) {
     const dungIds = new Set(cauChamTuDong.slice(0, kq.socaudung));
     const dungMcq = cauTracNghiem.filter((id) => dungIds.has(id)).length;
     const dungDocHieu = cauDocHieu.filter((id) => dungIds.has(id)).length;
@@ -574,7 +586,7 @@ async function taoKetQuaMau(
         100
       : 0;
 
-    const ketthuc = new Date(batdau.getTime() + kq.thoigianlambai * 60 * 1000);
+    const ketthuc = times.results[index];
     const created = await prisma.ketQua.create({
       data: {
         made,
@@ -582,7 +594,7 @@ async function taoKetQuaMau(
         diemthi: diemTracNghiem + diemDocHieu,
         diem_dochieu: diemDocHieu,
         diem_tuluan: 0,
-        thoigianvaothi: batdau,
+        thoigianvaothi: times.start,
         thoigianketthuc: ketthuc,
         // Cột lưu SỐ GIÂY làm bài (submit tính bằng giây), dữ liệu mẫu khai theo phút.
         thoigianlambai: kq.thoigianlambai * 60,
@@ -621,18 +633,20 @@ async function taoKetQuaMau(
   return dem;
 }
 
-/** Cảnh báo (không chặn) nếu thiếu người dùng mà dữ liệu mẫu tham chiếu tới. */
-async function canhBaoThieuNguoiDung(
+/** Reject missing database users before writing or clearing demo data. */
+export async function assertDemoUsersExist(
   prisma: PrismaClient,
-  log: (message: string) => void,
+  data: IDemoSeedData,
 ): Promise<void> {
   const can = new Set<string>();
-  for (const p of demoPhanCong) can.add(p.manguoidung);
-  for (const g of demoNhom) {
+  for (const p of data.assignments) can.add(p.manguoidung);
+  for (const q of data.questions) can.add(q.nguoitao);
+  for (const passage of data.readingPassages) can.add(passage.nguoitao);
+  for (const g of data.groups) {
     can.add(g.giangvien);
     for (const sv of g.sinhvien) can.add(sv);
   }
-  for (const t of demoDeThi) {
+  for (const t of data.exams) {
     can.add(t.nguoitao);
     for (const kq of t.ketqua ?? []) can.add(kq.manguoidung);
   }
@@ -643,9 +657,8 @@ async function canhBaoThieuNguoiDung(
   });
   const thieu = [...can].filter((id) => !co.some((u) => u.id === id));
   if (thieu.length) {
-    log(
-      `⚠️  Thiếu ${thieu.length} người dùng mà dữ liệu mẫu tham chiếu: ${thieu.join(', ')}. ` +
-        `Hãy seed exam-sample.ts trước (SEED_DB=true hoặc scripts/seed-exam.cjs).`,
+    throw new Error(
+      `Missing seed users in the database: ${thieu.join(', ')}. Run scripts/seed-exam.cjs first; no demo rows were written.`,
     );
   }
 }

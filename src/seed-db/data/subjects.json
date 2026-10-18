@@ -1,0 +1,52 @@
+[
+  {
+    "mamonhoc": "LTW001",
+    "tenmonhoc": "Lập trình Web",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Tổng quan Web và HTML",
+      "CSS và giao diện",
+      "JavaScript cơ bản",
+      "Lập trình phía máy chủ"
+    ]
+  },
+  {
+    "mamonhoc": "CSDL01",
+    "tenmonhoc": "Cơ sở dữ liệu",
+    "sotinchi": 3,
+    "sotietlythuyet": 45,
+    "sotietthuchanh": 15,
+    "chuong": [
+      "Mô hình quan hệ",
+      "Ngôn ngữ SQL",
+      "Chuẩn hoá dữ liệu",
+      "Giao dịch và toàn vẹn"
+    ]
+  },
+  {
+    "mamonhoc": "MMT001",
+    "tenmonhoc": "Mạng máy tính",
+    "sotinchi": 3,
+    "sotietlythuyet": 45,
+    "sotietthuchanh": 0,
+    "chuong": [
+      "Mô hình OSI và TCP/IP",
+      "Tầng mạng và địa chỉ IP",
+      "Tầng giao vận"
+    ]
+  },
+  {
+    "mamonhoc": "CTDL01",
+    "tenmonhoc": "Cấu trúc dữ liệu và giải thuật",
+    "sotinchi": 4,
+    "sotietlythuyet": 45,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Danh sách và ngăn xếp",
+      "Cây và bảng băm",
+      "Sắp xếp và tìm kiếm"
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "manhomquyen": 1,
+    "tennhomquyen": "Giáo Viên"
+  },
+  {
+    "manhomquyen": 2,
+    "tennhomquyen": "Sinh Viên"
+  },
+  {
+    "manhomquyen": 3,
+    "tennhomquyen": "Admin"
+  }
+]

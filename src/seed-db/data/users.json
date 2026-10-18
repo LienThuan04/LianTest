@@ -1,0 +1,80 @@
+[
+  {
+    "id": "admin",
+    "email": "admin@liantest.vn",
+    "hoten": "Quản trị viên",
+    "manhomquyen": 3
+  },
+  {
+    "id": "gv001",
+    "email": "gv001@liantest.vn",
+    "hoten": "Trần Minh Khoa",
+    "manhomquyen": 1
+  },
+  {
+    "id": "gv002",
+    "email": "gv002@liantest.vn",
+    "hoten": "Phạm Thị Lan",
+    "manhomquyen": 1
+  },
+  {
+    "id": "sv001",
+    "email": "sv001@liantest.vn",
+    "hoten": "Nguyễn Văn An",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv002",
+    "email": "sv002@liantest.vn",
+    "hoten": "Lê Thị Bình",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv003",
+    "email": "sv003@liantest.vn",
+    "hoten": "Trần Quốc Cường",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv004",
+    "email": "sv004@liantest.vn",
+    "hoten": "Phạm Thùy Dung",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv005",
+    "email": "sv005@liantest.vn",
+    "hoten": "Hoàng Minh Đức",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv006",
+    "email": "sv006@liantest.vn",
+    "hoten": "Vũ Thị Giang",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv007",
+    "email": "sv007@liantest.vn",
+    "hoten": "Đỗ Hoàng Hải",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv008",
+    "email": "sv008@liantest.vn",
+    "hoten": "Bùi Thu Hương",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv009",
+    "email": "sv009@liantest.vn",
+    "hoten": "Ngô Gia Khánh",
+    "manhomquyen": 2
+  },
+  {
+    "id": "sv010",
+    "email": "sv010@liantest.vn",
+    "hoten": "Đặng Thảo Linh",
+    "manhomquyen": 2
+  }
+]

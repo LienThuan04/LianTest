@@ -8,12 +8,14 @@
 //
 // YÊU CẦU: chạy `pnpm run build` trước (script nạp bản build trong `dist/`), và người
 // dùng mẫu phải có sẵn (SEED_DB=true lúc boot, hoặc `node scripts/seed-exam.cjs`).
-// Logic này trùng với SeedDbService khi SEED_DEMO_DATA=true.
+// Dùng chung hàm seed với SeedDbService khi SEED_DEMO_DATA=true.
 require('dotenv/config');
 const { createPrisma } = require('./prisma-client.cjs');
+const { loadSeedData } = require('../dist/src/seed-db/seed-data.loader.js');
 const {
   seedExamDemo,
   clearExamDemo,
+  assertDemoUsersExist,
 } = require('../dist/src/seed-db/seed/exam-demo.seeder.js');
 
 (async () => {
@@ -22,17 +24,22 @@ const {
   const clearOnly = args.includes('--clear-only');
   const force = args.includes('--force') || doClear;
 
+  // Invalid editable data must fail before a clear-and-seed can delete anything.
+  const dataset = clearOnly ? undefined : loadSeedData({ includeDemo: true });
   const prisma = createPrisma();
   try {
+    if (doClear && !clearOnly) await assertDemoUsersExist(prisma, dataset.demo);
     if (doClear) await clearExamDemo(prisma);
     if (clearOnly) {
       console.log('✅ Đã xoá dữ liệu mẫu nghiệp vụ.');
       return;
     }
 
-    const r = await seedExamDemo(prisma, { force });
+    const r = await seedExamDemo(prisma, { force, dataset });
     if (r.skipped) {
-      console.log('⏭️  Bỏ qua (DB đã có dữ liệu nghiệp vụ). Dùng --clear để seed lại.');
+      console.log(
+        '⏭️  Bỏ qua (DB đã có dữ liệu nghiệp vụ). Dùng --clear để seed lại.',
+      );
       return;
     }
     console.log(
@@ -45,4 +52,7 @@ const {
   } finally {
     await prisma.$disconnect();
   }
-})();
+})().catch((error) => {
+  console.error(error.message);
+  process.exitCode = 1;
+});

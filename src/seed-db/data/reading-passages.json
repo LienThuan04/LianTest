@@ -1,0 +1,79 @@
+[
+  {
+    "key": "ltw-dv-01",
+    "mamonhoc": "LTW001",
+    "chuong": "Lập trình phía máy chủ",
+    "tieude": "Giao thức HTTP",
+    "nguoitao": "gv001",
+    "dokho": 2,
+    "noidung": "HTTP (HyperText Transfer Protocol) là giao thức ở tầng ứng dụng, dùng để trao đổi dữ liệu giữa trình duyệt và máy chủ web. HTTP hoạt động theo mô hình yêu cầu - phản hồi: trình duyệt gửi một yêu cầu gồm phương thức, đường dẫn, các tiêu đề (header) và phần thân tuỳ chọn; máy chủ trả về một phản hồi gồm mã trạng thái, các tiêu đề và nội dung. Một đặc điểm quan trọng của HTTP là phi trạng thái (stateless): mỗi yêu cầu độc lập với yêu cầu trước đó, máy chủ không tự ghi nhớ ngữ cảnh của phiên làm việc. Để duy trì trạng thái đăng nhập, các ứng dụng web phải dùng thêm cơ chế như cookie, session hoặc token. HTTPS là phiên bản HTTP chạy trên kênh đã được mã hoá bằng TLS, giúp bảo vệ dữ liệu khỏi bị nghe lén và sửa đổi trên đường truyền.",
+    "cauhoi": [
+      {
+        "key": "ltw-dv-01-c1",
+        "noidung": "Theo đoạn văn, HTTP hoạt động theo mô hình nào?",
+        "dapan": [
+          {
+            "noidungtl": "Ngang hàng (peer-to-peer)",
+            "ladapan": 0
+          },
+          {
+            "noidungtl": "Yêu cầu - phản hồi",
+            "ladapan": 1
+          },
+          {
+            "noidungtl": "Xuất bản - đăng ký",
+            "ladapan": 0
+          },
+          {
+            "noidungtl": "Quảng bá (broadcast)",
+            "ladapan": 0
+          }
+        ]
+      },
+      {
+        "key": "ltw-dv-01-c2",
+        "noidung": "Đặc điểm \"phi trạng thái\" của HTTP được hiểu là gì?",
+        "dapan": [
+          {
+            "noidungtl": "Máy chủ không lưu ngữ cảnh giữa các yêu cầu",
+            "ladapan": 1
+          },
+          {
+            "noidungtl": "Máy chủ không trả về mã trạng thái",
+            "ladapan": 0
+          },
+          {
+            "noidungtl": "Trình duyệt không lưu được cookie",
+            "ladapan": 0
+          },
+          {
+            "noidungtl": "Kết nối luôn bị ngắt sau 30 giây",
+            "ladapan": 0
+          }
+        ]
+      },
+      {
+        "key": "ltw-dv-01-c3",
+        "noidung": "Theo đoạn văn, HTTPS khác HTTP ở điểm nào?",
+        "dapan": [
+          {
+            "noidungtl": "Dùng phương thức khác hoàn toàn",
+            "ladapan": 0
+          },
+          {
+            "noidungtl": "Không cần máy chủ web",
+            "ladapan": 0
+          },
+          {
+            "noidungtl": "Chạy trên kênh đã mã hoá bằng TLS",
+            "ladapan": 1
+          },
+          {
+            "noidungtl": "Chỉ hoạt động trong mạng nội bộ",
+            "ladapan": 0
+          }
+        ]
+      }
+    ]
+  }
+]

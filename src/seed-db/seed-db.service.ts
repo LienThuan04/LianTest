@@ -2,14 +2,10 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { errorMessage } from '@/common/utils/text.util';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import {
-  examRoles,
-  examResources,
-  examPermissions,
-  examUsers,
-} from '@/seed-db/seed/exam-sample';
+import { loadSeedData } from './seed-data.loader';
+import { seedExamBase } from './seed/seed-base.seeder';
+import type { IBaseSeedData, ISeedDataset } from './seed/seed-data.types';
 import { ConfigService } from '@nestjs/config';
-import { generatePasswordHash } from '@/lib/bcrypt/bcrypt';
 import { clearExamDemo, seedExamDemo } from '@/seed-db/seed/exam-demo.seeder';
 
 @Injectable()
@@ -21,96 +17,30 @@ export class SeedDbService implements OnModuleInit {
 
   private readonly logger = new Logger(SeedDbService.name);
 
-  // ─── Hệ thi OnTest (nguoidung / nhomquyen / chitietquyen / danhmucchucnang) ───
+  // ─── Hệ thi LianTest (nguoidung / nhomquyen / chitietquyen / danhmucchucnang) ───
 
-  private async seedExamResources() {
-    const existing = await this.prisma.danhMucChucNang.count();
-    if (existing > 0) {
-      this.logger.warn(`danhmucchucnang đã có ${existing} bản ghi. Bỏ qua.`);
-      return;
-    }
-    const result = await this.prisma.danhMucChucNang.createMany({
-      data: examResources,
-      skipDuplicates: true,
-    });
-    this.logger.log(`Seeded ${result.count} chức năng (danhmucchucnang).`);
-  }
-
-  private async seedExamRoles() {
-    const existing = await this.prisma.nhomQuyen.count();
-    if (existing > 0) {
-      this.logger.warn(`nhomquyen đã có ${existing} bản ghi. Bỏ qua.`);
-      return;
-    }
-    const result = await this.prisma.nhomQuyen.createMany({
-      data: examRoles,
-      skipDuplicates: true,
-    });
-    this.logger.log(`Seeded ${result.count} nhóm quyền (nhomquyen).`);
-  }
-
-  private async seedExamPermissions() {
-    const existing = await this.prisma.chiTietQuyen.count();
-    if (existing > 0) {
-      this.logger.warn(`chitietquyen đã có ${existing} bản ghi. Bỏ qua.`);
-      return;
-    }
-    const result = await this.prisma.chiTietQuyen.createMany({
-      data: examPermissions,
-      skipDuplicates: true,
-    });
-    this.logger.log(`Seeded ${result.count} chi tiết quyền (chitietquyen).`);
-  }
-
-  private async seedExamUsers() {
-    const existing = await this.prisma.nguoiDung.count();
-    if (existing > 0) {
-      this.logger.warn(`nguoidung đã có ${existing} bản ghi. Bỏ qua.`);
-      return;
-    }
-    const saltRounds = parseInt(
-      this.configService.get<string>('BCRYPT_SALT_ROUNDS') || '10',
-      10,
-    );
-    const defaultPassword =
-      this.configService.get<string>('DEFAULT_PASSWORD') || '123456';
-    const data = await Promise.all(
-      examUsers.map(async (u) => ({
-        id: u.id,
-        email: u.email,
-        hoten: u.hoten,
-        manhomquyen: u.manhomquyen,
-        matkhau: await generatePasswordHash(defaultPassword, saltRounds),
-        trangthai: 1,
-      })),
-    );
-    const result = await this.prisma.nguoiDung.createMany({
+  private async seedExam(data: IBaseSeedData) {
+    await seedExamBase(this.prisma, {
       data,
-      skipDuplicates: true,
+      password: this.configService.get<string>('DEFAULT_PASSWORD') || '123456',
+      saltRounds: Number.parseInt(
+        this.configService.get<string>('BCRYPT_SALT_ROUNDS') || '10',
+        10,
+      ),
+      skipExistingTables: true,
+      log: (message) => this.logger.log(message),
     });
-    this.logger.log(
-      `Seeded ${result.count} người dùng (nguoidung). Mật khẩu mặc định: "${defaultPassword}".`,
-    );
   }
-
-  private async seedExam() {
-    // Thứ tự dependency: resource + role trước → permission + user sau.
-    await this.seedExamResources();
-    await this.seedExamRoles();
-    await this.seedExamPermissions();
-    await this.seedExamUsers();
-  }
-
-  // ─── Dữ liệu mẫu NGHIỆP VỤ (monhoc/phancong/nhom/cauhoi/dethi) — Phase 7 slice 2 ───
 
   /**
    * Ghi dữ liệu mẫu nghiệp vụ. Chạy SAU seedExam() vì nhóm/phân công/bài làm đều trỏ
-   * tới id người dùng cố định trong `exam-sample.ts`.
+   * tới id người dùng cố định trong `data/users.json`.
    * `force` = true khi vừa clear xong (bỏ kiểm tra "DB đã có dữ liệu").
    */
-  private async seedExamDemoData(force: boolean) {
+  private async seedExamDemoData(force: boolean, data: ISeedDataset) {
     const result = await seedExamDemo(this.prisma, {
       force,
+      dataset: data,
       log: (message) => this.logger.log(message),
     });
     if (result.skipped) return;
@@ -129,11 +59,20 @@ export class SeedDbService implements OnModuleInit {
   }
 
   async seed(seedDemo = false, force = false) {
+    const data = loadSeedData({ includeDemo: seedDemo });
+    await this.seedPrepared(data, seedDemo, force);
+  }
+
+  private async seedPrepared(
+    data: ISeedDataset,
+    seedDemo: boolean,
+    force: boolean,
+  ) {
     try {
       this.logger.log('Starting database seeding...');
-      // Hệ thi OnTest
-      await this.seedExam();
-      if (seedDemo) await this.seedExamDemoData(force);
+      // Hệ thi LianTest
+      await this.seedExam(data.base);
+      if (seedDemo) await this.seedExamDemoData(force, data);
 
       this.logger.log('Database seeding completed successfully.');
     } catch (error) {
@@ -146,7 +85,7 @@ export class SeedDbService implements OnModuleInit {
 
   async clear() {
     try {
-      // Hệ thi OnTest — xoá theo thứ tự khoá ngoại
+      // Hệ thi LianTest — xoá theo thứ tự khoá ngoại
       await this.prisma.chiTietQuyen.deleteMany();
       await this.prisma.nguoiDung.deleteMany();
       await this.prisma.nhomQuyen.deleteMany();
@@ -166,7 +105,7 @@ export class SeedDbService implements OnModuleInit {
     // Chỉ xoá khi được bật rõ ràng. Thiếu biến/sai chính tả phải giữ dữ liệu.
     const shouldClear = this.configService.get<string>('CLEAR_DB') === 'true';
     // Dữ liệu mẫu nghiệp vụ là TUỲ CHỌN (mặc định TẮT) — chỉ bật khi muốn có sẵn
-    // môn học/nhóm/câu hỏi/đề thi để chạy thử. Xem `seed/exam-demo.data.ts`.
+    // môn học/nhóm/câu hỏi/đề thi để chạy thử. Xem `data/README.md`.
     const shouldSeedDemo =
       this.configService.get<string>('SEED_DEMO_DATA') === 'true';
 
@@ -177,6 +116,7 @@ export class SeedDbService implements OnModuleInit {
 
     if (shouldSeed) {
       try {
+        const data = loadSeedData({ includeDemo: shouldSeedDemo });
         if (shouldClear) {
           // Xoá dữ liệu nghiệp vụ TRƯỚC bảng người dùng: clear() xoá nguoidung nên
           // nếu giữ lại nhóm/đề/bài làm thì chúng thành bản ghi mồ côi (FK dạng
@@ -186,7 +126,7 @@ export class SeedDbService implements OnModuleInit {
           await this.clear();
           this.logger.log('Database cleared before seeding.');
         }
-        await this.seed(shouldSeedDemo, shouldClear);
+        await this.seedPrepared(data, shouldSeedDemo, shouldClear);
       } catch (error) {
         this.logger.error(`Seeding failed: ${errorMessage(error)}`);
         // Có thể throw error để app không start nếu seed thất bại

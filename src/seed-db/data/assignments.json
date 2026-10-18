@@ -1,0 +1,56 @@
+[
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "admin",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "admin",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "admin",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "admin",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  }
+]
