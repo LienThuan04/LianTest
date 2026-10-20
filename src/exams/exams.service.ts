@@ -1030,7 +1030,7 @@ export class ExamsService {
     const kq = await this.prisma.ketQua.findFirst({
       where: { made, manguoidung: userId },
     });
-    return (kq as unknown as IKetQuaRow) ?? null;
+    return kq;
   }
 
   /**

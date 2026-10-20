@@ -1,15 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import nodemailer from 'nodemailer';
+import nodemailer, {
+  type SMTPSentMessageInfo,
+  type Transporter,
+} from 'nodemailer';
 import ejs from 'ejs';
 import path from 'path';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  // Lấy đúng kiểu transporter SMTP mà createTransport trả về — `nodemailer.Transporter`
-  // trần có generic mặc định `any` nên `info.messageId` mất kiểu.
-  private readonly transporter: ReturnType<typeof nodemailer.createTransport>;
+  // Khai báo kết quả SMTP để sendMail giữ kiểu của messageId.
+  private readonly transporter: Transporter<SMTPSentMessageInfo>;
   private readonly appName: string;
   private readonly supportEmail: string;
   private readonly fromEmail: string;

@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger/dist/decorators/api-property.decorator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 
