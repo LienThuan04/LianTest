@@ -4,6 +4,10 @@
   "description": "This is a base authentication project built with NestJS, Prisma, and Supabase. It provides a solid foundation for implementing user authentication and authorization features in your applications. The project includes features such as JWT-based authentication, password hashing, and integration with Supabase for database management.",
   "author": "LianHarman(LienThuan04)",
   "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": "24.x"
+  },
   "license": "UNLICENSED",
   "scripts": {
     "seed:check": "node scripts/check-seed-data.cjs",
@@ -19,7 +23,9 @@
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
     "test:cov": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "test:debug": "node --experimental-vm-modules --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/jest/bin/jest.js --runInBand",
-    "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-e2e.json"
+    "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config ./test/jest-e2e.json",
+    "test:runtime": "node --test test/runtime/*.test.cjs",
+    "test:smoke": "node scripts/smoke-runtime.cjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.2.0",
