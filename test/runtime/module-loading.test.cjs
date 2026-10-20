@@ -2,12 +2,12 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const { resolve } = require('node:path');
+const { env: runtimeEnv = {} } = require('../../vercel.json');
 
-test('compiled Nest application loads when require(ESM) is disabled', () => {
+test('compiled Nest application loads with the configured Vercel runtime options', () => {
   const result = spawnSync(
     process.execPath,
     [
-      '--no-experimental-require-module',
       '-e',
       `
         require('reflect-metadata');
@@ -21,7 +21,13 @@ test('compiled Nest application loads when require(ESM) is disabled', () => {
         console.log('Compiled dependency graph and decorator metadata loaded');
       `,
     ],
-    { cwd: resolve(__dirname, '../..'), encoding: 'utf8', timeout: 30_000 },
+    {
+      cwd: resolve(__dirname, '../..'), encoding: 'utf8', timeout: 30_000,
+      env: {
+        ...process.env,
+        NODE_OPTIONS: `--no-experimental-require-module ${runtimeEnv.NODE_OPTIONS || ''}`,
+      },
+    },
   );
 
   assert.equal(result.status, 0, result.error?.message || result.stderr);

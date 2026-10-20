@@ -5,6 +5,7 @@ const { createServer } = require('node:net');
 const { randomBytes } = require('node:crypto');
 const { setTimeout: delay } = require('node:timers/promises');
 const { resolve } = require('node:path');
+const { env: runtimeEnv = {} } = require('../vercel.json');
 
 async function main() {
   for (const key of ['RUNTIME_SMOKE_DATABASE_URL', 'RUNTIME_SMOKE_USER', 'RUNTIME_SMOKE_PASSWORD']) {
@@ -15,10 +16,11 @@ async function main() {
   const port = reservation.address().port;
   await new Promise((done) => reservation.close(done));
   const base = `http://127.0.0.1:${port}`;
-  const child = spawn(process.execPath, ['--no-experimental-require-module', 'dist/src/main.js'], {
+  const child = spawn(process.execPath, ['dist/src/main.js'], {
     cwd: resolve(__dirname, '..'),
     env: {
       ...process.env,
+      NODE_OPTIONS: `--no-experimental-require-module ${runtimeEnv.NODE_OPTIONS || ''}`,
       DATABASE_URL: process.env.RUNTIME_SMOKE_DATABASE_URL,
       PORT: String(port), HOST: '127.0.0.1', NODE_ENV: 'production', MODE: 'production',
       SEED_DB: 'false', CLEAR_DB: 'false', SEED_DEMO_DATA: 'false', EXPORT_SWAGGER_API_JSON: 'false',
