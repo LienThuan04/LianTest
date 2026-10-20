@@ -134,22 +134,22 @@ function showData(data) {
 
     html += `
       <tr>
-        <td class="text-center fs-sm"><strong>${
+        <td class="text-center fs-sm question-id-column"><strong>${
           question.macauhoi ?? ""
         }</strong></td>
 
-        <td class="fs-sm">
-          <div class="d-flex align-items-start gap-2">
+        <td class="fs-sm question-content-column">
+          <div class="question-summary d-flex flex-wrap align-items-start gap-2">
             <div class="question-preview">${contentHtml}</div>
             ${badge}
           </div>
           <div class="question-full d-none">${contentHtml}</div>
         </td>
 
-        <td class="d-none d-xl-table-cell fs-sm">${
+        <td class="d-none d-sm-table-cell fs-sm question-subject-column">${
           question.tenmonhoc ?? ""
         }</td>
-        <td class="d-none d-sm-table-cell fs-sm"><strong>${dokho}</strong></td>
+        <td class="d-none d-xl-table-cell fs-sm question-difficulty-column"><strong>${dokho}</strong></td>
 
         <td class="text-center col-action">
         

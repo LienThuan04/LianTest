@@ -47,7 +47,17 @@
 .page-test-schedule .modern-table tbody td { padding: 16px !important; }
 .page-test-schedule .modern-table tbody tr:hover { background: var(--color-chalk-canvas); }
 .page-test-schedule .modern-table td:first-child { min-width: 180px; }
-.page-question .question-content-column { max-width: 700px; width: 100%; }
+.page-question .question-table { table-layout: auto; }
+.page-question .question-table > thead th { white-space: nowrap; }
+.page-question .question-table > tbody > tr > td { overflow-wrap: normal; word-break: normal; }
+.page-question .question-table .question-id-column,
+.page-question .question-table .question-difficulty-column,
+.page-question .question-table .col-action { width: 1%; white-space: nowrap; }
+.page-question .question-table .question-content-column { min-width: 20rem; }
+.page-question .question-table .question-subject-column { min-width: 10rem; max-width: 16rem; }
+.page-question .question-table .question-preview { flex: 1 1 18rem; min-width: 0; overflow-wrap: anywhere; }
+.page-question .question-table .question-preview > :last-child { margin-bottom: 0; }
+.page-question .question-table .question-summary > .badge { flex-shrink: 0; white-space: nowrap; }
 @media (max-width: 767.98px) {
   .page-class-detail .content > .row:first-child > [class*="col-"], .page-test-detail .content .row > .col-6 { width: 100%; }
   .page-class-detail .content > .row:first-child > .d-flex { justify-content: flex-start !important; }
