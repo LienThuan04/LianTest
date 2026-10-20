@@ -2,7 +2,7 @@
 
 [Chỉ mục tài liệu](README.md) · [README tiếng Việt](../README.vi.md)
 
-Cập nhật: **18/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
+Cập nhật: **21/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
 dưới chỉ áp dụng cho phạm vi và môi trường được mô tả.
 
 ## Chức năng hiện có
@@ -15,6 +15,21 @@ thông báo, thống kê, nhập/xuất Excel và trang in PDF. Chi tiết modul
 Dữ liệu mẫu được đọc từ 11 file JSON ở `src/seed-db/data/`. Startup và CLI dùng
 chung loader/validation; seed mặc định tắt. `seed:check` chạy không cần DB sau build.
 Sửa JSON không tự cập nhật bản ghi đã tồn tại trong DB.
+
+## Cập nhật ngày 21/10/2026
+
+- Bảng `/question` chia độ rộng theo dữ liệu, giữ ID/độ khó/nút thao tác trên
+  một dòng và đồng bộ ẩn/hiện tiêu đề với dữ liệu cột theo kích thước màn hình.
+- `.env.example` đã bỏ các biến không còn được code hoặc script sử dụng,
+  gồm cấu hình Google OAuth cũ, refresh token, OTP, reset mật khẩu và Redis.
+- Hai API `POST /api/v1/email/test-email` và
+  `POST /api/v1/email/send-register-otp` yêu cầu đăng nhập qua JWT guard.
+
+Kiểm chứng đợt này: build, ESLint, **120/120 unit test** và **2/2 frontend test**
+đạt; template EJS và JavaScript trang câu hỏi hợp lệ. Bố cục bảng đã được kiểm
+tra bằng HTML/CSS của ứng dụng và dữ liệu mẫu trong Chrome, gồm nội dung dài,
+ID nhiều chữ số và các khung nhìn từ 500px đến 1422px. Chưa chạy lại E2E với
+DB/Storage/SMTP thực hoặc kiểm tra phiên đăng nhập trên trang `/question`.
 
 ## Kiểm chứng đã ghi nhận
 
