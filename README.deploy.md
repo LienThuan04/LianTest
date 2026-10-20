@@ -26,17 +26,18 @@ See the [Nest CLI compatibility issue](https://github.com/nestjs/nest-cli/issues
 and [Jest ESM documentation](https://jestjs.io/docs/ecmascript-modules).
 
 By repository convention, `pnpm-lock.yaml` and `pnpm-workspace.yaml` stay
-local and are ignored by Git. Hosted builds therefore use
-`--no-frozen-lockfile`. Dependency resolutions can change between deployments;
+local and are ignored by Git. The explicit pnpm install commands in this guide
+therefore use `--no-frozen-lockfile`. Vercel uses its framework defaults as
+described in section 4. Dependency resolutions can change between deployments;
 review build-script approval prompts when installing locally. If you decide
 to version a lockfile later, change the install command to use that lockfile
 with `--frozen-lockfile`.
 
-### Prepare build-script approvals for hosted installs
+### Prepare build-script approvals for pnpm installs
 
 pnpm 11 rejects an install when a dependency's build script has no approval
 decision. Since the root `pnpm-workspace.yaml` is ignored by this repository,
-Git deployments need a reviewed policy that they can copy into place.
+hosted pnpm installs need a reviewed policy that they can copy into place.
 
 The repository includes the reviewed decisions in
 [deploy/pnpm-build-policy.yaml](deploy/pnpm-build-policy.yaml).
@@ -110,7 +111,6 @@ Run the following checks before release:
 
 ```sh
 pnpm install --no-frozen-lockfile --prod=false
-pnpm exec prisma generate
 pnpm run build
 pnpm run lint
 pnpm test --runInBand
@@ -119,7 +119,8 @@ node --test test/frontend/*.test.cjs
 
 `--prod=false` keeps build tools available even when `NODE_ENV=production`.
 `pnpm run lint` includes automatic fixes, so review its changes before release.
-`prisma generate` creates application code; it does not apply database changes.
+The committed build script runs `prisma generate && nest build`, so building
+also generates Prisma Client. Client generation does not apply database changes.
 
 Apply committed migrations to the intended production database as a separate
 release step, using credentials configured for that target:
@@ -151,38 +152,45 @@ Import the GitHub repository, select the release branch, and configure:
 | Setting | Value for this repository |
 | --- | --- |
 | Framework Preset | `NestJS` |
-| Root Directory | `.` |
-| Production Branch | `NestJS`, unless you intentionally release from another branch |
-| Node.js Version | `24.x` |
-| Install Command | `cp deploy/pnpm-build-policy.yaml pnpm-workspace.yaml && npx --yes pnpm@11.22.0 install --no-frozen-lockfile --prod=false` |
-| Build Command | `npx --yes pnpm@11.22.0 exec prisma generate` |
-| Output Directory | Keep the framework preset default; do not override it with `dist`. |
+| Root Directory | `./` when the backend is at the repository root |
+| Build Command | Default (no override) |
+| Output Directory | Default (no override) |
+| Install Command | Default (no override) |
 
-Vercel handles NestJS compilation and routing. The custom build command above
-generates Prisma Client before Vercel bundles the backend. Configure all
-production environment variables before creating the production deployment.
-Preview deployments need their own variables and database target.
+Leave the Build Command, Output Directory, and Install Command override
+toggles disabled. If you previously entered custom values, restore the defaults.
+The committed `package.json` build script generates Prisma Client before
+compiling NestJS; no separate Prisma build-command override is needed.
 
-### Include runtime files
+Use `NestJS` as the Production Branch unless you intentionally release from
+another branch, and select Node.js `24.x`. Configure production environment
+variables before deploying. Preview deployments need their own variables and
+database target.
 
-The repository's [vercel.json](vercel.json) includes the runtime files:
+### Vercel configuration
+
+The repository's [vercel.json](vercel.json) explicitly selects the NestJS preset:
 
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "src/main.ts": {
-      "includeFiles": "{views/**,public/**,src/email/templates/**,src/seed-db/data/**}"
-    }
-  }
+  "framework": "nestjs"
 }
 ```
 
-The application reads its page templates, email templates, and static files
-relative to the project
-working directory. Packaging those files avoids missing-template and missing-
-asset failures. See Vercel's
-[Node backend file-inclusion example](https://github.com/vercel/vercel/blob/main/skills/vercel-cli/references/node-backends.md).
+Do not add the previous `functions["src/main.ts"]` configuration. Vercel CLI
+64.5.0 rejects that pattern with `unused_function`, even with the NestJS preset
+selected. The native builder detects `src/main.ts` itself; it does not require
+moving the application into an `api/` directory. See the
+[framework setting](https://vercel.com/docs/project-configuration/vercel-json#framework).
+
+The application reads page templates, email templates, and static files
+relative to the project working directory. Verify those resources using the
+smoke checks in section 8 after the deployment builds successfully.
+
+A local packaging check with CLI 64.5.0 on Windows included `views/`, but did
+not include `src/email/templates/` or `src/seed-db/data/`. Check these directories
+in the hosted function bundle before relying on email or startup seeding.
 
 Apply migrations separately, deploy, and complete the smoke checks below.
 For a linked Vercel CLI project, the equivalent production build/deploy flow is:
@@ -215,7 +223,7 @@ to a supported Node 24 release, such as the tested `24.19.0`.
 Use this **Build Command**:
 
 ```sh
-cp deploy/pnpm-build-policy.yaml pnpm-workspace.yaml && npx --yes pnpm@11.22.0 install --no-frozen-lockfile --prod=false && npx --yes pnpm@11.22.0 exec prisma generate && npx --yes pnpm@11.22.0 run build
+cp deploy/pnpm-build-policy.yaml pnpm-workspace.yaml && npx --yes pnpm@11.22.0 install --no-frozen-lockfile --prod=false && npx --yes pnpm@11.22.0 run build
 ```
 
 Use this **Start Command**:
@@ -241,7 +249,7 @@ release branch, and use the repository root as the service root.
 - Set `RAILPACK_INSTALL_CMD` to
   `cp deploy/pnpm-build-policy.yaml pnpm-workspace.yaml && npx --yes pnpm@11.22.0 install --no-frozen-lockfile --prod=false`.
 - Set the custom build command to
-  `npx --yes pnpm@11.22.0 exec prisma generate && npx --yes pnpm@11.22.0 run build`.
+  `npx --yes pnpm@11.22.0 run build`.
 - Set the start command to `node dist/src/main.js`.
 - Add the production environment variables, connect an accessible PostgreSQL
   database, and run migrations as a separate release/pre-deploy step.
@@ -312,7 +320,8 @@ does not currently provide a dedicated `/health` endpoint.
 | `defineConfig`, `PrismaClient`, or Prisma model types are missing | Align Prisma CLI/client versions, run `prisma generate`, then build again. |
 | Jest says an ESM module cannot be loaded | Use the repository test scripts, which enable VM modules, on Node 24.9+. |
 | Build succeeds but startup fails | Check `DATABASE_URL`, network access, JWT, Storage, and all SMTP variables, including `SUPPORT_EMAIL`. |
-| `Failed to lookup view` or missing email templates | Keep runtime files and the correct working directory; on Vercel, check `includeFiles`. |
+| Vercel reports `unused_function` for `src/main.ts` | Use the committed `vercel.json` with `framework: "nestjs"`; remove the old `functions` block and deploy the updated commit. |
+| `Failed to lookup view` or missing email templates | Check runtime files in the deployed bundle and the process working directory. |
 | Vercel returns `FUNCTION_PAYLOAD_TOO_LARGE` | Reduce the total request size below the provider limit or change the upload flow. |
 | No open port is detected | Start `dist/src/main.js` and allow the provider to supply `PORT`. |
 | Database tables do not exist | Apply committed migrations against the intended database before serving traffic. |

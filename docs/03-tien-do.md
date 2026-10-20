@@ -42,12 +42,23 @@ DB/Storage/SMTP thực hoặc kiểm tra phiên đăng nhập trên trang `/ques
 - Thêm [hướng dẫn production bằng tiếng Anh](../README.deploy.md) cho Vercel,
   Render, Railway và máy chủ Node.js, gồm biến môi trường, migration, tài nguyên
   runtime và cấu hình duyệt build script pnpm cho CI.
-- Thêm `vercel.json` đóng gói template/static và policy pnpm được duyệt ở
+- Thêm `vercel.json` chọn preset NestJS và policy pnpm được duyệt ở
   `deploy/pnpm-build-policy.yaml` để hosted build có thể cài dependency.
 
 Kiểm chứng sau khi chỉnh tương thích: build đạt; chế độ build/watch báo **0 lỗi**;
 ESLint đạt; **120/120 unit test** và **2/2 frontend test** đạt. Chưa thực hiện
 deployment lên nhà cung cấp hoặc chạy lại E2E với dịch vụ thật trong đợt này.
+
+Sửa cấu hình Vercel: bỏ `functions["src/main.ts"]`, khai báo `framework: "nestjs"`.
+Đã tái hiện `unused_function` bằng bộ nhận diện của CLI **64.5.0**, kể cả khi
+chọn preset NestJS; cấu hình mới qua bước nhận diện và chọn `@vercel/nestjs`.
+README đã đổi Build Command, Output Directory và Install Command về **Default**;
+script build chạy `prisma generate && nest build` và đã kiểm tra đạt.
+
+Builder NestJS đi kèm CLI 64.5.0 đã biên dịch và đóng gói được ứng dụng trên
+Windows với dependency có sẵn. Bundle thử có đủ 46 file `views/`, chưa có
+`src/email/templates/` và `src/seed-db/data/`; cần kiểm tra các tài nguyên này
+trên môi trường triển khai. Chưa xác nhận runtime hoặc deployment production.
 
 ## Kiểm chứng đã ghi nhận
 
