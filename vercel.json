@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nestjs",
+  "outputDirectory": "dist",
   "env": {
     "NODE_OPTIONS": "--experimental-require-module"
   }

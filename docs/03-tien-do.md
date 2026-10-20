@@ -62,6 +62,32 @@ trên môi trường triển khai. Chưa xác nhận runtime hoặc deployment p
 
 ## Kiểm chứng đã ghi nhận
 
+### Điều tra runtime Vercel ngày 21/10/2026
+
+- Log mới lúc 02:07 báo `Cannot find module '@/app.module'`: Vercel chọn
+  `src/main.ts` và biên dịch lại source mà không có bộ chuyển alias của Nest CLI.
+- Giữ nguyên import `@/` và cấu hình TypeScript; thêm `outputDirectory: "dist"`
+  vào `vercel.json` để Vercel đóng gói `dist/src/main.js` sau `nest build`.
+- Regression test tái hiện đúng lỗi alias với cấu hình cũ và nạp được dependency
+  của entrypoint cùng metadata DI với cấu hình mới. Native builder đóng gói thành
+  công: 6.576 file, đủ 46 view và 3 email template; chưa có JSON seed. Build,
+  ESLint, 120 unit test, 2 runtime test, 2 frontend test và smoke HTTP/auth với
+  PostgreSQL/PGlite riêng đều đạt. Chưa redeploy production.
+
+- Production đã build đúng commit `6eca7f9`, dùng runtime `nodejs24.x` và đã hết
+  `TS5101`. `dist/src/main.js` vẫn là CommonJS, NestJS 12 là ESM.
+- `NODE_OPTIONS=--experimental-require-module` có trong cấu hình nguồn nhưng
+  chưa có trong Project Settings hoặc danh sách môi trường deployment lúc kiểm tra.
+- Giữ alias `baseUrl` theo thay đổi của người dùng, kèm `ignoreDeprecations: "6.0"`.
+- Chuỗi npm ci/generate/build, ESLint, 120 unit test, 2 frontend test và regression
+  test module đều đạt. Smoke HTTP trên bản compile với PostgreSQL/PGlite riêng đã
+  kiểm tra trang public, EJS/static, đăng nhập JWT và trang cần xác thực.
+- Hai domain production vẫn trả 500 lúc kiểm tra. Người dùng chọn tự cập nhật
+  biến môi trường và redeploy; agent chưa thay đổi môi trường hoặc triển khai.
+
+Chi tiết commit, kiểm thử, giới hạn và các bước thao tác ở
+[báo cáo runtime Vercel](vercel-runtime-interop.md).
+
 | Phạm vi                      | Kết quả và điều kiện                                                                                                                            |
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | Build, lint, unit test       | Build/lint đạt; **120/120 unit test**, 9 suite                                                                                                  |

@@ -11,6 +11,7 @@ Cài đặt, biến môi trường, sơ đồ hoạt động và ảnh giao di�
 | [Quy ước phát triển](02-quy-uoc-va-cach-lam.md) | Cấu trúc module, route/response, quyền, DB và Git        |
 | [Trạng thái dự án](03-tien-do.md)               | Các kiểm chứng đã ghi nhận và phạm vi còn cần kiểm tra   |
 | [Triển khai production (EN)](../README.deploy.md) | Hướng dẫn Vercel, Render, Railway và máy chủ Node.js   |
+| [Runtime Vercel: CommonJS/ESM](vercel-runtime-interop.md) | Bằng chứng runtime, kiểm thử và cấu hình NODE_OPTIONS |
 | [Kiến trúc và module](04-kien-truc-module.md)   | Cấu trúc mã nguồn, hạ tầng, route và bảng dữ liệu        |
 | [Supabase Storage](05-luu-tru-file-supabase.md) | Upload, URL ảnh, avatar và dọn ảnh thay thế              |
 | [Phát triển và kiểm thử](06-so-tay-agent.md)    | Quy trình làm việc, fixture và kiểm tra bằng trình duyệt |

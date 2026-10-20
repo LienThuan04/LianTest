@@ -13,8 +13,10 @@ your computer is named `NestJS`.
 ## 1. Runtime and dependency versions
 
 - Use **Node.js 24.x**; the local verification environment uses **24.19.0**.
-- Use **pnpm 11.22.0** for the commands below. If pnpm is unavailable, replace
+- Use **pnpm 11.22.0** for pnpm commands below. If pnpm is unavailable, replace
   `pnpm` with `npx --yes pnpm@11.22.0`.
+- The committed `package-lock.json` also supports the clean npm verification
+  workflow in section 3.
 - Keep TypeScript on the declared **6.x** range. TypeScript 7.0 does not expose
   the compiler API required by the Nest CLI.
 - Keep Prisma CLI, `@prisma/client`, and `@prisma/adapter-pg` on compatible
@@ -27,11 +29,10 @@ and [Jest ESM documentation](https://jestjs.io/docs/ecmascript-modules).
 
 By repository convention, `pnpm-lock.yaml` and `pnpm-workspace.yaml` stay
 local and are ignored by Git. The explicit pnpm install commands in this guide
-therefore use `--no-frozen-lockfile`. Vercel uses its framework defaults as
-described in section 4. Dependency resolutions can change between deployments;
-review build-script approval prompts when installing locally. If you decide
-to version a lockfile later, change the install command to use that lockfile
-with `--frozen-lockfile`.
+therefore use `--no-frozen-lockfile`. For reproducible npm installs, use the
+committed `package-lock.json` with `npm ci`. Vercel uses its framework defaults
+as described in section 4. Review build-script approval prompts when installing
+locally.
 
 ### Prepare build-script approvals for pnpm installs
 
@@ -110,15 +111,18 @@ The current bootstrap reads `PORT`; `HOST` is used only in startup log messages.
 Run the following checks before release:
 
 ```sh
-pnpm install --no-frozen-lockfile --prod=false
-pnpm run build
-pnpm run lint
-pnpm test --runInBand
+npm ci
+npx prisma generate
+npm run build
+npm run lint
+npm test -- --runInBand
+npm run test:runtime
 node --test test/frontend/*.test.cjs
 ```
 
-`--prod=false` keeps build tools available even when `NODE_ENV=production`.
-`pnpm run lint` includes automatic fixes, so review its changes before release.
+Keep development dependencies available during the build. The explicit pnpm
+install commands use `--prod=false` for this purpose.
+`npm run lint` includes automatic fixes, so review its changes before release.
 The committed build script runs `prisma generate && nest build`, so building
 also generates Prisma Client. Client generation does not apply database changes.
 
@@ -142,8 +146,9 @@ can otherwise retain an outdated client. See
 
 ## 4. Deploy to Vercel
 
-Vercel supports NestJS directly and detects this application's `src/main.ts`
-entrypoint. See [NestJS on Vercel](https://vercel.com/docs/frameworks/backend/nestjs).
+Vercel supports NestJS directly. This repository selects the emitted
+`dist/src/main.js` entrypoint so Nest CLI can prepare its source aliases.
+See [NestJS on Vercel](https://vercel.com/docs/frameworks/backend/nestjs).
 
 ### Project settings
 
@@ -154,11 +159,11 @@ Import the GitHub repository, select the release branch, and configure:
 | Framework Preset | `NestJS` |
 | Root Directory | `./` when the backend is at the repository root |
 | Build Command | Default (no override) |
-| Output Directory | Default (no override) |
+| Output Directory | `dist` (set in `vercel.json`) |
 | Install Command | Default (no override) |
 
-Leave the Build Command, Output Directory, and Install Command override
-toggles disabled. If you previously entered custom values, restore the defaults.
+Leave the Build Command and Install Command override toggles disabled.
+Keep Output Directory at `dist`, as declared in `vercel.json`.
 The committed `package.json` build script generates Prisma Client before
 compiling NestJS; no separate Prisma build-command override is needed.
 
@@ -174,23 +179,62 @@ The repository's [vercel.json](vercel.json) explicitly selects the NestJS preset
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "nestjs"
+  "framework": "nestjs",
+  "outputDirectory": "dist",
+  "env": {
+    "NODE_OPTIONS": "--experimental-require-module"
+  }
 }
 ```
 
 Do not add the previous `functions["src/main.ts"]` configuration. Vercel CLI
 64.5.0 rejects that pattern with `unused_function`, even with the NestJS preset
-selected. The native builder detects `src/main.ts` itself; it does not require
+selected. With `outputDirectory: "dist"`, the native builder detects
+`dist/src/main.js` after `nest build`; it does not require
 moving the application into an `api/` directory. See the
 [framework setting](https://vercel.com/docs/project-configuration/vercel-json#framework).
+
+Keep the `@/*` alias in the TypeScript source and `tsconfig.json`. Nest CLI
+rewrites alias imports in its emitted JavaScript. Without `outputDirectory`,
+Vercel selects `src/main.ts` and compiles the source again without Nest CLI's
+alias transformer, leaving `require("@/app.module")` in the function. Pointing
+Vercel at `dist` makes it package the JavaScript that Nest CLI already prepared.
+
+### Required runtime setting for NestJS 12
+
+The application deliberately uses CommonJS (`"type": "commonjs"`), while
+NestJS 12 packages are ESM. Node.js 24 supports this combination through
+`require(ESM)`, but Vercel disables that feature by default.
+
+In **Project Settings → Environment Variables**, create a **Config** variable:
+
+| Key | Value | Environments |
+| --- | --- | --- |
+| `NODE_OPTIONS` | `--experimental-require-module` | Production and Preview |
+
+If `NODE_OPTIONS` already contains other flags, append this flag to its current
+value. Save the variable and create a new deployment; an existing deployment
+does not receive environment-variable changes retroactively.
+
+The `env` entry in `vercel.json` expresses the same requirement, but it is not
+proof that a Git deployment received the variable. Production deployment
+`6eca7f9` included the entry in its build configuration while its actual
+deployment environment did not contain `NODE_OPTIONS`. Verify the Project
+Settings variable and the new deployment's environment before relying on it.
+
+See [Vercel's require(ESM) setting](https://vercel.com/docs/functions/runtimes/node-js/advanced-node-configuration#experimental-nodejs-require-of-es-module)
+and the [NestJS 12 migration guide](https://docs.nestjs.com/migration-guide).
+The [runtime investigation report](docs/vercel-runtime-interop.md) records the
+verified commit, the failure mechanism, and local HTTP/auth checks.
 
 The application reads page templates, email templates, and static files
 relative to the project working directory. Verify those resources using the
 smoke checks in section 8 after the deployment builds successfully.
 
-A local packaging check with CLI 64.5.0 on Windows included `views/`, but did
-not include `src/email/templates/` or `src/seed-db/data/`. Check these directories
-in the hosted function bundle before relying on email or startup seeding.
+A local packaging check with CLI 64.5.0 on Windows and `outputDirectory: "dist"`
+included all 46 page templates and three email templates. Seed JSON files were
+not traced. Keep startup seeding disabled and verify the hosted resources
+before relying on email or startup seeding.
 
 Apply migrations separately, deploy, and complete the smoke checks below.
 For a linked Vercel CLI project, the equivalent production build/deploy flow is:
@@ -315,8 +359,9 @@ does not currently provide a dedicated `/health` endpoint.
 | Symptom | What to check |
 | --- | --- |
 | Nest CLI reports a missing TypeScript compiler API | Keep TypeScript on 6.x and reinstall dependencies; do not run an unconditional `update --latest` during deployment. |
+| `ERR_REQUIRE_ESM` when loading `@nestjs/core` | Set `NODE_OPTIONS=--experimental-require-module` in Vercel Project Settings for the intended environment, then redeploy. Node.js 24 and `type: commonjs` alone are insufficient on Vercel. |
 | pnpm rejects unapproved dependency build scripts | Copy the reviewed `deploy/pnpm-build-policy.yaml` policy to `pnpm-workspace.yaml` before installation, as described in section 1. |
-| TypeScript reports `baseUrl` or `rootDir` errors | Use the committed tsconfig files: explicit `rootDir: "."` and relative `paths` entries without `baseUrl`. |
+| TypeScript reports `TS5101` for `baseUrl` | The retained alias configuration uses `ignoreDeprecations: "6.0"` with TypeScript 6. Keep the committed tsconfig files; migrate away from `baseUrl` before upgrading to TypeScript 7. |
 | `defineConfig`, `PrismaClient`, or Prisma model types are missing | Align Prisma CLI/client versions, run `prisma generate`, then build again. |
 | Jest says an ESM module cannot be loaded | Use the repository test scripts, which enable VM modules, on Node 24.9+. |
 | Build succeeds but startup fails | Check `DATABASE_URL`, network access, JWT, Storage, and all SMTP variables, including `SUPPORT_EMAIL`. |
