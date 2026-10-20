@@ -1,6 +1,5 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { EmailService } from '@/email/email.service';
-import { Public } from '@/common/decorators/metadata';
 import { ApiOperation } from '@nestjs/swagger';
 import {
   SendEmailDto,
@@ -12,7 +11,7 @@ import { IApiResponse } from '@/common/interceptors/transform.interceptor';
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
-  @Public()
+  // @Public()
   @ApiOperation({ summary: 'Send a test email to verify email configuration' })
   @Post('test-email')
   async testEmail(@Body() body: SendEmailDto): Promise<IApiResponse<any>> {
@@ -24,7 +23,7 @@ export class EmailController {
     };
   }
 
-  @Public()
+  // @Public()
   @ApiOperation({ summary: 'Send a registration OTP email to a user' })
   @Post('send-register-otp')
   async sendRegisterOtp(
