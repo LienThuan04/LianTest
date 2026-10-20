@@ -9,7 +9,7 @@ Hệ thống thi trực tuyến dành cho sinh viên, giảng viên và quản t
 
 [English](README.md) · **Tiếng Việt**
 
-[Bắt đầu](#cài-đặt-và-chạy-local) · [Ảnh giao diện](#ảnh-giao-diện) · [Tài liệu](#tài-liệu-và-api)
+[Bắt đầu](#cài-đặt-và-chạy-local) · [Ảnh giao diện](#ảnh-giao-diện) · [Triển khai production (EN)](README.deploy.md) · [Tài liệu](#tài-liệu-và-api)
 
 <!-- rg:end:hero -->
 
@@ -70,7 +70,7 @@ Các thẻ bài thi trên trang chủ là minh họa sản phẩm; các trang sa
 
 | Thành phần    | Công nghệ                            | Vai trò                             |
 | ------------- | ------------------------------------ | ----------------------------------- |
-| Server        | NestJS 11, TypeScript, Express       | Module, service và kiểm tra dữ liệu |
+| Server        | NestJS 12, TypeScript 6, Express     | Module, service và kiểm tra dữ liệu |
 | Giao diện     | EJS, Bootstrap/Dashmix, jQuery       | Render phía server và AJAX          |
 | Cơ sở dữ liệu | PostgreSQL, Prisma 7                 | Lưu trữ, schema và migration        |
 | Xác thực      | Passport JWT, bcrypt                 | Cookie access token và băm mật khẩu |

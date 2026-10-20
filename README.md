@@ -9,7 +9,7 @@ An online examination system for students, teachers and administrators, built wi
 
 **English** · [Tiếng Việt](README.vi.md)
 
-[Get started](#setup-and-first-run) · [Screenshots](#screenshots) · [Documentation](#documentation-and-api)
+[Get started](#setup-and-first-run) · [Screenshots](#screenshots) · [Deployment](README.deploy.md) · [Documentation](#documentation-and-api)
 
 <!-- rg:end:hero -->
 
@@ -70,7 +70,7 @@ The illustrated exam cards on the homepage are product examples; the authenticat
 
 | Layer          | Technology                           | Role                                          |
 | -------------- | ------------------------------------ | --------------------------------------------- |
-| Server         | NestJS 11, TypeScript, Express       | Modules, services and validation              |
+| Server         | NestJS 12, TypeScript 6, Express     | Modules, services and validation              |
 | UI             | EJS, Bootstrap/Dashmix, jQuery       | Server-rendered pages and AJAX                |
 | Database       | PostgreSQL, Prisma 7                 | Persistence, schema and migrations            |
 | Authentication | Passport JWT, bcrypt                 | Access-token cookies and password hashing     |

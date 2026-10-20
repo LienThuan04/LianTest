@@ -31,6 +31,24 @@ tra bằng HTML/CSS của ứng dụng và dữ liệu mẫu trong Chrome, gồm
 ID nhiều chữ số và các khung nhìn từ 500px đến 1422px. Chưa chạy lại E2E với
 DB/Storage/SMTP thực hoặc kiểm tra phiên đăng nhập trên trang `/question`.
 
+### Tương thích dependency và hướng dẫn triển khai
+
+- Dự án đang dùng NestJS 12; TypeScript được giữ ở `6.0.3` để Nest CLI còn
+  sử dụng được compiler API, Prisma CLI đồng bộ `7.10.1` với client/adapter.
+- Khai báo `rootDir` rõ ràng, chuyển alias sang đường dẫn tương đối và bỏ
+  `baseUrl` đã deprecated trong TypeScript 6.
+- Sửa import Swagger sang API công khai, cập nhật kiểu kết quả SMTP của
+  Nodemailer 10 và bật VM modules trong các script Jest cho dependency ESM.
+- Thêm [hướng dẫn production bằng tiếng Anh](../README.deploy.md) cho Vercel,
+  Render, Railway và máy chủ Node.js, gồm biến môi trường, migration, tài nguyên
+  runtime và cấu hình duyệt build script pnpm cho CI.
+- Thêm `vercel.json` đóng gói template/static và policy pnpm được duyệt ở
+  `deploy/pnpm-build-policy.yaml` để hosted build có thể cài dependency.
+
+Kiểm chứng sau khi chỉnh tương thích: build đạt; chế độ build/watch báo **0 lỗi**;
+ESLint đạt; **120/120 unit test** và **2/2 frontend test** đạt. Chưa thực hiện
+deployment lên nhà cung cấp hoặc chạy lại E2E với dịch vụ thật trong đợt này.
+
 ## Kiểm chứng đã ghi nhận
 
 | Phạm vi                      | Kết quả và điều kiện                                                                                                                            |
