@@ -1,8 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "src/main.ts": {
-      "includeFiles": "{views/**,public/**,src/email/templates/**,src/seed-db/data/**}"
-    }
-  }
+  "framework": "nestjs"
 }
