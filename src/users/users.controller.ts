@@ -102,24 +102,27 @@ export class UsersController {
   @Permissions('nguoidung', 'update')
   @SkipTransform()
   @Post('update')
-  update(@Body() dto: UpdateUserDto) {
-    return this.usersService.update(dto);
+  update(@Req() req: Request, @Body() dto: UpdateUserDto) {
+    const user = req.user as IExamJwtPayload;
+    return this.usersService.update(dto, user.id);
   }
 
   /** POST /user/deleteData — xoá mềm người dùng (thay deleteData). */
   @Permissions('nguoidung', 'delete')
   @SkipTransform()
   @Post('deleteData')
-  deleteData(@Body() dto: UserIdDto) {
-    return this.usersService.delete(dto.id);
+  deleteData(@Req() req: Request, @Body() dto: UserIdDto) {
+    const user = req.user as IExamJwtPayload;
+    return this.usersService.delete(dto.id, user.id);
   }
 
   /** POST /user/setStatus — khoá/mở khoá (thay setStatus). */
   @Permissions('nguoidung', 'update')
   @SkipTransform()
   @Post('setStatus')
-  async setStatus(@Body() dto: SetStatusDto) {
-    const ok = await this.usersService.setStatus(dto.id, dto.status);
+  async setStatus(@Req() req: Request, @Body() dto: SetStatusDto) {
+    const user = req.user as IExamJwtPayload;
+    const ok = await this.usersService.setStatus(dto.id, dto.status, user.id);
     return { success: ok };
   }
 
@@ -147,7 +150,8 @@ export class UsersController {
   @Permissions('nguoidung', 'create')
   @SkipTransform()
   @Post('addFileExcel')
-  addFileExcel(@Body() dto: AddFileExcelDto) {
+  addFileExcel(@Req() req: Request, @Body() dto: AddFileExcelDto) {
+    const user = req.user as IExamJwtPayload;
     let list: IImportUserRow[] = [];
     try {
       const parsed: unknown = JSON.parse(dto.listuser);
@@ -155,16 +159,19 @@ export class UsersController {
     } catch {
       return { status: 'error', message: 'Danh sách người dùng không hợp lệ' };
     }
-    return this.usersService.addUsersFromFile(list, dto.password);
+    return this.usersService.addUsersFromFile(list, dto.password, user.id);
   }
 
   /**
    * POST /user/addFileExcelGroup — tạo tài khoản SV từ danh sách đã đọc rồi thêm
-   * vào nhóm. Chỉ cần đăng nhập như user.php gốc (checkAuthentication).
+   * vào nhóm. Đòi quyền sửa học phần và chủ nhóm hoặc quản trị viên; không dùng
+   * nhóm quyền/trạng thái do client gửi để cấp đặc quyền cho tài khoản mới.
    */
+  @Permissions('hocphan', 'update')
   @SkipTransform()
   @Post('addFileExcelGroup')
-  addFileExcelGroup(@Body() dto: AddFileExcelGroupDto) {
+  addFileExcelGroup(@Req() req: Request, @Body() dto: AddFileExcelGroupDto) {
+    const user = req.user as IExamJwtPayload;
     let list: IImportUserRow[] = [];
     try {
       const parsed: unknown = JSON.parse(dto.listuser);
@@ -172,6 +179,11 @@ export class UsersController {
     } catch {
       return { status: 'error', message: 'Danh sách sinh viên không hợp lệ' };
     }
-    return this.usersService.addStudentsFromFile(list, dto.password, dto.group);
+    return this.usersService.addStudentsFromFile(
+      list,
+      dto.password,
+      dto.group,
+      user.id,
+    );
   }
 }

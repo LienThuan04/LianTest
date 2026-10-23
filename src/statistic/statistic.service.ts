@@ -15,13 +15,8 @@ import type {
  * Hai chế độ: (1) thống kê điểm 1 đề (getStatisticalData) và (2) thống kê tổng
  * hợp theo học kỳ/năm học/môn/nhóm (getAggregatedStatisticalData).
  *
- * QUIRK PHP GIỮ NGUYÊN:
- * - getStatisticalData JOIN `chitietnhom` chỉ theo `manguoidung` (không kèm mã đề/
- *   giao đề) → SV thuộc nhiều nhóm bị đếm nhiều lần khi lọc "Tất cả nhóm".
- * - Phân khoảng điểm dùng LEAST(diemthi,10) với điều kiện `>= i AND < i+1` nên
- *   điểm đúng 10 KHÔNG rơi vào khoảng nào (không lên biểu đồ) — giống PHP.
- * KHÁC PHP (rút gọn, cùng kết quả): gộp các truy vấn cùng phép JOIN của
- * getStatisticalData thành 1 rồi tính trên JS (PHP chạy 13 truy vấn riêng).
+ * Mỗi kết quả chỉ được đếm một lần dù SV thuộc nhiều nhóm được giao cùng đề.
+ * Khoảng điểm cuối bao gồm điểm 10; thống kê tổng hợp đếm các lượt thi theo đề.
  */
 @Injectable()
 export class StatisticService {
@@ -49,17 +44,11 @@ export class StatisticService {
   }
 
   /**
-   * Phân bố điểm: gán mỗi điểm (đã cap 10) vào khoảng [i, i+1). Điểm = 10 không
-   * thuộc khoảng nào (giữ quirk PHP `LEAST(diemthi,10) >= i AND < i+1`).
+   * Phân bố điểm: [0,1), ... [8,9), [9,10], giữ mảng 10 cột cho giao diện.
    */
   private binScore(bins: number[], diemthi: number): void {
-    const v = Math.min(diemthi, 10);
-    for (let i = 0; i <= 9; i++) {
-      if (v >= i && v < i + 1) {
-        bins[i]++;
-        return;
-      }
-    }
+    const v = Math.max(0, Math.min(diemthi, 10));
+    bins[Math.min(Math.floor(v), 9)]++;
   }
 
   // ── Dropdown lọc (thống kê tổng hợp) ────────────────────────────────────────
@@ -171,29 +160,39 @@ export class StatisticService {
 
     const nhomCond =
       manhom === 0 ? Prisma.empty : Prisma.sql`AND cn.manhom = ${manhom}`;
+    const resultGroupCond = manhom === 0 ? Prisma.empty : Prisma.sql`
+      AND EXISTS (
+        SELECT 1 FROM chitietnhom cn
+        JOIN giaodethi gd ON gd.manhom = cn.manhom AND gd.made = kq.made
+        WHERE cn.manguoidung = kq.manguoidung AND cn.manhom = ${manhom}
+      )
+    `;
 
     // Các số liệu dùng chung phép JOIN (đã nộp / chưa nộp / TB / cao nhất / phân bố).
     const rows = await this.prisma.$queryRaw<
-      { diemthi: number | null; thoigianvaothi: Date | null }[]
+      { makq: number; diemthi: number | null; thoigianvaothi: Date | null }[]
     >(Prisma.sql`
-      SELECT kq.diemthi, kq.thoigianvaothi
+      SELECT kq.makq, kq.diemthi, kq.thoigianvaothi
       FROM ketqua kq
-      JOIN chitietnhom cn ON kq.manguoidung = cn.manguoidung
-      WHERE kq.made = ${made} ${nhomCond}
+      WHERE kq.made = ${made} ${resultGroupCond}
     `);
 
     let tong = 0;
     let dem = 0;
+    const seen = new Set<number>();
     for (const row of rows) {
+      if (seen.has(row.makq)) continue;
+      seen.add(row.makq);
       if (row.diemthi !== null) {
+        const score = Math.max(0, Math.min(row.diemthi, 10));
         data.da_nop_bai++;
-        tong += row.diemthi;
+        tong += score;
         dem++;
         data.diem_cao_nhat = Math.max(
           data.diem_cao_nhat,
-          Math.min(row.diemthi, 10),
+          score,
         );
-        this.binScore(data.thong_ke_diem, row.diemthi);
+        this.binScore(data.thong_ke_diem, score);
       } else if (row.thoigianvaothi !== null) {
         data.chua_nop_bai++;
       }
@@ -204,7 +203,7 @@ export class StatisticService {
     const khongThi = await this.prisma.$queryRaw<
       { total: bigint }[]
     >(Prisma.sql`
-      SELECT COUNT(*)::bigint AS total
+      SELECT COUNT(DISTINCT cn.manguoidung)::bigint AS total
       FROM chitietnhom cn
       JOIN giaodethi gd ON cn.manhom = gd.manhom
       LEFT JOIN ketqua kq ON cn.manguoidung = kq.manguoidung AND kq.made = ${made}
@@ -238,9 +237,9 @@ export class StatisticService {
         : Prisma.empty;
 
     const rows = await this.prisma.$queryRaw<
-      { diemthi: number | null; thoigianvaothi: Date | null }[]
+      { makq: number; diemthi: number | null; thoigianvaothi: Date | null }[]
     >(Prisma.sql`
-      SELECT kq.diemthi, kq.thoigianvaothi
+      SELECT DISTINCT kq.makq, kq.diemthi, kq.thoigianvaothi
       FROM ketqua kq
       JOIN giaodethi gd ON kq.made = gd.made
       JOIN chitietnhom cn ON gd.manhom = cn.manhom AND kq.manguoidung = cn.manguoidung
@@ -251,20 +250,23 @@ export class StatisticService {
     `);
 
     const scores: number[] = [];
+    const seen = new Set<number>();
     for (const row of rows) {
+      if (seen.has(row.makq)) continue;
+      seen.add(row.makq);
       if (row.diemthi !== null) {
         data.da_nop_bai++;
-        scores.push(Math.min(row.diemthi, 10));
+        scores.push(Math.max(0, Math.min(row.diemthi, 10)));
       } else if (row.thoigianvaothi !== null) {
         data.chua_nop_bai++;
       }
     }
 
-    // Số thí sinh không thi (đếm DISTINCT người chưa có kết quả).
+    // Mỗi cặp sinh viên/đề chưa có kết quả là một lượt không thi.
     const khongThi = await this.prisma.$queryRaw<
       { total: bigint }[]
     >(Prisma.sql`
-      SELECT COUNT(DISTINCT cn.manguoidung)::bigint AS total
+      SELECT COUNT(DISTINCT (cn.manguoidung, d.made))::bigint AS total
       FROM chitietnhom cn
       JOIN giaodethi gd ON cn.manhom = gd.manhom
       JOIN dethi d ON gd.made = d.made

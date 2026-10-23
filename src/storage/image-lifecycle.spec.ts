@@ -225,7 +225,10 @@ function essayDatabase(
         },
       ),
     },
-    ketQua: { update: jest.fn(() => Promise.resolve({})) },
+    ketQua: {
+      updateMany: jest.fn(() => Promise.resolve({ count: 1 })),
+      update: jest.fn(() => Promise.resolve({})),
+    },
     $queryRaw: jest.fn(() => Promise.resolve([{ cnt: 1 }])),
   });
   const findResult = jest.fn(() =>
@@ -250,6 +253,14 @@ function essayDatabase(
   );
   const prisma = {
     ketQua: { findFirst: findResult },
+    chiTietDeThi: {
+      findMany: jest.fn(() => Promise.resolve([{ macauhoi: 1 }])),
+    },
+    cauHoi: {
+      findMany: jest.fn(() =>
+        Promise.resolve([{ macauhoi: 1, loai: 'essay' }]),
+      ),
+    },
     $transaction: transaction,
     $queryRaw: jest.fn(() =>
       Promise.resolve(

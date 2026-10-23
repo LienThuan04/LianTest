@@ -582,7 +582,7 @@ $(document).ready(function () {
 
     $.post(
       "/test/getResultDetail",
-      { makq: makq, made: made },
+      { makq: makq },
       function (res) {
         console.log("Full response:", res);
 

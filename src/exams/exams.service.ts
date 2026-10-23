@@ -1,4 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
@@ -60,6 +65,142 @@ export class ExamsService {
     private readonly prisma: PrismaService,
     private readonly storage: SupabaseStorageService,
   ) {}
+
+  /** Role permissions do not grant access to another teacher's exam. */
+  async assertCanManageExam(made: number, userId: string): Promise<void> {
+    if (!Number.isInteger(made) || made <= 0) {
+      throw new NotFoundException('Đề thi không tồn tại');
+    }
+    const exam = await this.prisma.deThi.findUnique({
+      where: { made },
+      select: { nguoitao: true },
+    });
+    if (!exam) throw new NotFoundException('Đề thi không tồn tại');
+    if (exam.nguoitao === userId) return;
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: userId },
+      select: { manhomquyen: true },
+    });
+    if (actor?.manhomquyen !== 3) {
+      throw new ForbiddenException('Bạn không có quyền quản lý đề thi này');
+    }
+  }
+
+  async assertCanManageResult(makq: number, userId: string): Promise<void> {
+    const result = await this.prisma.ketQua.findUnique({
+      where: { makq },
+      select: { made: true },
+    });
+    if (!result) throw new NotFoundException('Không tìm thấy kết quả thi');
+    await this.assertCanManageExam(result.made, userId);
+  }
+
+  async assertCanManageGroup(manhom: number, userId: string): Promise<void> {
+    const group = await this.prisma.nhom.findUnique({
+      where: { manhom },
+      select: { giangvien: true, trangthai: true },
+    });
+    if (!group || group.trangthai === 0) {
+      throw new NotFoundException('Không tìm thấy nhóm học phần');
+    }
+    if (group.giangvien === userId) return;
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: userId },
+      select: { manhomquyen: true },
+    });
+    if (actor?.manhomquyen !== 3) {
+      throw new ForbiddenException('Bạn không có quyền quản lý nhóm này');
+    }
+  }
+
+  async assertExamGroups(made: number, requested: number[]): Promise<void> {
+    const assigned = await this.prisma.giaoDeThi.findMany({
+      where: { made },
+      select: { manhom: true },
+    });
+    const ids = new Set(assigned.map((group) => group.manhom));
+    if (requested.some((id) => !ids.has(id))) {
+      throw new ForbiddenException('Nhóm không được giao đề thi này');
+    }
+  }
+
+  async assertGroupMember(manhom: number, userId: string): Promise<void> {
+    const count = await this.prisma.chiTietNhom.count({
+      where: { manhom, manguoidung: userId },
+    });
+    if (!count)
+      throw new ForbiddenException('Bạn không thuộc nhóm học phần này');
+  }
+
+  async assertCanTakeExam(made: number, userId: string): Promise<void> {
+    const exam = await this.prisma.deThi.findUnique({ where: { made } });
+    if (!exam || exam.trangthai !== 1) {
+      throw new NotFoundException('Đề thi không tồn tại');
+    }
+    if (!(await this.checkStudentAllowed(userId, made))) {
+      throw new ForbiddenException('Bạn không được giao đề thi này');
+    }
+    const now = Date.now();
+    if (
+      (exam.thoigianbatdau && now < exam.thoigianbatdau.getTime()) ||
+      (exam.thoigianketthuc && now > exam.thoigianketthuc.getTime())
+    ) {
+      throw new ForbiddenException('Đề thi chưa mở hoặc đã kết thúc');
+    }
+  }
+
+  /** Viewing answers is a separate policy from participation or exam management. */
+  async getResultDetailForUser(
+    makq: number,
+    userId: string,
+  ): Promise<IResultDetailRow[]> {
+    const result = await this.prisma.ketQua.findUnique({ where: { makq } });
+    if (!result) throw new NotFoundException('Không tìm thấy kết quả thi');
+    const exam = await this.prisma.deThi.findUnique({
+      where: { made: result.made },
+    });
+    if (!exam) throw new NotFoundException('Đề thi không tồn tại');
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: userId },
+      select: { manhomquyen: true },
+    });
+    if (!actor?.manhomquyen)
+      throw new ForbiddenException('Tài khoản không hợp lệ');
+    const canManage =
+      (exam.nguoitao === userId || actor.manhomquyen === 3) &&
+      (await this.prisma.chiTietQuyen.count({
+        where: {
+          manhomquyen: actor.manhomquyen,
+          chucnang: 'dethi',
+          hanhdong: 'view',
+        },
+      })) > 0;
+    if (canManage) return this.getResultDetail(makq);
+    const canParticipate = await this.prisma.chiTietQuyen.count({
+      where: {
+        manhomquyen: actor.manhomquyen,
+        chucnang: 'tgthi',
+        hanhdong: 'join',
+      },
+    });
+    if (
+      result.manguoidung !== userId ||
+      !canParticipate ||
+      result.trangthai !== 'Đã nộp' ||
+      exam.hienthibailam !== 1
+    ) {
+      throw new ForbiddenException('Bạn không được xem bài làm này');
+    }
+    const rows = await this.getResultDetail(makq);
+    return rows.map((row) => ({
+      ...row,
+      diem_cham_tuluan: exam.xemdiemthi === 1 ? row.diem_cham_tuluan : null,
+      cautraloi: row.cautraloi.map((answer) => ({
+        ...answer,
+        ladapan: exam.xemdapan === 1 ? answer.ladapan : 0,
+      })),
+    }));
+  }
 
   /** Điều kiện lọc theo trạng thái thời gian (filter "0"|"1"|"2"). */
   private buildStateCond(filter: unknown): Prisma.Sql {
@@ -199,6 +340,14 @@ export class ExamsService {
 
     return {
       ...(dethi as unknown as Omit<IExamDetail, 'chuong' | 'nhom'>),
+      diem_tracnghiem:
+        dethi.diem_tracnghiem == null
+          ? null
+          : this.decToNum(dethi.diem_tracnghiem),
+      diem_tuluan:
+        dethi.diem_tuluan == null ? null : this.decToNum(dethi.diem_tuluan),
+      diem_dochieu:
+        dethi.diem_dochieu == null ? null : this.decToNum(dethi.diem_dochieu),
       chuong: chuongRows.map((r) => r.machuong),
       nhom: nhomRows.map((r) => r.manhom),
     };
@@ -1299,6 +1448,8 @@ export class ExamsService {
     userId: string,
     body: Record<string, unknown>,
   ): Promise<{ success: boolean; makq: number | null; message?: string }> {
+    const alreadySubmitted = new Error('Bài đã nộp hoặc không tồn tại');
+    const newlyUploadedImages: string[] = [];
     try {
       const kq = await this.prisma.ketQua.findFirst({
         where: { made, manguoidung: userId, diemthi: null },
@@ -1308,7 +1459,7 @@ export class ExamsService {
         return {
           success: false,
           makq: null,
-          message: 'Bài đã nộp hoặc không tồn tại',
+          message: alreadySubmitted.message,
         };
       }
       const makq = kq.makq;
@@ -1332,51 +1483,141 @@ export class ExamsService {
 
       // listCauTraLoi (JSON) → [{macauhoi, cautraloi, thutu}].
       type ILuaChon = {
-        macauhoi?: number;
-        cautraloi?: number;
-        thutu?: number;
+        macauhoi: number;
+        cautraloi: number;
+        thutu: number;
       };
-      let listCauTraLoi: ILuaChon[] = [];
+      const invalid = (message: string) => ({
+        success: false,
+        makq: null,
+        message,
+      });
+      const parseId = (value: unknown): number | null => {
+        const text = plainText(value);
+        if (!/^\d+$/.test(text)) return null;
+        const number = Number(text);
+        return Number.isSafeInteger(number) ? number : null;
+      };
+      let submittedChoices: unknown[] = [];
       const rawList = body.listCauTraLoi;
-      if (typeof rawList === 'string') {
+      if (rawList != null && rawList !== '') {
+        if (typeof rawList !== 'string') {
+          return invalid('Danh sách câu trả lời không hợp lệ');
+        }
         try {
           const parsed = JSON.parse(rawList) as unknown;
-          if (Array.isArray(parsed)) listCauTraLoi = parsed as ILuaChon[];
+          if (!Array.isArray(parsed)) {
+            return invalid('Danh sách câu trả lời không hợp lệ');
+          }
+          submittedChoices = parsed;
         } catch {
-          listCauTraLoi = [];
+          return invalid('Danh sách câu trả lời không hợp lệ');
         }
       }
 
-      // Loại của từng câu (mcq/essay/reading).
-      const macList = [
-        ...new Set(
-          listCauTraLoi.map((a) => this.toInt(a.macauhoi)).filter((n) => n > 0),
-        ),
-      ];
-      const typeMap = new Map<number, string>();
-      if (macList.length) {
-        const qs = await this.prisma.cauHoi.findMany({
-          where: { macauhoi: { in: macList } },
-          select: { macauhoi: true, loai: true },
+      // Câu của đề trên server quyết định mẫu số, kể cả câu SV bỏ trống.
+      const examQuestions = await this.prisma.chiTietDeThi.findMany({
+        where: { made },
+        select: { macauhoi: true },
+      });
+      const qs = await this.prisma.cauHoi.findMany({
+        where: { macauhoi: { in: examQuestions.map((q) => q.macauhoi) } },
+        select: { macauhoi: true, loai: true },
+      });
+      const typeMap = new Map(qs.map((q) => [q.macauhoi, q.loai]));
+      const listCauTraLoi: ILuaChon[] = [];
+      const seenChoices = new Set<number>();
+      for (const value of submittedChoices) {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+          return invalid('Danh sách câu trả lời không hợp lệ');
+        }
+        const ans = value as Record<string, unknown>;
+        const macauhoi = parseId(ans.macauhoi);
+        const cautraloi =
+          ans.cautraloi == null || ans.cautraloi === ''
+            ? 0
+            : parseId(ans.cautraloi);
+        if (macauhoi == null || macauhoi <= 0 || cautraloi == null) {
+          return invalid('Mã câu hỏi hoặc đáp án không hợp lệ');
+        }
+        const loai = typeMap.get(macauhoi);
+        if (loai !== 'mcq' && loai !== 'reading') {
+          return invalid('Câu hỏi trắc nghiệm không thuộc đề thi');
+        }
+        if (seenChoices.has(macauhoi)) {
+          return invalid('Câu trả lời bị lặp');
+        }
+        seenChoices.add(macauhoi);
+        listCauTraLoi.push({
+          macauhoi,
+          cautraloi,
+          thutu: this.toInt(ans.thutu),
         });
-        qs.forEach((q) => typeMap.set(q.macauhoi, q.loai));
+      }
+
+      // Đáp án phải thuộc đúng câu trước khi ghi DB hoặc upload bất kỳ ảnh nào.
+      const selectedIds = listCauTraLoi
+        .map((ans) => ans.cautraloi)
+        .filter((id) => id > 0);
+      if (selectedIds.length) {
+        const selectedAnswers = await this.prisma.cauTraLoi.findMany({
+          where: { macautl: { in: selectedIds } },
+          select: { macautl: true, macauhoi: true },
+        });
+        const answerOwners = new Map(
+          selectedAnswers.map((ans) => [ans.macautl, ans.macauhoi]),
+        );
+        for (const ans of listCauTraLoi) {
+          if (
+            ans.cautraloi > 0 &&
+            answerOwners.get(ans.cautraloi) !== ans.macauhoi
+          ) {
+            return invalid('Đáp án không thuộc câu hỏi');
+          }
+        }
+      }
+
+      const essayIndices = new Set<string>();
+      for (const key of Object.keys(body)) {
+        const match = key.match(
+          /^essay_(\d+)_(exists|macauhoi|noidung|thutu|image_\d+)$/,
+        );
+        if (match) essayIndices.add(match[1]);
+      }
+      const seenEssays = new Set<number>();
+      for (const index of essayIndices) {
+        const macauhoi = parseId(body[`essay_${index}_macauhoi`]);
+        if (macauhoi == null || typeMap.get(macauhoi) !== 'essay') {
+          return invalid('Câu tự luận không thuộc đề thi');
+        }
+        if (seenEssays.has(macauhoi)) {
+          return invalid('Câu trả lời tự luận bị lặp');
+        }
+        seenEssays.add(macauhoi);
       }
 
       // Upload ảnh tự luận lên Supabase TRƯỚC transaction (tránh I/O mạng trong tx).
       const essayEntries = await this.collectEssayAnswers(body);
+      newlyUploadedImages.push(
+        ...essayEntries.flatMap((entry) => entry.imageUrls),
+      );
       const obsoleteImages: (string | null)[] = [];
 
       const diemthi = await this.prisma.$transaction(async (tx) => {
+        // Giành quyền nộp trong cùng transaction với bài làm và điểm. UPDATE
+        // khóa hàng; request đến sau phải kiểm lại diemthi sau khi hàng mở khóa.
+        const claimed = await tx.ketQua.updateMany({
+          where: { makq, diemthi: null },
+          data: { trangthai: 'Đã nộp' },
+        });
+        if (claimed.count !== 1) throw alreadySubmitted;
+
         let socaudungMcq = 0;
         let socaudungReading = 0;
 
         for (const ans of listCauTraLoi) {
-          const macauhoi = this.toInt(ans.macauhoi);
-          const cautraloi = this.toInt(ans.cautraloi);
-          const thutu = this.toInt(ans.thutu);
-          if (macauhoi <= 0) continue;
-          const loai = typeMap.get(macauhoi) ?? '';
-          if (loai === 'essay') continue;
+          const { macauhoi, cautraloi, thutu } = ans;
+          const loai = typeMap.get(macauhoi);
 
           await tx.chiTietKetQua.upsert({
             where: { makq_macauhoi: { makq, macauhoi } },
@@ -1431,13 +1672,7 @@ export class ExamsService {
         );
 
         // Đề có câu tự luận → chờ chấm.
-        const essayCount = await tx.$queryRaw<{ cnt: number }[]>(Prisma.sql`
-          SELECT COUNT(*)::int AS cnt
-          FROM chitietdethi ctd
-          JOIN cauhoi ch ON ctd.macauhoi = ch.macauhoi
-          WHERE ctd.made = ${made} AND ch.loai = 'essay'
-        `);
-        const hasEssay = (essayCount[0]?.cnt ?? 0) > 0;
+        const hasEssay = [...typeMap.values()].includes('essay');
 
         await tx.ketQua.update({
           where: { makq },
@@ -1463,6 +1698,19 @@ export class ExamsService {
       );
       return { success: true, makq };
     } catch (e) {
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        newlyUploadedImages,
+        this.logger,
+      );
+      if (e === alreadySubmitted) {
+        return {
+          success: false,
+          makq: null,
+          message: alreadySubmitted.message,
+        };
+      }
       this.logger.error(`submit(${made}) lỗi: ${(e as Error).message}`);
       return { success: false, makq: null, message: 'Lỗi hệ thống' };
     }

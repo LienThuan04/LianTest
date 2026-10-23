@@ -5,13 +5,13 @@ import { ThrottlerModule } from '@nestjs/throttler';
   imports: [
     ThrottlerModule.forRoot({
       throttlers: [
-        { name: 'default', ttl: 60, limit: 100 },
-        { name: 'short-term', ttl: 10, limit: 20 },
-        { name: 'medium-term', ttl: 300, limit: 500 },
-        { name: 'long-term', ttl: 3600, limit: 1000 },
+        { name: 'default', ttl: 60_000, limit: 100 },
+        { name: 'short-term', ttl: 10_000, limit: 20 },
+        { name: 'medium-term', ttl: 300_000, limit: 500 },
+        { name: 'long-term', ttl: 3_600_000, limit: 1000 },
       ],
       errorMessage(context, throttlerLimitDetail) {
-        return `You have made ${throttlerLimitDetail.totalHits} requests. Rate limit exceeded, Try again in ${throttlerLimitDetail.ttl} seconds. `;
+        return `You have made ${throttlerLimitDetail.totalHits} requests. Rate limit exceeded, Try again in ${Math.ceil(throttlerLimitDetail.ttl / 1000)} seconds. `;
       },
     }),
   ],

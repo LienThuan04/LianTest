@@ -1,9 +1,7 @@
 import {
   Body,
   Controller,
-  ForbiddenException,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -49,11 +47,7 @@ export class AnnouncementsController {
 
   /** Chặn thao tác lên thông báo của người khác (KHÁC PHP: PHP không kiểm). */
   private async assertOwner(matb: number, userId: string): Promise<void> {
-    const tb = await this.announcements.getById(matb);
-    if (!tb) throw new NotFoundException('Không tìm thấy thông báo.');
-    if (tb.nguoitao !== userId) {
-      throw new ForbiddenException('Bạn không có quyền với thông báo này.');
-    }
+    await this.announcements.assertCanManageAnnouncement(matb, userId);
   }
 
   /** GET /teacher_announcement — trang quản lý thông báo (thay default). */
@@ -123,7 +117,7 @@ export class AnnouncementsController {
   ) {
     const user = req.user as IExamJwtPayload;
     await this.assertOwner(dto.matb, user.id);
-    return this.announcements.updateAnnounce(dto.matb, dto.noidung, dto.manhom);
+    return this.announcements.updateAnnounce(dto.matb, dto.noidung, dto.manhom, user.id);
   }
 
   /** POST /teacher_announcement/deleteAnnounce — xoá thông báo. */
@@ -133,21 +127,23 @@ export class AnnouncementsController {
   async deleteAnnounce(@Req() req: Request, @Body() dto: MatbDto) {
     const user = req.user as IExamJwtPayload;
     await this.assertOwner(dto.matb, user.id);
-    return this.announcements.deleteAnnounce(dto.matb);
+    return this.announcements.deleteAnnounce(dto.matb, user.id);
   }
 
   /** POST /teacher_announcement/getDetail — chi tiết 1 thông báo (trang sửa). */
   @SkipTransform()
   @Post('getDetail')
-  getDetail(@Body() dto: MatbDto) {
-    return this.announcements.getDetail(dto.matb);
+  getDetail(@Body() dto: MatbDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.announcements.getDetail(dto.matb, user.id);
   }
 
   /** POST /teacher_announcement/getAnnounce — thông báo của 1 nhóm (offcanvas). */
   @SkipTransform()
   @Post('getAnnounce')
-  getAnnounce(@Body() dto: AnnouncementManhomDto) {
-    return this.announcements.getAnnounce(dto.manhom);
+  getAnnounce(@Body() dto: AnnouncementManhomDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.announcements.getAnnounce(dto.manhom, user.id);
   }
 
   /** POST /teacher_announcement/getListAnnounce — thông báo GV đã tạo (mảng). */

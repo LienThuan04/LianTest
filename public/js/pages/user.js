@@ -269,7 +269,16 @@ $(document).ready(function () {
         type: "post",
         url: "/user/update",
         data: data,
-        success: function () {
+        dataType: "json",
+        success: function (response) {
+          if (!response || response.status !== "success") {
+            Dashmix.helpers("jq-notify", {
+              type: "danger",
+              icon: "fa fa-times me-1",
+              message: (response && response.message) || "Cập nhật người dùng thất bại!",
+            });
+            return;
+          }
           Dashmix.helpers("jq-notify", {
             type: "success",
             icon: "fa fa-check me-1",
@@ -284,6 +293,13 @@ $(document).ready(function () {
           $(".update-user-element").addClass("d-none");
           $("#masinhvien").prop("disabled", false);
           clearInputFields();
+        },
+        error: function (xhr) {
+          Dashmix.helpers("jq-notify", {
+            type: "danger",
+            icon: "fa fa-times me-1",
+            message: (xhr.responseJSON && xhr.responseJSON.message) || "Cập nhật người dùng thất bại!",
+          });
         },
       });
     } else {
@@ -329,12 +345,20 @@ $(document).ready(function () {
           type: "post",
           url: "/user/deleteData",
           data: { id: trid },
-          success: function () {
+          dataType: "json",
+          success: function (response) {
+            if (!response || response.status !== "success") {
+              e.fire("Thất bại", (response && response.message) || "Xóa người dùng thất bại!", "error");
+              return;
+            }
             e.fire("Deleted!", "Xóa người dùng thành công!", "success");
             mainPagePagination.getPagination(
               mainPagePagination.option,
               mainPagePagination.valuePage.curPage
             );
+          },
+          error: function (xhr) {
+            e.fire("Thất bại", (xhr.responseJSON && xhr.responseJSON.message) || "Xóa người dùng thất bại!", "error");
           },
         });
       } else {

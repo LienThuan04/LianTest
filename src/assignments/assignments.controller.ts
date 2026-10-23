@@ -27,12 +27,12 @@ import type { IExamJwtPayload } from '@/exam-auth/interfaces/exam-auth.types';
  * Route ở path gốc `/assignment/...` (VERSION_NEUTRAL, trong exclude global prefix).
  * AJAX dùng @SkipTransform để trả nguyên shape JS gốc mong đợi.
  *
- * RBAC: trang cần 'phancong'/'view'. Các route AJAX trong assignment.php chỉ dùng
- * checkAuthentication (không gate quyền riêng) → giữ nguyên, chỉ dựa JwtAuthGuard.
+ * RBAC: trang và đọc AJAX cần 'phancong'/'view'; ghi cần quyền hành động tương ứng.
  * Phân trang dùng chung 2 nhánh: mặc định = danh sách phân công; custom=monhoc =
  * danh sách môn cho modal chọn.
  */
 @Controller({ path: 'assignment', version: VERSION_NEUTRAL })
+@Permissions('phancong', 'view')
 export class AssignmentsController {
   constructor(private readonly assignments: AssignmentsService) {}
 
@@ -104,6 +104,7 @@ export class AssignmentsController {
   }
 
   /** POST /assignment/checkDuplicate — các môn bị trùng khi thêm. */
+  @Permissions('phancong', 'create')
   @SkipTransform()
   @Post('checkDuplicate')
   checkDuplicate(@Body() dto: AddAssignmentDto) {
@@ -116,6 +117,7 @@ export class AssignmentsController {
   }
 
   /** POST /assignment/addAssignment — phân công nhiều môn cho 1 GV. */
+  @Permissions('phancong', 'create')
   @SkipTransform()
   @Post('addAssignment')
   addAssignment(@Body() dto: AddAssignmentDto) {
@@ -128,6 +130,7 @@ export class AssignmentsController {
   }
 
   /** POST /assignment/checkDuplicateForUpdate — kiểm trùng 1 môn khi đổi GV. */
+  @Permissions('phancong', 'update')
   @SkipTransform()
   @Post('checkDuplicateForUpdate')
   checkDuplicateForUpdate(@Body() dto: CheckDuplicateForUpdateDto) {
@@ -143,6 +146,7 @@ export class AssignmentsController {
    * POST /assignment/update — đổi giảng viên của 1 phân công.
    * Chặn nếu GV mới đã được phân công môn này trong kỳ này (như PHP).
    */
+  @Permissions('phancong', 'update')
   @SkipTransform()
   @Post('update')
   async update(@Body() dto: UpdateAssignmentDto) {
@@ -168,6 +172,7 @@ export class AssignmentsController {
   }
 
   /** POST /assignment/delete — xoá mềm phân công. */
+  @Permissions('phancong', 'delete')
   @SkipTransform()
   @Post('delete')
   async delete(@Body() dto: DeleteAssignmentDto) {

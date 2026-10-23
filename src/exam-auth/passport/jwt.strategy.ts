@@ -1,7 +1,8 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '@/prisma/prisma.service';
 import type { Request } from 'express';
 import type { IExamJwtPayload } from '@/exam-auth/interfaces/exam-auth.types';
 
@@ -12,7 +13,10 @@ import type { IExamJwtPayload } from '@/exam-auth/interfaces/exam-auth.types';
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {
     const jwtSecret = configService.get<string>('JWT_ACCESS_TOKEN_SECRET');
     if (!jwtSecret) {
       throw new Error('JWT secret key is not defined in environment variables');
@@ -35,7 +39,45 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: IExamJwtPayload) {
-    return payload; // req.user = payload (id, email, hoten, manhomquyen, roleName)
+  async validate(payload: unknown): Promise<IExamJwtPayload> {
+    const claims = payload as Partial<IExamJwtPayload> | null;
+    if (
+      !claims ||
+      typeof claims !== 'object' ||
+      'purpose' in claims ||
+      typeof claims.id !== 'string' ||
+      !claims.id.trim()
+    ) {
+      throw new UnauthorizedException('Invalid access token');
+    }
+
+    // Recovery tickets share the signing service but never authenticate a user.
+    // Reload identity so locked/deleted users and changed roles take effect now.
+    const user = await this.prisma.nguoiDung.findUnique({
+      where: { id: claims.id },
+      select: {
+        id: true,
+        email: true,
+        hoten: true,
+        trangthai: true,
+        manhomquyen: true,
+        nhomQuyen: { select: { tennhomquyen: true, trangthai: true } },
+      },
+    });
+    if (
+      !user ||
+      user.trangthai !== 1 ||
+      user.manhomquyen == null ||
+      !user.nhomQuyen?.trangthai
+    ) {
+      throw new UnauthorizedException('Account or role is no longer active');
+    }
+    return {
+      id: user.id,
+      email: user.email,
+      hoten: user.hoten,
+      manhomquyen: user.manhomquyen,
+      roleName: user.nhomQuyen.tennhomquyen,
+    };
   }
 }

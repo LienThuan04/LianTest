@@ -150,31 +150,35 @@ export class SubjectsController {
   @Permissions('monhoc', 'view')
   @SkipTransform()
   @Post('getAllChapter')
-  getAllChapter(@Body() dto: ChapterListDto) {
-    return this.subjects.getChapters(dto.mamonhoc);
+  getAllChapter(@Body() dto: ChapterListDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.subjects.getChapters(dto.mamonhoc, user.id);
   }
 
   /** POST /subject/addChapter — thêm chương (thay addChapter). */
   @Permissions('chuong', 'create')
   @SkipTransform()
   @Post('addChapter')
-  addChapter(@Body() dto: AddChapterDto) {
-    return this.subjects.addChapter(dto.mamonhoc, dto.tenchuong);
+  addChapter(@Body() dto: AddChapterDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.subjects.addChapter(dto.mamonhoc, dto.tenchuong, user.id);
   }
 
   /** POST /subject/updateChapter — đổi tên chương (thay updateChapter). */
   @Permissions('chuong', 'update')
   @SkipTransform()
   @Post('updateChapter')
-  updateChapter(@Body() dto: UpdateChapterDto) {
-    return this.subjects.updateChapter(dto.machuong, dto.tenchuong);
+  updateChapter(@Body() dto: UpdateChapterDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.subjects.updateChapter(dto.machuong, dto.tenchuong, user.id);
   }
 
   /** POST /subject/chapterDelete — xoá mềm chương (thay chapterDelete). */
   @Permissions('chuong', 'delete')
   @SkipTransform()
   @Post('chapterDelete')
-  chapterDelete(@Body() dto: ChapterIdDto) {
-    return this.subjects.deleteChapter(dto.machuong);
+  chapterDelete(@Body() dto: ChapterIdDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.subjects.deleteChapter(dto.machuong, user.id);
   }
 }

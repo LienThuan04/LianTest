@@ -9,11 +9,11 @@
     <table width="100%" cellpadding="0" cellspacing="0"
         style="max-width:600px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05)">
 
-        <!-- Header - TikTok style gradient -->
+        <!-- Header -->
         <tr>
             <td style="background:linear-gradient(135deg, #000000 0%, #161616 100%);padding:28px 32px;text-align:left">
                 <div style="display:flex;align-items:center;gap:8px">
-                    <span style="font-size:28px">🎵</span>
+                    <span style="font-size:28px">📧</span>
                     <h1 style="color:#ffffff;margin:0;font-size:22px;font-weight:700;letter-spacing:-0.5px"><%= appName %></h1>
                 </div>
                 <p style="color:#a1a1aa;margin:8px 0 0;font-size:13px">Email Verification Test</p>
@@ -25,26 +25,26 @@
             <td style="padding:40px 32px">
                 <!-- Greeting -->
                 <p style="color:#18181b;font-size:16px;line-height:1.5;margin:0 0 16px">
-                    Hello <strong style="color:#000000">TikTok User</strong>,
+                    Hello <strong style="color:#000000"><%= appName %> User</strong>,
                 </p>
 
                 <p style="color:#18181b;font-size:16px;line-height:1.5;margin:0 0 24px">
-                    This is a <strong>test email</strong> to confirm that your TikTok email notification system is working correctly.
+                    This is a <strong>test email</strong> to confirm that your <%= appName %> email notification system is working correctly.
                 </p>
 
-                <!-- Success Badge - TikTok style -->
+                <!-- Success Badge -->
                 <table width="100%" cellpadding="0" cellspacing="0"
                     style="background:#f0fdf4;border-radius:16px;border:1px solid #bbf7d0;margin-bottom:24px">
                     <tr>
                         <td style="padding:28px 24px;text-align:center">
                             <div style="font-size:48px;margin-bottom:12px">✅</div>
                             <p style="color:#166534;font-size:16px;font-weight:600;margin:0 0 8px">Email Configuration Successful!</p>
-                            <p style="color:#15803d;font-size:13px;margin:0">Your TikTok notifications are ready to go</p>
+                            <p style="color:#15803d;font-size:13px;margin:0">Your <%= appName %> email service is ready to go</p>
                         </td>
                     </tr>
                 </table>
 
-                <!-- Info Box - TikTok style -->
+                <!-- Info Box -->
                 <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;border-radius:12px;margin-bottom:24px">
                     <tr>
                         <td style="padding:16px 20px">
@@ -52,7 +52,7 @@
                                 <span style="font-size:20px">📧</span>
                                 <div>
                                     <p style="color:#18181b;margin:0;font-size:14px;font-weight:600">Test Details</p>
-                                    <p style="color:#52525b;margin:4px 0 0;font-size:13px">This email was sent to verify your email service is properly configured for TikTok notifications.</p>
+                                    <p style="color:#52525b;margin:4px 0 0;font-size:13px">This email was sent to verify your email service is properly configured for <%= appName %>.</p>
                                 </div>
                             </div>
                         </td>
@@ -64,9 +64,7 @@
                     <tr>
                         <td style="padding:20px">
                             <p style="color:#18181b;margin:0 0 12px;font-size:14px;font-weight:600">What happens next?</p>
-                            <p style="color:#52525b;margin:0 0 8px;font-size:13px">✓ You'll receive security alerts like login notifications</p>
-                            <p style="color:#52525b;margin:0 0 8px;font-size:13px">✓ OTP verification codes for account actions</p>
-                            <p style="color:#52525b;margin:0;font-size:13px">✓ Important updates about your TikTok account</p>
+                            <p style="color:#52525b;margin:0;font-size:13px">No action is required. You can return to <%= appName %>.</p>
                         </td>
                     </tr>
                 </table>
@@ -79,12 +77,12 @@
                                 <span style="font-size:20px">🔒</span>
                                 <div>
                                     <p style="color:#18181b;margin:0;font-size:14px;font-weight:600">Security tip</p>
-                                    <p style="color:#52525b;margin:4px 0 0;font-size:13px">TikTok will never ask for your password or verification codes via email.</p>
+                                    <p style="color:#52525b;margin:4px 0 0;font-size:13px">Never share your password or verification codes by email.</p>
                                 </div>
                             </div>
                         </td>
                     </tr>
-                <tr>
+                </table>
 
                 <hr style="margin:24px 0;border:none;border-top:1px solid #e4e4e7" />
 
@@ -93,22 +91,22 @@
                 </p>
 
                 <p style="color:#71717a;font-size:13px;line-height:1.5;margin:16px 0 0">
-                    Questions? <a href="mailto:<%= supportEmail %>" style="color:#000000;text-decoration:none;font-weight:600">Contact TikTok Support</a>
+                    Questions? <a href="mailto:<%= supportEmail %>" style="color:#000000;text-decoration:none;font-weight:600">Contact <%= appName %> Support</a>
                 </p>
             </td>
         </tr>
 
-        <!-- Footer - TikTok style -->
+        <!-- Footer -->
         <tr>
             <td style="padding:24px 32px;text-align:center;background:#fafafa;border-top:1px solid #e4e4e7">
                 <p style="color:#a1a1aa;margin:0 0 12px;font-size:12px">
-                    TikTok · 5800 Bristol Pkwy, Culver City, CA 90230
+                    <%= appName %>
                 </p>
                 <p style="color:#a1a1aa;margin:0;font-size:12px">
                     This test email was sent to <strong style="color:#52525b"><%= toEmail %></strong>
                 </p>
                 <p style="color:#a1a1aa;margin:12px 0 0;font-size:11px">
-                    © <%= new Date().getFullYear() %> TikTok
+                    © <%= new Date().getFullYear() %> <%= appName %>
                 </p>
             </td>
         </tr>

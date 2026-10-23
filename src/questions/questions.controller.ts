@@ -113,13 +113,15 @@ export class QuestionsController {
   @Permissions('cauhoi', 'view')
   @SkipTransform()
   @Post('getQuestionBySubject')
-  getQuestionBySubject(@Body() dto: QuestionBySubjectDto) {
+  getQuestionBySubject(@Body() dto: QuestionBySubjectDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
     return this.questions.getQuestionBySubject(
       dto.mamonhoc,
       dto.machuong,
       dto.dokho,
       dto.content,
       dto.page,
+      user.id,
     );
   }
 
@@ -127,12 +129,14 @@ export class QuestionsController {
   @Permissions('cauhoi', 'view')
   @SkipTransform()
   @Post('getTotalPageQuestionBySubject')
-  getTotalPageQuestionBySubject(@Body() dto: QuestionBySubjectDto) {
+  getTotalPageQuestionBySubject(@Body() dto: QuestionBySubjectDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
     return this.questions.getTotalPageQuestionBySubject(
       dto.mamonhoc,
       dto.machuong,
       dto.dokho,
       dto.content,
+      user.id,
     );
   }
 
@@ -140,32 +144,36 @@ export class QuestionsController {
   @Permissions('cauhoi', 'view')
   @SkipTransform()
   @Post('getQuestionById')
-  getQuestionById(@Body() dto: QuestionIdDto) {
-    return this.questions.getQuestionById(dto.id);
+  getQuestionById(@Body() dto: QuestionIdDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.questions.getQuestionById(dto.id, user.id);
   }
 
   /** POST /question/getAnswerById — đáp án của câu hỏi (mcq/essay/reading). */
   @Permissions('cauhoi', 'view')
   @SkipTransform()
   @Post('getAnswerById')
-  getAnswerById(@Body() dto: QuestionIdDto) {
-    return this.questions.getAnswerById(dto.id);
+  getAnswerById(@Body() dto: QuestionIdDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.questions.getAnswerById(dto.id, user.id);
   }
 
   /** POST /question/getAnswersForMultipleQuestions — đáp án nhiều câu (chọn câu cho đề). */
   @Permissions('cauhoi', 'view')
   @SkipTransform()
   @Post('getAnswersForMultipleQuestions')
-  getAnswersForMultipleQuestions(@Body() dto: AnswersForMultipleDto) {
-    return this.questions.getAnswersForMultipleQuestions(dto.questions);
+  getAnswersForMultipleQuestions(@Body() dto: AnswersForMultipleDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.questions.getAnswersForMultipleQuestions(dto.questions, user.id);
   }
 
   /** POST /question/delete — xoá mềm câu hỏi. */
   @Permissions('cauhoi', 'delete')
   @SkipTransform()
   @Post('delete')
-  delete(@Body() dto: DeleteQuestionDto) {
-    return this.questions.delete(dto.macauhoi);
+  delete(@Body() dto: DeleteQuestionDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.questions.delete(dto.macauhoi, user.id);
   }
 
   /**
@@ -175,11 +183,13 @@ export class QuestionsController {
   @Permissions('cauhoi', 'view')
   @SkipTransform()
   @Post('getsoluongcauhoi')
-  async getsoluongcauhoi(@Body() dto: QuestionCountDto) {
+  async getsoluongcauhoi(@Body() dto: QuestionCountDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
     const data = await this.questions.getQuestionCounts(
       dto.chuong,
       dto.monhoc,
       dto.loaicauhoi,
+      user.id,
     );
     return { success: true, data };
   }

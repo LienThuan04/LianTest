@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { createHmac } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { EmailService } from '@/email/email.service';
@@ -46,7 +47,7 @@ export class ExamAuthService {
     });
 
     if (!user) throw new UnauthorizedException('Tài khoản không tồn tại');
-    if (user.trangthai === 0) throw new ForbiddenException('Tài khoản bị khóa');
+    if (user.trangthai !== 1) throw new ForbiddenException('Tài khoản bị khóa');
     if (!user.matkhau)
       throw new UnauthorizedException('Tài khoản chưa đặt mật khẩu');
 
@@ -55,6 +56,10 @@ export class ExamAuthService {
 
     if (user.manhomquyen == null || !user.nhomQuyen)
       throw new ForbiddenException('Tài khoản chưa được gán nhóm quyền');
+    if (!user.nhomQuyen.trangthai)
+      throw new ForbiddenException(
+        'Nhóm quyền của tài khoản đã bị vô hiệu hóa',
+      );
 
     const payload: IExamJwtPayload = {
       id: user.id,
@@ -150,9 +155,39 @@ export class ExamAuthService {
 
   // ── KHÔI PHỤC MẬT KHẨU (recover → otp → changepass) ────────────────────────
 
-  /** Ký vé khôi phục để controller đặt vào cookie httpOnly. */
-  signRecoveryTicket(email: string, verified: boolean): Promise<string> {
-    const payload: IRecoveryTicket = { email, purpose: 'recover', verified };
+  /** MAC dùng secret server để JWT không lộ hash mật khẩu hoặc oracle đoán OTP. */
+  private recoveryPasswordVersion(
+    email: string,
+    passwordHash: string | null,
+  ): string {
+    const secret = this.config.get<string>('JWT_ACCESS_TOKEN_SECRET');
+    if (!secret) throw new Error('JWT access token secret is not configured');
+    return createHmac('sha256', secret)
+      .update(JSON.stringify(['recover-password-v1', email, passwordHash]))
+      .digest('hex');
+  }
+
+  /** Ký vé gắn với mật khẩu hiện tại; đổi mật khẩu làm mọi vé cũ hết hiệu lực. */
+  async signRecoveryTicket(
+    email: string,
+    verified: boolean,
+    expectedVersion?: string,
+  ): Promise<string> {
+    const user = await this.prisma.nguoiDung.findUnique({
+      where: { email },
+      select: { matkhau: true },
+    });
+    if (!user) throw new UnauthorizedException('Không tìm thấy người dùng');
+    const passwordVersion = this.recoveryPasswordVersion(email, user.matkhau);
+    if (expectedVersion !== undefined && expectedVersion !== passwordVersion) {
+      throw new UnauthorizedException('Vé khôi phục đã hết hiệu lực');
+    }
+    const payload: IRecoveryTicket = {
+      email,
+      purpose: 'recover',
+      verified,
+      passwordVersion,
+    };
     return this.jwt.signAsync(payload, {
       expiresIn: `${RECOVERY_TTL_MINUTES}m`,
     });
@@ -163,7 +198,23 @@ export class ExamAuthService {
     if (!token) return null;
     try {
       const payload = await this.jwt.verifyAsync<IRecoveryTicket>(token);
-      return payload?.purpose === 'recover' ? payload : null;
+      if (
+        payload?.purpose !== 'recover' ||
+        typeof payload.email !== 'string' ||
+        typeof payload.verified !== 'boolean' ||
+        typeof payload.passwordVersion !== 'string' ||
+        !/^[a-f0-9]{64}$/.test(payload.passwordVersion)
+      )
+        return null;
+      const user = await this.prisma.nguoiDung.findUnique({
+        where: { email: payload.email },
+        select: { matkhau: true },
+      });
+      return user &&
+        payload.passwordVersion ===
+          this.recoveryPasswordVersion(payload.email, user.matkhau)
+        ? payload
+        : null;
     } catch {
       return null;
     }
@@ -244,19 +295,35 @@ export class ExamAuthService {
   async resetPassword(
     email: string,
     password: string,
+    passwordVersion: string,
   ): Promise<IAuthActionResult> {
     const salt = parseInt(
       this.config.get<string>('BCRYPT_SALT_ROUNDS') || '10',
       10,
     );
     try {
-      await this.prisma.nguoiDung.update({
+      const user = await this.prisma.nguoiDung.findUnique({
         where: { email },
+        select: { matkhau: true },
+      });
+      if (
+        !user ||
+        passwordVersion !== this.recoveryPasswordVersion(email, user.matkhau)
+      ) {
+        return { status: 'error', message: 'Vé khôi phục đã hết hiệu lực' };
+      }
+      // Compare-and-set trong cùng câu UPDATE: hai request dùng cùng vé chỉ có
+      // một request đổi được mật khẩu, kể cả khi đã đọc cùng hash trước đó.
+      const result = await this.prisma.nguoiDung.updateMany({
+        where: { email, matkhau: user.matkhau },
         data: {
           matkhau: await generatePasswordHash(password, salt),
           otp: null,
         },
       });
+      if (result.count !== 1) {
+        return { status: 'error', message: 'Vé khôi phục đã được sử dụng' };
+      }
       return { status: 'success', message: 'Đổi mật khẩu thành công' };
     } catch (err) {
       this.logger.error('Đặt lại mật khẩu thất bại', err as Error);

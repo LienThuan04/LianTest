@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { ClassModulesService } from '@/class-modules/class-modules.service';
@@ -82,6 +82,12 @@ export class ClientService {
     manhom: number,
     userId: string,
   ): Promise<IGroupStudentRow[]> {
+    const membership = await this.prisma.chiTietNhom.count({
+      where: { manhom, manguoidung: userId },
+    });
+    if (membership === 0) {
+      throw new ForbiddenException('Bạn không thuộc nhóm này.');
+    }
     const list = await this.classModules.getSvList(manhom);
     return list.filter((sv) => sv.id !== userId);
   }

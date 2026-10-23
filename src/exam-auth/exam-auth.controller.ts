@@ -63,10 +63,12 @@ export class ExamAuthController {
     res: Response,
     email: string,
     verified: boolean,
+    expectedVersion?: string,
   ): Promise<void> {
     const token = await this.examAuthService.signRecoveryTicket(
       email,
       verified,
+      expectedVersion,
     );
     res.cookie(RECOVERY_COOKIE, token, {
       httpOnly: true,
@@ -236,7 +238,13 @@ export class ExamAuthController {
       ticket.email,
       dto.otp,
     );
-    if (ok) await this.setRecoveryCookie(res, ticket.email, true);
+    if (ok)
+      await this.setRecoveryCookie(
+        res,
+        ticket.email,
+        true,
+        ticket.passwordVersion,
+      );
     return ok;
   }
 
@@ -263,6 +271,7 @@ export class ExamAuthController {
     const result = await this.examAuthService.resetPassword(
       ticket.email,
       dto.password,
+      ticket.passwordVersion,
     );
     if (result.status === 'success') {
       res.clearCookie(RECOVERY_COOKIE, { path: '/' });

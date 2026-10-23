@@ -6,12 +6,13 @@ import {
   TestSendRegisterOtpDto,
 } from '@/email/dto/create-email.dto';
 import { IApiResponse } from '@/common/interceptors/transform.interceptor';
+import { AdminOnly } from '@/common/decorators/metadata';
 
+@AdminOnly()
 @Controller('email')
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
-  // @Public()
   @ApiOperation({ summary: 'Send a test email to verify email configuration' })
   @Post('test-email')
   async testEmail(@Body() body: SendEmailDto): Promise<IApiResponse<any>> {
@@ -23,7 +24,6 @@ export class EmailController {
     };
   }
 
-  // @Public()
   @ApiOperation({ summary: 'Send a registration OTP email to a user' })
   @Post('send-register-otp')
   async sendRegisterOtp(

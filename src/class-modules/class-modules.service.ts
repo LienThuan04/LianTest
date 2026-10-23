@@ -1,5 +1,5 @@
 import { randomBytes } from 'crypto';
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -53,6 +53,30 @@ export class ClassModulesService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
+
+  /** Cấp quyền quản lý theo chủ nhóm hoặc vai trò admin hiện tại trong DB. */
+  async assertCanManageGroup(manhom: number, actorId: string): Promise<void> {
+    const [group, actor] = await Promise.all([
+      this.prisma.nhom.findUnique({
+        where: { manhom },
+        select: { giangvien: true, trangthai: true },
+      }),
+      this.prisma.nguoiDung.findUnique({
+        where: { id: actorId },
+        select: { manhomquyen: true, trangthai: true },
+      }),
+    ]);
+    if (!group || group.trangthai !== 1) {
+      throw new NotFoundException('Không tìm thấy nhóm.');
+    }
+    if (
+      !actor ||
+      actor.trangthai !== 1 ||
+      (group.giangvien !== actorId && actor.manhomquyen !== 3)
+    ) {
+      throw new ForbiddenException('Bạn không có quyền quản lý nhóm này.');
+    }
+  }
 
   /**
    * POST /module/loadData — nhóm GV đang dạy, gom theo môn + năm học + học kỳ.
@@ -376,7 +400,7 @@ export class ClassModulesService {
   /**
    * Build mệnh đề WHERE + ORDER BY cho danh sách SV của 1 nhóm (thay getQuery/
    * getQuerySortByName). Search theo hoten/id; sort theo id hoặc tên (từ cuối).
-   * userId KHÔNG cần vì trang đã kiểm nguoitao==GV ở SSR; manhom tham số hoá.
+   * Controller kiểm chủ nhóm/admin ở từng AJAX trước khi truy vấn; manhom tham số hoá.
    */
   private buildStudentListSql(args: IGroupPaginationArgs): {
     where: Prisma.Sql;
@@ -483,6 +507,23 @@ export class ClassModulesService {
 
   /** Thêm SV (đã có tài khoản) vào nhóm. Thay join — trả false nếu đã có. */
   async join(manhom: number, manguoidung: string): Promise<boolean> {
+    const [group, student] = await Promise.all([
+      this.prisma.nhom.findUnique({
+        where: { manhom },
+        select: { trangthai: true },
+      }),
+      this.prisma.nguoiDung.findUnique({
+        where: { id: manguoidung },
+        select: { manhomquyen: true, trangthai: true },
+      }),
+    ]);
+    if (
+      group?.trangthai !== 1 ||
+      student?.trangthai !== 1 ||
+      student.manhomquyen !== 2
+    ) {
+      return false;
+    }
     const existed = await this.prisma.chiTietNhom.count({
       where: { manhom, manguoidung },
     });
@@ -564,7 +605,7 @@ export class ClassModulesService {
   ): Promise<IActionResult> {
     const prefix = `${malop}%`;
     const totalLop = await this.prisma.nguoiDung.count({
-      where: { id: { startsWith: malop } },
+      where: { id: { startsWith: malop }, manhomquyen: 2, trangthai: 1 },
     });
     if (totalLop === 0) {
       return { success: false, message: 'Mã lớp không tồn tại' };
@@ -577,6 +618,7 @@ export class ClassModulesService {
       LEFT JOIN chitietnhom CTN
         ON ND.id = CTN.manguoidung AND CTN.manhom = ${manhom}
       WHERE ND.id LIKE ${prefix} AND CTN.manguoidung IS NULL
+        AND ND.manhomquyen = 2 AND ND.trangthai = 1
     `);
 
     if (candidates.length === 0) {

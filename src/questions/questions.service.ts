@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
@@ -54,6 +54,44 @@ export class QuestionsService {
     private readonly storage: SupabaseStorageService,
   ) {}
 
+  private async getActor(actorId: string) {
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: actorId },
+      select: { manhomquyen: true, trangthai: true },
+    });
+    if (!actor || actor.trangthai !== 1) {
+      throw new ForbiddenException('Tài khoản không có quyền truy cập.');
+    }
+    return actor;
+  }
+
+  private async assertSubjectAccess(mamonhoc: string, actorId: string): Promise<void> {
+    const actor = await this.getActor(actorId);
+    if (actor.manhomquyen === 3) return;
+    const assigned = await this.prisma.phanCong.count({
+      where: { mamonhoc, manguoidung: actorId, trangthai: 1 },
+    });
+    if (assigned === 0) {
+      throw new ForbiddenException('Bạn không được phân công môn học này.');
+    }
+  }
+
+  private async assertQuestionAccess(id: number, actorId: string, write = false) {
+    const [question, actor] = await Promise.all([
+      this.prisma.cauHoi.findUnique({ where: { macauhoi: id } }),
+      this.getActor(actorId),
+    ]);
+    if (!question || question.trangthai === 0) {
+      throw new NotFoundException('Câu hỏi không tồn tại.');
+    }
+    if (actor.manhomquyen === 3 || question.nguoitao === actorId) return question;
+    if (write) {
+      throw new ForbiddenException('Bạn không có quyền sửa câu hỏi này.');
+    }
+    await this.assertSubjectAccess(question.mamonhoc, actorId);
+    return question;
+  }
+
   /** Điều kiện lọc danh sách câu hỏi theo môn/chương/độ khó/nội dung. */
   private buildWhere(
     mamonhoc: string,
@@ -81,7 +119,9 @@ export class QuestionsService {
     dokho = 0,
     content = '',
     page = 1,
+    actorId: string,
   ): Promise<IQuestionRow[]> {
+    await this.assertSubjectAccess(mamonhoc, actorId);
     const where = this.buildWhere(mamonhoc, machuong, dokho, content);
     const rows = await this.prisma.cauHoi.findMany({
       where,
@@ -147,7 +187,9 @@ export class QuestionsService {
     machuong = 0,
     dokho = 0,
     content = '',
+    actorId: string,
   ): Promise<number> {
+    await this.assertSubjectAccess(mamonhoc, actorId);
     const total = await this.prisma.cauHoi.count({
       where: this.buildWhere(mamonhoc, machuong, dokho, content),
     });
@@ -270,9 +312,9 @@ export class QuestionsService {
   /** POST /question/getQuestionById — chi tiết 1 câu hỏi để mở modal sửa. */
   async getQuestionById(
     id: number,
+    actorId: string,
   ): Promise<IQuestionDetail | { error: string }> {
-    const q = await this.prisma.cauHoi.findUnique({ where: { macauhoi: id } });
-    if (!q) return { error: 'not_found' };
+    const q = await this.assertQuestionAccess(id, actorId);
 
     const base64 = q.hinhanh ?? null; // nay la public URL Supabase (khong con base64)
     const detail: IQuestionDetail = {
@@ -303,12 +345,8 @@ export class QuestionsService {
   }
 
   /** POST /question/getAnswerById — đáp án (mcq/essay) hoặc câu con + đáp án (reading). */
-  async getAnswerById(id: number): Promise<IAnswerRow[] | IReadingAnswerRow[]> {
-    const q = await this.prisma.cauHoi.findUnique({
-      where: { macauhoi: id },
-      select: { macauhoi: true, loai: true, madv: true },
-    });
-    if (!q) return [];
+  async getAnswerById(id: number, actorId: string): Promise<IAnswerRow[] | IReadingAnswerRow[]> {
+    const q = await this.assertQuestionAccess(id, actorId);
 
     // Reading: gom đáp án của từng câu hỏi con (thay getSubQuestions + getAll).
     if (q.loai === 'reading' && q.madv) {
@@ -358,8 +396,10 @@ export class QuestionsService {
    */
   async getAnswersForMultipleQuestions(
     ids: number[],
+    actorId: string,
   ): Promise<IMultiAnswerRow[]> {
     if (!ids.length) return [];
+    await Promise.all([...new Set(ids)].map((id) => this.assertQuestionAccess(id, actorId)));
     const rows = await this.prisma.cauTraLoi.findMany({
       where: { macauhoi: { in: ids } },
       select: {
@@ -380,7 +420,8 @@ export class QuestionsService {
   }
 
   /** POST /question/delete — xoá mềm câu hỏi (trangthai = 0). */
-  async delete(macauhoi: number): Promise<boolean> {
+  async delete(macauhoi: number, actorId: string): Promise<boolean> {
+    await this.assertQuestionAccess(macauhoi, actorId, true);
     try {
       await this.prisma.cauHoi.update({
         where: { macauhoi },
@@ -489,6 +530,8 @@ export class QuestionsService {
         message: 'Vui lòng nhập đầy đủ môn học, chương và độ khó',
       };
     }
+
+    await this.assertSubjectAccess(mamonhoc, nguoitao);
 
     const answers = this.parseAnswers(input.cautraloi);
     if (answers === null) {
@@ -625,13 +668,9 @@ export class QuestionsService {
       return { status: 'error', message: 'Dữ liệu đáp án không hợp lệ' };
     }
 
-    const question = await this.prisma.cauHoi.findUnique({
-      where: { macauhoi: id },
-      select: { macauhoi: true, madv: true },
-    });
-    if (!question) {
-      return { status: 'error', message: 'Câu hỏi không tồn tại' };
-    }
+    const question = await this.assertQuestionAccess(id, nguoitao, true);
+    await this.assertSubjectAccess(mamonhoc, nguoitao);
+    const questionOwner = question.nguoitao;
 
     const mainImg = deleteQuestionImage ? null : await this.mainImageUrl(files);
     const optQueue = await this.uploadQueue(files, 'option_hinhanh[]');
@@ -668,7 +707,7 @@ export class QuestionsService {
               tieude: input.doanvan_tieude ?? '',
               mamonhoc,
               machuong,
-              nguoitao,
+              nguoitao: questionOwner,
             },
           });
 
@@ -702,7 +741,7 @@ export class QuestionsService {
                 dokho,
                 mamonhoc,
                 machuong,
-                nguoitao,
+                nguoitao: questionOwner,
                 loai: 'reading',
                 madv,
                 hinhanh: subImage,
@@ -734,7 +773,7 @@ export class QuestionsService {
               dokho,
               mamonhoc,
               machuong,
-              nguoitao,
+              nguoitao: questionOwner,
               loai: 'reading',
               madv,
               ...(deleteQuestionImage
@@ -789,7 +828,7 @@ export class QuestionsService {
               dokho,
               mamonhoc,
               machuong,
-              nguoitao,
+              nguoitao: questionOwner,
               loai,
               madv: null,
               ...(deleteQuestionImage
@@ -901,6 +940,8 @@ export class QuestionsService {
     if (!nguoitao || !monhoc || !chuong || !Array.isArray(items)) {
       return { status: 'error', message: 'Dữ liệu không hợp lệ' };
     }
+
+    await this.assertSubjectAccess(monhoc, nguoitao);
 
     const machuong = Number(chuong);
     const errors: string[] = [];
@@ -1044,7 +1085,9 @@ export class QuestionsService {
     chuong: number[],
     monhoc: string,
     loaicauhoi: string[],
+    actorId: string,
   ): Promise<Record<string, { de: number; tb: number; kho: number }>> {
+    await this.assertSubjectAccess(monhoc, actorId);
     const types = loaicauhoi.length ? loaicauhoi : ['mcq'];
     const result: Record<string, { de: number; tb: number; kho: number }> = {};
     for (const t of types) result[t] = { de: 0, tb: 0, kho: 0 };

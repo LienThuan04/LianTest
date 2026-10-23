@@ -213,6 +213,12 @@ export class ResultDetailDto {
   @Type(() => Number)
   @IsInt()
   makq!: number;
+
+  /** Legacy teacher clients send this too; authorization derives made from makq. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  made?: number;
 }
 
 /** $_POST[made,manhom] cho getStatictical (test_detail.js — tab Thống kê). */

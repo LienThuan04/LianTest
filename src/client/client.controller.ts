@@ -110,15 +110,23 @@ export class ClientController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('getTotalPages')
-  getTotalPages(@Body() dto: ClientPaginationBodyDto) {
-    return this.client.countUserTestSchedulePages(this.parseArgs(dto.args));
+  getTotalPages(@Body() dto: ClientPaginationBodyDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.client.countUserTestSchedulePages({
+      ...this.parseArgs(dto.args),
+      manguoidung: user.id,
+    });
   }
 
   /** POST /client/pagination — 1 trang lịch thi (mảng). */
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('pagination')
-  pagination(@Body() dto: ClientPaginationBodyDto) {
-    return this.client.listUserTestSchedule(this.parseArgs(dto.args));
+  pagination(@Body() dto: ClientPaginationBodyDto, @Req() req: Request) {
+    const user = req.user as IExamJwtPayload;
+    return this.client.listUserTestSchedule({
+      ...this.parseArgs(dto.args),
+      manguoidung: user.id,
+    });
   }
 }

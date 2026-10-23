@@ -191,10 +191,18 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getTotalPages')
-  getTotalPages(@Body() dto: ExamPaginationBodyDto, @Req() req: Request) {
+  async getTotalPages(@Body() dto: ExamPaginationBodyDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
     const args = this.parseArgs(dto.args);
     if (args.model === 'KetQuaModel') {
+      await this.exams.assertCanManageExam(Number(args.made), user.id);
+      await this.exams.assertExamGroups(
+        Number(args.made),
+        [args.manhom ?? []]
+          .flat()
+          .map(Number)
+          .filter((id) => id > 0),
+      );
       return this.exams.countExamResultPages(args);
     }
     if (args.custom?.function === 'getQuestionsForTest') {
@@ -207,10 +215,18 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('pagination')
-  paginate(@Body() dto: ExamPaginationBodyDto, @Req() req: Request) {
+  async paginate(@Body() dto: ExamPaginationBodyDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
     const args = this.parseArgs(dto.args);
     if (args.model === 'KetQuaModel') {
+      await this.exams.assertCanManageExam(Number(args.made), user.id);
+      await this.exams.assertExamGroups(
+        Number(args.made),
+        [args.manhom ?? []]
+          .flat()
+          .map(Number)
+          .filter((id) => id > 0),
+      );
       return this.exams.listExamResults(args);
     }
     if (args.custom?.function === 'getQuestionsForTest') {
@@ -223,7 +239,11 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getQuestionOfTestManual')
-  getQuestionOfTestManual(@Body() dto: ExamIdDto) {
+  async getQuestionOfTestManual(@Body() dto: ExamIdDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.getQuestionOfTestManual(dto.made);
   }
 
@@ -231,7 +251,11 @@ export class ExamsController {
   @Permissions('dethi', 'update')
   @SkipTransform()
   @Post('addDetail')
-  addDetail(@Body() dto: AddDetailDto) {
+  async addDetail(@Body() dto: AddDetailDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.addDetail(dto.made, dto.cauhoi);
   }
 
@@ -239,7 +263,11 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getDetail')
-  getDetail(@Body() dto: ExamIdDto) {
+  async getDetail(@Body() dto: ExamIdDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.getById(dto.made);
   }
 
@@ -247,7 +275,11 @@ export class ExamsController {
   @Permissions('dethi', 'delete')
   @SkipTransform()
   @Post('delete')
-  delete(@Body() dto: DeleteExamDto) {
+  async delete(@Body() dto: DeleteExamDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.delete(dto.made);
   }
 
@@ -264,8 +296,9 @@ export class ExamsController {
   @Permissions('dethi', 'update')
   @SkipTransform()
   @Post('updateTest')
-  updateTest(@Body() dto: UpdateTestDto, @Req() req: Request) {
+  async updateTest(@Body() dto: UpdateTestDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
+    await this.exams.assertCanManageExam(dto.made, user.id);
     return this.exams.updateTest(user.id, dto);
   }
 
@@ -342,8 +375,9 @@ export class ExamsController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('getQuestion')
-  getQuestion(@Body() dto: TestMadeDto, @Req() req: Request) {
+  async getQuestion(@Body() dto: TestMadeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
+    await this.exams.assertCanTakeExam(dto.made, user.id);
     return this.exams.getQuestionByUser(dto.made, user.id);
   }
 
@@ -351,8 +385,9 @@ export class ExamsController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('startTest')
-  startTest(@Body() dto: TestMadeDto, @Req() req: Request) {
+  async startTest(@Body() dto: TestMadeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
+    await this.exams.assertCanTakeExam(dto.made, user.id);
     return this.exams.startTest(dto.made, user.id);
   }
 
@@ -360,8 +395,9 @@ export class ExamsController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('getTimeTest')
-  getTimeTest(@Body() dto: TestTimeDto, @Req() req: Request) {
+  async getTimeTest(@Body() dto: TestTimeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
+    await this.exams.assertCanTakeExam(dto.dethi, user.id);
     return this.exams.getTimeTest(dto.dethi, user.id);
   }
 
@@ -369,7 +405,11 @@ export class ExamsController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('getTimeEndTest')
-  getTimeEndTest(@Body() dto: TestTimeDto) {
+  async getTimeEndTest(@Body() dto: TestTimeDto, @Req() req: Request) {
+    await this.exams.assertCanTakeExam(
+      dto.dethi,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.getTimeEndTest(dto.dethi);
   }
 
@@ -377,8 +417,9 @@ export class ExamsController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('chuyentab')
-  chuyentab(@Body() dto: TestMadeDto, @Req() req: Request) {
+  async chuyentab(@Body() dto: TestMadeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
+    await this.exams.assertCanTakeExam(dto.made, user.id);
     return this.exams.chuyentab(dto.made, user.id);
   }
 
@@ -391,10 +432,11 @@ export class ExamsController {
   @SkipTransform()
   @UseInterceptors(AnyFilesInterceptor({ limits: MULTER_LIMITS }))
   @Post('submit')
-  submit(@Req() req: Request) {
+  async submit(@Req() req: Request) {
     const user = req.user as IExamJwtPayload;
     const body = req.body as Record<string, unknown>;
     const made = Number(body.made);
+    await this.exams.assertCanTakeExam(made, user.id);
     return this.exams.submit(made, user.id, body);
   }
 
@@ -405,8 +447,12 @@ export class ExamsController {
   @Permissions('tgthi', 'join')
   @SkipTransform()
   @Post('getTestsGroupWithUserResult')
-  getTestsGroupWithUserResult(@Body() dto: GroupTestsDto, @Req() req: Request) {
+  async getTestsGroupWithUserResult(
+    @Body() dto: GroupTestsDto,
+    @Req() req: Request,
+  ) {
     const user = req.user as IExamJwtPayload;
+    await this.exams.assertGroupMember(dto.manhom, user.id);
     return this.exams.getTestsGroupWithUserResult(dto.manhom, user.id);
   }
 
@@ -420,21 +466,24 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getTestGroup')
-  getTestGroup(@Body() dto: GroupTestsDto) {
+  async getTestGroup(@Body() dto: GroupTestsDto, @Req() req: Request) {
+    await this.exams.assertCanManageGroup(
+      dto.manhom,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.getTestGroup(dto.manhom);
   }
 
-  /** POST /test/getResultDetail — chi tiết bài làm để SV xem lại. */
-  @Permissions('tgthi', 'join')
+  /** Both the owner teacher and the submitting student use this route.
+   * The service checks their separate permission and visibility policies. */
   @SkipTransform()
   @Post('getResultDetail')
-  async getResultDetail(@Body() dto: ResultDetailDto) {
-    try {
-      const data = await this.exams.getResultDetail(dto.makq);
-      return { success: true, data };
-    } catch {
-      return { success: false, error: 'Lỗi server khi lấy chi tiết bài làm' };
-    }
+  async getResultDetail(@Body() dto: ResultDetailDto, @Req() req: Request) {
+    const data = await this.exams.getResultDetailForUser(
+      dto.makq,
+      (req.user as IExamJwtPayload).id,
+    );
+    return { success: true, data };
   }
 
   // ============ CHI TIẾT/KẾT QUẢ ĐỀ (GV) + CHẤM TỰ LUẬN (slice 5) ============
@@ -443,7 +492,13 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getStatictical')
-  getStatictical(@Body() dto: StaticticalDto) {
+  async getStatictical(@Body() dto: StaticticalDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
+    if (dto.manhom > 0)
+      await this.exams.assertExamGroups(dto.made, [dto.manhom]);
     return this.exams.getStatictical(dto.made, dto.manhom);
   }
 
@@ -455,7 +510,12 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getExamineeByGroup')
-  getExamineeByGroup(@Body() dto: StaticticalDto) {
+  async getExamineeByGroup(@Body() dto: StaticticalDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
+    await this.exams.assertExamGroups(dto.made, [dto.manhom]);
     return this.exams.getExamineeByGroup(dto.made, dto.manhom);
   }
 
@@ -463,7 +523,14 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getListEssaySubmissionsAction')
-  getListEssaySubmissions(@Body() dto: ListEssaySubmissionsDto) {
+  async getListEssaySubmissions(
+    @Body() dto: ListEssaySubmissionsDto,
+    @Req() req: Request,
+  ) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
     const search = dto.q ?? dto.search ?? null;
     return this.exams.getEssaySubmissions(
       dto.made,
@@ -476,7 +543,11 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getEssayDetailAction')
-  getEssayDetail(@Body() dto: EssayDetailDto) {
+  async getEssayDetail(@Body() dto: EssayDetailDto, @Req() req: Request) {
+    await this.exams.assertCanManageResult(
+      dto.makq,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.exams.getEssayDetail(dto.makq);
   }
 
@@ -489,10 +560,14 @@ export class ExamsController {
   @Permissions('dethi', 'update')
   @SkipTransform()
   @Post('saveEssayScoreAction')
-  saveEssayScore(
+  async saveEssayScore(
     @Req() req: RawBodyRequest<Request>,
     @Body() dto: SaveEssayScoreDto,
   ) {
+    await this.exams.assertCanManageResult(
+      dto.makq,
+      (req.user as IExamJwtPayload).id,
+    );
     const diem = Number(dto.diem) || 0;
     const cau = parseScoreMapFromRawBody(req.rawBody) ?? dto.cau ?? {};
     return this.exams.saveEssayScore(dto.makq, diem, cau);
@@ -510,7 +585,14 @@ export class ExamsController {
   @SkipTransform()
   @Get('exportPdf/:makq')
   @Render('pages/export_pdf')
-  async exportPdf(@Param('makq', ParseIntPipe) makq: number) {
+  async exportPdf(
+    @Param('makq', ParseIntPipe) makq: number,
+    @Req() req: Request,
+  ) {
+    await this.exams.assertCanManageResult(
+      makq,
+      (req.user as IExamJwtPayload).id,
+    );
     const info = await this.examsExport.getInfoPrintPdf(makq);
     if (!info) throw new NotFoundException('Không tìm thấy kết quả thi.');
     const rows = await this.exams.getResultDetail(makq);
@@ -541,7 +623,15 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('exportExcel')
-  exportExcel(@Body() dto: ExportExcelDto) {
+  async exportExcel(@Body() dto: ExportExcelDto, @Req() req: Request) {
+    await this.exams.assertCanManageExam(
+      dto.made,
+      (req.user as IExamJwtPayload).id,
+    );
+    await this.exams.assertExamGroups(
+      dto.made,
+      dto.manhom ? [dto.manhom] : (dto.ds ?? []),
+    );
     return this.examsExport.exportExamScores(
       dto.made,
       Number(dto.manhom) || 0,
@@ -557,7 +647,11 @@ export class ExamsController {
   @Permissions('dethi', 'view')
   @SkipTransform()
   @Post('getMarkOfAllTest')
-  getMarkOfAllTest(@Body() dto: MarkOfAllTestDto) {
+  async getMarkOfAllTest(@Body() dto: MarkOfAllTestDto, @Req() req: Request) {
+    await this.exams.assertCanManageGroup(
+      dto.manhom,
+      (req.user as IExamJwtPayload).id,
+    );
     return this.examsExport.exportMarkOfAllTest(dto.manhom);
   }
 }

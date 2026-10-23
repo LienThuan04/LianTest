@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
+import { ForbiddenException } from '@/common/exceptions/app.exception';
 import { generatePasswordHash } from '@/lib/bcrypt/bcrypt';
 import { readXlsSheetRows, readXlsxSheetRows } from '@/common/utils/excel.util';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
@@ -30,6 +31,58 @@ export class UsersService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
   ) {}
+
+  /** Kiểm quyền từ trạng thái/nhóm hiện tại trong DB trước mọi thao tác ghi. */
+  private async requirePermission(
+    actorId: string,
+    action: 'create' | 'update' | 'delete',
+    resource = 'nguoidung',
+  ) {
+    if (!actorId)
+      throw new ForbiddenException('Không xác định được người dùng');
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: actorId },
+      select: { id: true, manhomquyen: true, trangthai: true },
+    });
+    if (!actor || actor.trangthai !== 1 || actor.manhomquyen == null) {
+      throw new ForbiddenException(
+        'Tài khoản không có quyền thực hiện thao tác',
+      );
+    }
+    const allowed = await this.prisma.chiTietQuyen.count({
+      where: {
+        manhomquyen: actor.manhomquyen,
+        chucnang: resource,
+        hanhdong: action,
+      },
+    });
+    if (!allowed)
+      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác');
+    return actor;
+  }
+
+  /** Quyền quản lý người dùng không đồng nghĩa quyền cấp/sửa nhóm đặc quyền. */
+  private async assertCanManageUser(
+    actorId: string,
+    targetId: string,
+    action: 'update' | 'delete',
+    newRole?: number,
+  ): Promise<void> {
+    const actor = await this.requirePermission(actorId, action);
+    if (actor.manhomquyen === 3) return;
+    const target = await this.prisma.nguoiDung.findUnique({
+      where: { id: targetId },
+      select: { manhomquyen: true },
+    });
+    if (
+      (target?.manhomquyen != null && ![1, 2].includes(target.manhomquyen)) ||
+      (newRole != null && ![1, 2].includes(newRole))
+    ) {
+      throw new ForbiddenException(
+        'Chỉ quản trị viên được quản lý tài khoản đặc quyền',
+      );
+    }
+  }
 
   /** Nhóm quyền đang hoạt động — cho dropdown lọc + select2 (getAllRoles). */
   getAllRoles() {
@@ -106,7 +159,21 @@ export class UsersService {
 
   /** Chi tiết 1 người dùng — thay getById(). */
   getDetail(id: string) {
-    return this.prisma.nguoiDung.findUnique({ where: { id } });
+    return this.prisma.nguoiDung.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        hoten: true,
+        gioitinh: true,
+        ngaysinh: true,
+        avatar: true,
+        ngaythamgia: true,
+        sodienthoai: true,
+        trangthai: true,
+        manhomquyen: true,
+      },
+    });
   }
 
   /** Tạo người dùng — thay create(). Như PHP: luôn nhóm 2, trạng thái 1. */
@@ -151,7 +218,9 @@ export class UsersService {
   /** Cập nhật người dùng — thay update(). password trống = giữ nguyên. */
   async update(
     dto: UpdateUserDto,
+    actorId: string,
   ): Promise<{ status: string; message: string }> {
+    await this.assertCanManageUser(actorId, dto.id, 'update', dto.role);
     const existing = await this.prisma.nguoiDung.findUnique({
       where: { email: dto.email },
     });
@@ -185,7 +254,11 @@ export class UsersService {
   }
 
   /** Xoá mềm (trangthai=0) — thay delete(). */
-  async delete(id: string): Promise<{ status: string; message: string }> {
+  async delete(
+    id: string,
+    actorId: string,
+  ): Promise<{ status: string; message: string }> {
+    await this.assertCanManageUser(actorId, id, 'delete');
     try {
       await this.prisma.nguoiDung.update({
         where: { id },
@@ -199,7 +272,12 @@ export class UsersService {
   }
 
   /** Khoá/mở khoá — thay setStatus(). Dùng bởi modal "Thành viên" trang phân quyền. */
-  async setStatus(id: string, status: number): Promise<boolean> {
+  async setStatus(
+    id: string,
+    status: number,
+    actorId: string,
+  ): Promise<boolean> {
+    await this.assertCanManageUser(actorId, id, 'update');
     try {
       await this.prisma.nguoiDung.update({
         where: { id },
@@ -298,7 +376,20 @@ export class UsersService {
     listUser: IImportUserRow[],
     password: string,
     manhom: number,
+    actorId: string,
   ): Promise<IActionStatus> {
+    const actor = await this.requirePermission(actorId, 'update', 'hocphan');
+    const group = await this.prisma.nhom.findUnique({
+      where: { manhom },
+      select: { giangvien: true, trangthai: true },
+    });
+    if (
+      !group ||
+      group.trangthai !== 1 ||
+      (group.giangvien !== actor.id && actor.manhomquyen !== 3)
+    ) {
+      throw new ForbiddenException('Bạn không có quyền quản lý nhóm này');
+    }
     if (listUser.length === 0 || !password || !manhom) {
       return {
         status: 'error',
@@ -317,6 +408,15 @@ export class UsersService {
     const errors: string[] = [];
 
     for (const user of listUser) {
+      if (
+        !user ||
+        typeof user.mssv !== 'string' ||
+        typeof user.email !== 'string' ||
+        typeof user.fullname !== 'string'
+      ) {
+        errors.push('Dữ liệu sinh viên không hợp lệ');
+        continue;
+      }
       const mssv = (user.mssv ?? '').trim();
       const email = (user.email ?? '').trim();
       const fullname = (user.fullname ?? '').trim();
@@ -327,8 +427,13 @@ export class UsersService {
 
       const account = await this.prisma.nguoiDung.findUnique({
         where: { id: mssv },
-        select: { id: true },
+        select: { id: true, manhomquyen: true },
       });
+
+      if (account && account.manhomquyen !== 2) {
+        errors.push(`Tài khoản ${mssv} không phải sinh viên`);
+        continue;
+      }
 
       if (!account) {
         try {
@@ -338,8 +443,8 @@ export class UsersService {
               email,
               hoten: fullname,
               matkhau: hashed,
-              trangthai: Number(user.trangthai ?? 1),
-              manhomquyen: Number(user.nhomquyen ?? 2),
+              trangthai: 1,
+              manhomquyen: 2,
             },
           });
         } catch (err) {
@@ -403,12 +508,25 @@ export class UsersService {
    * chết vì trùng khoá chính; (3) email trùng bắt bằng `P2002` nên không 500;
    * (4) trả `{status,message}` liệt kê rõ đã thêm / đã tồn tại / lỗi, thay vì chỉ
    * `true|false` như PHP (JS cũ chỉ báo "thành công" bất kể kết quả thật).
-   * Giữ nguyên: mặc định `trangthai`/`nhomquyen` lấy từ từng dòng của file.
+   * Admin được nhập nhóm quyền cấu hình trong file; người dùng khác chỉ được
+   * cấp nhóm giáo viên/sinh viên, không được dùng import để tự cấp đặc quyền.
    */
   async addUsersFromFile(
     listUser: IImportUserRow[],
     password: string,
+    actorId: string,
   ): Promise<IActionStatus> {
+    const actor = await this.requirePermission(actorId, 'create');
+    if (
+      actor.manhomquyen !== 3 &&
+      listUser.some(
+        (user) => user && ![1, 2].includes(Number(user.nhomquyen ?? 2)),
+      )
+    ) {
+      throw new ForbiddenException(
+        'Chỉ quản trị viên được cấp nhóm quyền đặc biệt',
+      );
+    }
     if (listUser.length === 0 || !password) {
       return { status: 'error', message: 'Dữ liệu hoặc mật khẩu không hợp lệ' };
     }
@@ -424,6 +542,15 @@ export class UsersService {
     const errors: string[] = [];
 
     for (const user of listUser) {
+      if (
+        !user ||
+        typeof user.mssv !== 'string' ||
+        typeof user.email !== 'string' ||
+        typeof user.fullname !== 'string'
+      ) {
+        errors.push('Dữ liệu người dùng không hợp lệ');
+        continue;
+      }
       const mssv = (user.mssv ?? '').trim();
       const email = (user.email ?? '').trim();
       const fullname = (user.fullname ?? '').trim();

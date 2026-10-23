@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import type {
@@ -22,6 +22,34 @@ export class SubjectsService {
   private readonly logger = new Logger(SubjectsService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  private async assertChapterSubjectAccess(mamonhoc: string, actorId: string): Promise<void> {
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: actorId },
+      select: { manhomquyen: true, trangthai: true },
+    });
+    if (!actor || actor.trangthai !== 1) {
+      throw new ForbiddenException('Tài khoản không có quyền truy cập.');
+    }
+    if (actor.manhomquyen === 3) return;
+    const assigned = await this.prisma.phanCong.count({
+      where: { mamonhoc, manguoidung: actorId, trangthai: 1 },
+    });
+    if (assigned === 0) {
+      throw new ForbiddenException('Bạn không được phân công môn học này.');
+    }
+  }
+
+  private async assertChapterAccess(machuong: number, actorId: string): Promise<void> {
+    const chapter = await this.prisma.chuong.findUnique({
+      where: { machuong },
+      select: { mamonhoc: true, trangthai: true },
+    });
+    if (!chapter || chapter.trangthai !== 1) {
+      throw new NotFoundException('Chương không tồn tại.');
+    }
+    await this.assertChapterSubjectAccess(chapter.mamonhoc, actorId);
+  }
 
   // ── MÔN HỌC ────────────────────────────────────────────────────────────────
 
@@ -180,7 +208,8 @@ export class SubjectsService {
   // ── CHƯƠNG ───────────────────────────────────────────────────────────────
 
   /** Danh sách chương còn hoạt động của 1 môn — thay ChuongModel::getAll(). */
-  getChapters(mamonhoc: string): Promise<IChapterRow[]> {
+  async getChapters(mamonhoc: string, actorId: string): Promise<IChapterRow[]> {
+    await this.assertChapterSubjectAccess(mamonhoc, actorId);
     return this.prisma.chuong.findMany({
       where: { mamonhoc, trangthai: 1 },
       orderBy: { machuong: 'asc' },
@@ -188,7 +217,8 @@ export class SubjectsService {
   }
 
   /** Thêm chương — thay ChuongModel::insert(). */
-  async addChapter(mamonhoc: string, tenchuong: string): Promise<boolean> {
+  async addChapter(mamonhoc: string, tenchuong: string, actorId: string): Promise<boolean> {
+    await this.assertChapterSubjectAccess(mamonhoc, actorId);
     try {
       await this.prisma.chuong.create({
         data: { mamonhoc, tenchuong, trangthai: 1 },
@@ -201,7 +231,8 @@ export class SubjectsService {
   }
 
   /** Đổi tên chương — thay ChuongModel::update(). */
-  async updateChapter(machuong: number, tenchuong: string): Promise<boolean> {
+  async updateChapter(machuong: number, tenchuong: string, actorId: string): Promise<boolean> {
+    await this.assertChapterAccess(machuong, actorId);
     try {
       await this.prisma.chuong.update({
         where: { machuong },
@@ -215,7 +246,8 @@ export class SubjectsService {
   }
 
   /** Xoá mềm chương (trangthai = 0) — thay ChuongModel::delete(). */
-  async deleteChapter(machuong: number): Promise<boolean> {
+  async deleteChapter(machuong: number, actorId: string): Promise<boolean> {
+    await this.assertChapterAccess(machuong, actorId);
     try {
       await this.prisma.chuong.update({
         where: { machuong },

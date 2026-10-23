@@ -126,14 +126,14 @@ export class EmailService {
       'test-email.ejs',
     );
     const html = await ejs.renderFile(templatePath, {
-      appName: 'privacy@tiktok.com',
-      supportEmail: 'support@tiktok.com',
+      appName: this.appName,
+      supportEmail: this.supportEmail,
       toEmail,
     });
     const info = await this.transporter.sendMail({
-      from: 'privacy@tiktok.com',
+      from: this.fromEmail,
       to: toEmail,
-      subject: `Tiktok Privacy Officer`,
+      subject: `${this.appName} - Email Configuration Test`,
       html,
     });
 

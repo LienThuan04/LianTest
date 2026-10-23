@@ -19,6 +19,8 @@ export interface IRecoveryTicket {
   email: string;
   purpose: 'recover';
   verified: boolean;
+  /** HMAC phía server của phiên bản mật khẩu; không chứa hash/OTP thật. */
+  passwordVersion: string;
 }
 
 /** Shape {status,message} mà signup/recover JS đọc. */

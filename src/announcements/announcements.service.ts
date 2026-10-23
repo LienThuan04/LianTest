@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import type {
@@ -21,6 +21,64 @@ import type {
 export class AnnouncementsService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private async getActor(actorId: string) {
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: actorId },
+      select: { manhomquyen: true, trangthai: true },
+    });
+    if (!actor || actor.trangthai !== 1) {
+      throw new ForbiddenException('Tài khoản không có quyền truy cập.');
+    }
+    return actor;
+  }
+
+  async assertCanManageAnnouncement(matb: number, actorId: string): Promise<void> {
+    const [notice, actor] = await Promise.all([this.getById(matb), this.getActor(actorId)]);
+    if (!notice) throw new NotFoundException('Không tìm thấy thông báo.');
+    if (notice.nguoitao !== actorId && actor.manhomquyen !== 3) {
+      throw new ForbiddenException('Bạn không có quyền với thông báo này.');
+    }
+  }
+
+  private async assertTargetGroups(nhom: number[], actorId: string): Promise<void> {
+    const ids = [...new Set(nhom)];
+    if (!ids.length) throw new BadRequestException('Vui lòng chọn nhóm nhận thông báo.');
+    const actor = await this.getActor(actorId);
+    const groups = await this.prisma.nhom.findMany({
+      where: { manhom: { in: ids }, trangthai: 1 },
+      select: { manhom: true, giangvien: true },
+    });
+    if (groups.length !== ids.length) throw new NotFoundException('Nhóm nhận không tồn tại.');
+    if (actor.manhomquyen !== 3 && groups.some((group) => group.giangvien !== actorId)) {
+      throw new ForbiddenException('Bạn không quản lý nhóm nhận thông báo.');
+    }
+  }
+
+  private async assertCanReadAnnouncement(matb: number, actorId: string): Promise<void> {
+    const [notice, actor] = await Promise.all([this.getById(matb), this.getActor(actorId)]);
+    if (!notice) throw new NotFoundException('Không tìm thấy thông báo.');
+    if (notice.nguoitao === actorId || actor.manhomquyen === 3) return;
+    const groups = await this.prisma.chiTietThongBao.findMany({
+      where: { matb },
+      select: { manhom: true },
+    });
+    const membership = await this.prisma.chiTietNhom.count({
+      where: { manguoidung: actorId, manhom: { in: groups.map((group) => group.manhom) } },
+    });
+    if (membership === 0) throw new ForbiddenException('Bạn không phải người nhận thông báo.');
+  }
+
+  private async assertCanReadGroup(manhom: number, actorId: string): Promise<void> {
+    const [group, actor] = await Promise.all([
+      this.prisma.nhom.findUnique({ where: { manhom }, select: { giangvien: true, trangthai: true } }),
+      this.getActor(actorId),
+    ]);
+    if (!group || group.trangthai !== 1) throw new NotFoundException('Không tìm thấy nhóm.');
+    if (group.giangvien === actorId || actor.manhomquyen === 3) return;
+    const membership = await this.prisma.chiTietNhom.count({ where: { manhom, manguoidung: actorId } });
+    if (membership === 0) throw new ForbiddenException('Bạn không thuộc nhóm này.');
+  }
+
   /**
    * Chuỗi thời gian JS gửi lên có dạng 'YYYY/M/D H:m:s' (announcement.js) —
    * new Date() hiểu được; rỗng/không hợp lệ → dùng thời điểm hiện tại.
@@ -39,9 +97,9 @@ export class AnnouncementsService {
     tx: Prisma.TransactionClient,
     matb: number,
     nhom: number[],
-  ): Promise<void> {
+  ): Promise<string[]> {
     const uniq = [...new Set(nhom)];
-    if (!uniq.length) return;
+    if (!uniq.length) return [];
 
     // Chỉ gửi tới nhóm CÓ THẬT (PHP dựa FK; ở đây chitietthongbao.manhom không
     // có FK trong schema Prisma nên tự lọc để tránh dòng mồ côi).
@@ -50,7 +108,7 @@ export class AnnouncementsService {
       select: { manhom: true },
     });
     const manhoms = valid.map((n) => n.manhom);
-    if (!manhoms.length) return;
+    if (!manhoms.length) return [];
 
     await tx.chiTietThongBao.createMany({
       data: manhoms.map((manhom) => ({ matb, manhom })),
@@ -69,6 +127,7 @@ export class AnnouncementsService {
         skipDuplicates: true,
       });
     }
+    return userIds;
   }
 
   /**
@@ -83,6 +142,7 @@ export class AnnouncementsService {
     nguoitao: string,
     nhom: number[],
   ): Promise<number | false> {
+    await this.assertTargetGroups(nhom, nguoitao);
     try {
       return await this.prisma.$transaction(async (tx) => {
         const tb = await tx.thongBao.create({
@@ -109,18 +169,24 @@ export class AnnouncementsService {
   /**
    * POST /teacher_announcement/updateAnnounce — sửa nội dung + đổi nhóm nhận.
    * Thay updateAnnounce: cập nhật nội dung, xoá hết chitietthongbao rồi gửi lại.
-   * QUIRK PHP giữ nguyên: trangthaithongbao của nhóm bị bỏ KHÔNG bị xoá.
+   * Dọn trạng thái của người không còn nhận, giữ trạng thái đọc của người còn nhận.
    */
   async updateAnnounce(
     matb: number,
     noidung: string,
     nhom: number[],
+    actorId: string,
   ): Promise<boolean> {
+    await this.assertCanManageAnnouncement(matb, actorId);
+    await this.assertTargetGroups(nhom, actorId);
     try {
       await this.prisma.$transaction(async (tx) => {
         await tx.thongBao.update({ where: { matb }, data: { noidung } });
         await tx.chiTietThongBao.deleteMany({ where: { matb } });
-        await this.sendToGroups(tx, matb, nhom);
+        const recipients = await this.sendToGroups(tx, matb, nhom);
+        await tx.trangThaiThongBao.deleteMany({
+          where: { matb, manguoidung: { notIn: recipients } },
+        });
       });
       return true;
     } catch {
@@ -133,7 +199,8 @@ export class AnnouncementsService {
    * Thay deleteAnnounce + deleteDetailAnnounce (chitietthongbao/trangthaithongbao
    * đã onDelete: Cascade trong schema nên chỉ cần xoá thongbao).
    */
-  async deleteAnnounce(matb: number): Promise<boolean> {
+  async deleteAnnounce(matb: number, actorId: string): Promise<boolean> {
+    await this.assertCanManageAnnouncement(matb, actorId);
     try {
       await this.prisma.thongBao.delete({ where: { matb } });
       return true;
@@ -147,7 +214,8 @@ export class AnnouncementsService {
    * Thay getDetail: thông tin môn/năm/kỳ lấy theo nhóm ĐẦU TIÊN nhận thông báo
    * (như PHP lấy dòng đầu của phép nối), kèm mảng mã nhóm đang nhận.
    */
-  async getDetail(matb: number): Promise<IAnnouncementDetail | null> {
+  async getDetail(matb: number, actorId: string): Promise<IAnnouncementDetail | null> {
+    await this.assertCanReadAnnouncement(matb, actorId);
     const rows = await this.prisma.$queryRaw<
       {
         matb: number;
@@ -181,7 +249,8 @@ export class AnnouncementsService {
    * QUIRK PHP: câu gốc nối thêm `chitietnhom` cùng mã nhóm → nhóm CHƯA có thành
    * viên nào sẽ không thấy thông báo. Giữ nguyên bằng EXISTS.
    */
-  getAnnounce(manhom: number): Promise<IGroupAnnouncementRow[]> {
+  async getAnnounce(manhom: number, actorId: string): Promise<IGroupAnnouncementRow[]> {
+    await this.assertCanReadGroup(manhom, actorId);
     return this.prisma.$queryRaw<IGroupAnnouncementRow[]>(Prisma.sql`
       SELECT DISTINCT TB.matb, TB.noidung, ND.avatar, TB.thoigiantao
       FROM thongbao TB
