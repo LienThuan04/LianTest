@@ -81,8 +81,8 @@ $(document).ready(function () {
       groups.forEach((group, index) => {
         const actionBtn =
           group.hienthi == 1
-            ? `<a class="dropdown-item btn-hide-group" data-id="${group.manhom}" href="#"><i class="si si-eye me-2"></i> Ẩn nhóm</a>`
-            : `<a class="dropdown-item btn-unhide-group" data-id="${group.manhom}" href="#"><i class="si si-action-undo me-2"></i> Huỷ ẩn</a>`;
+            ? `<button type="button" class="dropdown-item btn-hide-group" data-id="${group.manhom}"><i class="si si-eye me-2"></i> Ẩn nhóm</button>`
+            : `<button type="button" class="dropdown-item btn-unhide-group" data-id="${group.manhom}"><i class="si si-action-undo me-2"></i> Huỷ ẩn</button>`;
 
         html += `
         <tr>
@@ -101,11 +101,11 @@ $(document).ready(function () {
               </button>
               <div class="dropdown-menu dropdown-menu-end">
                 ${actionBtn}
-                <a class="dropdown-item btn-delete-group" data-id="${
+                <button type="button" class="dropdown-item btn-delete-group" data-id="${
                   group.manhom
-                }" href="#">
+                }">
                   <i class="si si-logout me-2"></i> Thoát nhóm
-                </a>
+                </button>
               </div>
             </div>
             
@@ -305,12 +305,14 @@ $(document).ready(function () {
     showListGroup(result);
   });
 
-  $(document).on("click", ".btn-hide-group", function () {
+  $(document).on("click", ".btn-hide-group", function (e) {
+    e.preventDefault();
     let manhom = $(this).data("id");
     actionHide(manhom, 0, "Ẩn nhóm thành công");
   });
 
-  $(document).on("click", ".btn-unhide-group", function () {
+  $(document).on("click", ".btn-unhide-group", function (e) {
+    e.preventDefault();
     let manhom = $(this).data("id");
     actionHide(manhom, 1, "Huỷ ẩn nhóm thành công");
   });
@@ -338,7 +340,8 @@ $(document).ready(function () {
     });
   }
 
-  $(document).on("click", ".btn-delete-group", function () {
+  $(document).on("click", ".btn-delete-group", function (e) {
+    e.preventDefault();
     const swalWithBootstrapButtons = Swal.mixin({
       customClass: {
         confirmButton: "btn btn-success me-2",

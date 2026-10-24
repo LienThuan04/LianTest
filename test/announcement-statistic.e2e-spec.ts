@@ -17,15 +17,16 @@ import {
  * 1. Chỉ TẠO dữ liệu mới (thông báo gắn dấu `[E2E-TB] <timestamp>`); `afterAll`
  *    xoá đúng phần đã tạo. Thao tác nào phải sửa dữ liệu sẵn có (đánh dấu đã xem
  *    thông báo) thì KHÔI PHỤC ngay trong cùng ca test.
- * 2. Thiếu dữ liệu mẫu → bỏ qua kèm cảnh báo thay vì đỏ oan.
+ * 2. Thiếu dữ liệu mẫu → báo lỗi tiên quyết, không bỏ qua ca test.
  *
  * ⚠️ QUYỀN: dump gốc chỉ seed `thongbao`/`thongke` cho nhóm quyền 3 (Admin), mà
- * dữ liệu nghiệp vụ (nhóm/đề/kết quả) lại thuộc GV `gv001` (nhóm quyền 1) — admin
- * không có gì để xem. Nên `beforeAll` CẤP TẠM các quyền còn thiếu cho nhóm quyền 1
+ * dữ liệu nghiệp vụ (nhóm/đề/kết quả) lại thuộc GV `gv001` (nhóm quyền 1).
+ * Admin hiện xem toàn hệ thống; suite này kiểm tra phạm vi riêng của GV, nên
+ * `beforeAll` CẤP TẠM các quyền còn thiếu cho nhóm quyền 1
  * và `afterAll` xoá lại ĐÚNG những dòng đã thêm (dòng có sẵn không đụng tới).
  *
- * Prisma chỉ dùng để dò dữ liệu tiên quyết, tính lại kỳ vọng ĐỘC LẬP với truy vấn
- * của service và dọn dẹp; mọi bước nghiệp vụ đều đi qua HTTP như trình duyệt.
+ * Prisma dùng để dò/tạo fixture riêng, tính lại kỳ vọng ĐỘC LẬP với truy vấn
+ * của service và dọn dẹp; các thao tác nghiệp vụ được kiểm tra qua HTTP.
  */
 describe('Thông báo + Thống kê (e2e)', () => {
   let app: NestExpressApplication;
@@ -45,7 +46,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
 
   const marker = `[E2E-TB] ${Date.now()}`;
 
-  /** Dữ liệu tiên quyết dò từ CSDL mẫu; null = bỏ qua cả bộ test. */
+  /** Dữ liệu tiên quyết dò từ CSDL mẫu; null = lỗi tiên quyết. */
   let fixture: {
     /** 2 nhóm học phần của gv001 (có thành viên) — nhóm 2 dùng cho ca đổi nhóm nhận. */
     g1: { manhom: number; tennhom: string; mamonhoc: string };
@@ -59,6 +60,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
   } | null = null;
 
   let matb = 0;
+  const statisticExamIds: number[] = [];
 
   /** POST kiểu AJAX của JS gốc (urlencoded + header XHR). */
   const post = (path: string, cookie: string, body: Record<string, unknown>) =>
@@ -77,6 +79,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
       id: GV,
       limit: 10,
       page: 1,
+      input: marker,
       ...extra,
     });
 
@@ -194,6 +197,15 @@ describe('Thông báo + Thống kê (e2e)', () => {
           where: { matb: { in: tb.map((t) => t.matb) } },
         });
       }
+      // Chỉ dọn đề/kết quả do ca kiểm tra điểm 10 tạo.
+      if (statisticExamIds.length) {
+        await prisma.ketQua.deleteMany({
+          where: { made: { in: statisticExamIds } },
+        });
+        await prisma.deThi.deleteMany({
+          where: { made: { in: statisticExamIds } },
+        });
+      }
       // Trả nhóm quyền về đúng như trước khi chạy test.
       for (const row of granted) {
         await prisma.chiTietQuyen.deleteMany({ where: row });
@@ -232,7 +244,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
       noticeText: `${marker} Nội dung ban đầu`,
       mamonhoc: fixture.g1.mamonhoc,
       manhom: nhom,
-      thoigiantao: '2026/8/11 9:30:0',
+      thoigiantao: new Date().toISOString(),
     });
 
     expect(res.status).toBe(201);
@@ -243,8 +255,8 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(tb!.nguoitao).toBe(GV);
     expect(tb!.is_auto).toBe(0); // KHÁC thông báo tự sinh khi tạo đề (is_auto=1)
     expect(tb!.noidung).toContain(marker);
-    // Chuỗi 'YYYY/M/D H:m:s' của announcement.js được hiểu đúng.
-    expect(tb!.thoigiantao?.getFullYear()).toBe(2026);
+    expect(tb!.thoigiantao!.getTime()).toBeLessThanOrEqual(Date.now());
+    expect(tb!.thoigiantao!.getTime()).toBeGreaterThan(Date.now() - 60_000);
 
     const ct = await prisma.chiTietThongBao.findMany({ where: { matb } });
     expect(ct.map((c) => c.manhom).sort()).toEqual([...nhom].sort());
@@ -260,23 +272,42 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(tt.every((r) => r.trangthai === 'chưa xem')).toBe(true);
   });
 
-  it('gửi cho nhóm KHÔNG tồn tại → không tạo dòng chitietthongbao mồ côi', async () => {
+  it('gửi cho nhóm KHÔNG tồn tại → 404, không ghi thông báo hay người nhận', async () => {
     requireFixture(
       fixture && gvCookie,
       'seeded business fixture and teacher session',
     );
-    const res = await post('/teacher_announcement/sendAnnouncement', gvCookie, {
+    await post('/teacher_announcement/sendAnnouncement', gvCookie, {
       noticeText: `${marker} Nhóm không tồn tại`,
       manhom: [999999],
-    });
+    }).expect(404);
+    expect(
+      await prisma.thongBao.count({
+        where: { noidung: `${marker} Nhóm không tồn tại` },
+      }),
+    ).toBe(0);
+  });
 
-    const id = Number(res.text);
-    expect(id).toBeGreaterThan(0);
-    // KHÁC PHP (dựa FK): service tự lọc nhóm có thật trước khi ghi.
-    expect(await prisma.chiTietThongBao.count({ where: { matb: id } })).toBe(0);
-    expect(await prisma.trangThaiThongBao.count({ where: { matb: id } })).toBe(
-      0,
+  it('GV khác không gửi/xem thông báo hoặc nhóm ngoài quyền', async () => {
+    requireFixture(
+      matb && fixture && gv2Cookie,
+      'notice, fixture and second teacher session',
     );
+    await post('/teacher_announcement/sendAnnouncement', gv2Cookie, {
+      noticeText: `${marker} Nhóm ngoài quyền`,
+      manhom: [fixture.g1.manhom],
+    }).expect(403);
+    await post('/teacher_announcement/getDetail', gv2Cookie, { matb }).expect(
+      403,
+    );
+    await post('/teacher_announcement/getAnnounce', gv2Cookie, {
+      manhom: fixture.g1.manhom,
+    }).expect(403);
+    expect(
+      await prisma.thongBao.count({
+        where: { noidung: `${marker} Nhóm ngoài quyền` },
+      }),
+    ).toBe(0);
   });
 
   it('POST getDetail trả nội dung + danh sách mã nhóm đang nhận', async () => {
@@ -385,7 +416,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(row.tenhocky).toBe(fixture.hocky);
   });
 
-  it('POST getAnnounce lấy thông báo theo nhóm (nhóm lạ → rỗng)', async () => {
+  it('POST getAnnounce lấy thông báo theo nhóm; nhóm không tồn tại → 404', async () => {
     requireFixture(
       matb && fixture && gvCookie,
       'announcement created by a preceding test and seeded business fixture and teacher session',
@@ -398,10 +429,9 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(row.noidung).toContain(marker);
     expect(row).toHaveProperty('avatar');
 
-    const nhomLa = await post('/teacher_announcement/getAnnounce', gvCookie, {
+    await post('/teacher_announcement/getAnnounce', gvCookie, {
       manhom: 999999,
-    });
-    expect(nhomLa.body).toEqual([]);
+    }).expect(404);
   });
 
   // ── Thông báo: phía sinh viên (chuông) ─────────────────────────────────────
@@ -528,12 +558,21 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(tb!.noidung).toContain(marker); // còn nguyên
   });
 
-  it('updateAnnounce đổi nội dung + nhóm nhận (giữ quirk không dọn trangthaithongbao)', async () => {
+  it('updateAnnounce dọn người nhận bị bỏ, giữ trạng thái đọc của người còn nhận', async () => {
     requireFixture(
       matb && fixture && gvCookie,
       'announcement created by a preceding test and seeded business fixture and teacher session',
     );
-    const truoc = await prisma.trangThaiThongBao.count({ where: { matb } });
+    const members = await prisma.chiTietNhom.findMany({
+      where: { manhom: fixture.g1.manhom },
+      select: { manguoidung: true },
+    });
+    const expectedIds = [...new Set(members.map((m) => m.manguoidung))].sort();
+    await prisma.trangThaiThongBao.update({
+      where: { matb_manguoidung: { matb, manguoidung: fixture.sv } },
+      data: { trangthai: 'đã xem' },
+    });
+    const truoc = await prisma.trangThaiThongBao.findMany({ where: { matb } });
 
     const res = await post('/teacher_announcement/updateAnnounce', gvCookie, {
       matb,
@@ -547,10 +586,13 @@ describe('Thông báo + Thống kê (e2e)', () => {
     const ct = await prisma.chiTietThongBao.findMany({ where: { matb } });
     expect(ct.map((c) => c.manhom)).toEqual([fixture.g1.manhom]);
 
-    // QUIRK PHP: SV của nhóm bị bỏ vẫn còn dòng trạng thái đọc.
-    expect(await prisma.trangThaiThongBao.count({ where: { matb } })).toBe(
-      truoc,
-    );
+    const sau = await prisma.trangThaiThongBao.findMany({ where: { matb } });
+    expect(sau.map((r) => r.manguoidung).sort()).toEqual(expectedIds);
+    for (const row of sau) {
+      expect(row.trangthai).toBe(
+        truoc.find((r) => r.manguoidung === row.manguoidung)!.trangthai,
+      );
+    }
   });
 
   it('deleteAnnounce xoá thông báo + dữ liệu phụ thuộc (cascade)', async () => {
@@ -601,7 +643,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
     }
   });
 
-  it('getStatictical (tất cả nhóm) khớp số liệu tính độc lập — kể cả quirk đếm trùng', async () => {
+  it('getStatictical (tất cả nhóm) đếm mỗi bài đúng một lần', async () => {
     requireFixture(
       fixture && gvCookie,
       'seeded business fixture and teacher session',
@@ -619,12 +661,10 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(res.body.diem_trung_binh).toBeCloseTo(mong.diem_trung_binh, 2);
     expect(res.body.thong_ke_diem).toEqual(mong.thong_ke_diem);
 
-    // QUIRK PHP: JOIN chitietnhom chỉ theo manguoidung → SV học nhiều nhóm bị
-    // đếm nhiều lần khi chọn "Tất cả nhóm". Số bài THẬT nhỏ hơn hoặc bằng.
     const soBaiThat = await prisma.ketQua.count({
       where: { made: fixture.made, diemthi: { not: null } },
     });
-    expect(res.body.da_nop_bai).toBeGreaterThanOrEqual(soBaiThat);
+    expect(res.body.da_nop_bai).toBe(soBaiThat);
   });
 
   it('getStatictical lọc theo 1 nhóm → chỉ đếm bài của nhóm đó', async () => {
@@ -650,21 +690,36 @@ describe('Thông báo + Thống kê (e2e)', () => {
     expect(res.body.thong_ke_diem).toEqual(mong.thong_ke_diem);
   });
 
-  it('thong_ke_diem có 10 khoảng và bỏ sót điểm 10 (giữ quirk PHP)', async () => {
+  it('thong_ke_diem có 10 khoảng, khoảng cuối gồm cả điểm 10', async () => {
     requireFixture(
       fixture && gvCookie,
       'seeded business fixture and teacher session',
     );
+    const exam = await prisma.deThi.create({
+      data: {
+        nguoitao: GV,
+        monthi: fixture.g1.mamonhoc,
+        tende: `${marker} Điểm 10`,
+      },
+    });
+    statisticExamIds.push(exam.made);
+    await prisma.giaoDeThi.create({
+      data: { made: exam.made, manhom: fixture.g1.manhom },
+    });
+    await prisma.ketQua.create({
+      data: {
+        made: exam.made,
+        manguoidung: fixture.sv,
+        diemthi: 10,
+        trangthai: 'Đã nộp',
+      },
+    });
     const res = await post('/statistic/getStatictical', gvCookie, {
-      made: fixture.made,
+      made: exam.made,
       manhom: 0,
     });
-    const bins = res.body.thong_ke_diem as number[];
-    expect(bins).toHaveLength(10);
-
-    const mong = await tinhThongKeDe(fixture.made, 0);
-    // Điểm đúng 10 không rơi vào khoảng nào → tổng cột = số bài có điểm < 10.
-    expect(bins.reduce((a, b) => a + b, 0)).toBe(mong.so_bai_duoi_10);
+    expect(res.body.da_nop_bai).toBe(1);
+    expect(res.body.thong_ke_diem).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0, 1]);
   });
 
   it('getStatictical với đề của người khác → trả {error}, KHÔNG lộ số liệu', async () => {
@@ -781,24 +836,22 @@ describe('Thông báo + Thống kê (e2e)', () => {
 
   /**
    * Thống kê 1 đề, tính bằng các truy vấn Prisma đơn giản (không tái dùng câu
-   * SQL của service) — kể cả quirk "đếm theo số nhóm SV tham gia".
+   * SQL của service). Thành viên nhiều nhóm không nhân số bài hoặc số lượt vắng.
    */
   async function tinhThongKeDe(made: number, manhom: number) {
     const kq = await prisma.ketQua.findMany({
       where: { made },
       select: { manguoidung: true, diemthi: true },
     });
-    const memberships = kq.length
-      ? await prisma.chiTietNhom.findMany({
-          where: {
-            manguoidung: { in: kq.map((r) => r.manguoidung) },
-            ...(manhom ? { manhom } : {}),
-          },
-          select: { manguoidung: true },
-        })
-      : [];
-    const soLan = (u: string) =>
-      memberships.filter((m) => m.manguoidung === u).length;
+    const assigned = await prisma.giaoDeThi.findMany({
+      where: { made, ...(manhom ? { manhom } : {}) },
+      select: { manhom: true },
+    });
+    const memberships = await prisma.chiTietNhom.findMany({
+      where: { manhom: { in: assigned.map((g) => g.manhom) } },
+      select: { manguoidung: true },
+    });
+    const eligible = new Set(memberships.map((m) => m.manguoidung));
 
     const bins = new Array<number>(10).fill(0);
     let da_nop_bai = 0;
@@ -806,41 +859,24 @@ describe('Thông báo + Thống kê (e2e)', () => {
     let tong = 0;
     let dem = 0;
     let diem_cao_nhat = 0;
-    let so_bai_duoi_10 = 0;
     for (const r of kq) {
-      const lan = soLan(r.manguoidung);
-      if (lan === 0) continue;
+      if (manhom && !eligible.has(r.manguoidung)) continue;
       if (r.diemthi === null) {
-        chua_nop_bai += lan;
+        chua_nop_bai++;
         continue;
       }
-      da_nop_bai += lan;
-      tong += r.diemthi * lan;
-      dem += lan;
-      const capped = Math.min(r.diemthi, 10);
+      da_nop_bai++;
+      const capped = Math.max(0, Math.min(r.diemthi, 10));
+      tong += capped;
+      dem++;
       diem_cao_nhat = Math.max(diem_cao_nhat, capped);
-      if (capped < 10) {
-        bins[Math.floor(capped)] += lan;
-        so_bai_duoi_10 += lan;
-      }
+      bins[Math.min(Math.floor(capped), 9)]++;
     }
 
     // Không thi = thành viên nhóm được giao đề nhưng chưa có kết quả.
-    const assigned = await prisma.giaoDeThi.findMany({
-      where: { made },
-      select: { manhom: true },
-    });
-    let khong_thi = 0;
-    for (const g of assigned) {
-      if (manhom && g.manhom !== manhom) continue;
-      const members = await prisma.chiTietNhom.findMany({
-        where: { manhom: g.manhom },
-        select: { manguoidung: true },
-      });
-      for (const m of members) {
-        if (!kq.some((r) => r.manguoidung === m.manguoidung)) khong_thi++;
-      }
-    }
+    const khong_thi = [...eligible].filter(
+      (id) => !kq.some((r) => r.manguoidung === id),
+    ).length;
 
     return {
       da_nop_bai,
@@ -849,7 +885,6 @@ describe('Thông báo + Thống kê (e2e)', () => {
       diem_cao_nhat,
       diem_trung_binh: dem ? round1(tong / dem) : 0,
       thong_ke_diem: bins,
-      so_bai_duoi_10,
     };
   }
 
@@ -904,19 +939,21 @@ describe('Thông báo + Thống kê (e2e)', () => {
     let da_nop_bai = 0;
     let chua_nop_bai = 0;
     for (const r of kq) {
-      for (const c of cap) {
-        if (c.made !== r.made || !laThanhVien(r.manguoidung, c.manhom))
-          continue;
-        if (r.diemthi === null) chua_nop_bai++;
-        else {
-          da_nop_bai++;
-          diem.push(Math.min(r.diemthi, 10));
-        }
+      if (
+        !cap.some(
+          (c) => c.made === r.made && laThanhVien(r.manguoidung, c.manhom),
+        )
+      )
+        continue;
+      if (r.diemthi === null) chua_nop_bai++;
+      else {
+        da_nop_bai++;
+        diem.push(Math.max(0, Math.min(r.diemthi, 10)));
       }
     }
-    for (const d of diem) if (d < 10) bins[Math.floor(d)]++;
+    for (const d of diem) bins[Math.min(Math.floor(d), 9)]++;
 
-    // COUNT(DISTINCT manguoidung) — đếm theo NGƯỜI, không theo lượt đề.
+    // Một SV vắng hai đề là hai lượt vắng; nhiều nhóm cùng đề chỉ là một lượt.
     const chuaLam = new Set<string>();
     for (const c of cap) {
       for (const t of thanhVien) {
@@ -924,7 +961,7 @@ describe('Thông báo + Thống kê (e2e)', () => {
         const daLam = kq.some(
           (r) => r.made === c.made && r.manguoidung === t.manguoidung,
         );
-        if (!daLam) chuaLam.add(t.manguoidung);
+        if (!daLam) chuaLam.add(JSON.stringify([t.manguoidung, c.made]));
       }
     }
 

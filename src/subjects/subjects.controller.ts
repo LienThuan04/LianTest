@@ -147,7 +147,7 @@ export class SubjectsController {
   // ── Chương (chuong) ─────────────────────────────────────────────────────────
 
   /** POST /subject/getAllChapter — chương của 1 môn (thay getAllChapter). */
-  @Permissions('monhoc', 'view')
+  @Permissions('chuong', 'view')
   @SkipTransform()
   @Post('getAllChapter')
   getAllChapter(@Body() dto: ChapterListDto, @Req() req: Request) {

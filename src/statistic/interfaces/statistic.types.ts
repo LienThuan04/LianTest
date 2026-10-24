@@ -17,6 +17,7 @@ export interface IStatisticData {
 export interface ISemesterOption {
   mahocky: number;
   tenhocky: string;
+  namhoc: number;
 }
 
 /** Năm học có đề của GV (dropdown lọc tổng hợp). */

@@ -24,7 +24,8 @@
         <div class="auth-field"><label for="signup-confirm_password">Xác nhận mật khẩu</label><input id="signup-confirm_password" class="form-control" type="password" autocomplete="new-password" name="confirm_password" placeholder="Nhập lại mật khẩu" required></div>
       </div>
       <div class="checkbox-container">
-        <label><input type="checkbox" required> Tôi đồng ý với <a href="#" onclick="document.getElementById('termsModal').style.display='flex'; return false;">chính sách và điều khoản</a></label>
+        <label><input type="checkbox" required> Tôi đồng ý với</label>
+        <button type="button" class="terms-toggle" aria-haspopup="dialog" aria-controls="termsModal" onclick="document.getElementById('termsModal').style.display='flex';">chính sách và điều khoản</button>
       </div>
       <button type="submit" class="btn btn-primary">Tạo tài khoản</button>
       <a href="/auth/signin" class="btn btn-secondary">Quay lại đăng nhập</a>

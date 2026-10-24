@@ -10,7 +10,10 @@ const { StatisticService } = loadTypeScript(path.resolve(__dirname, '../../src/s
 });
 function statisticFixture(rows) {
   let calls = 0;
-  return new StatisticService({ $queryRaw: async () => ++calls === 1 ? rows : [{ total: 0n }] });
+  return new StatisticService({
+    nguoiDung: { findUnique: async () => ({ manhomquyen: 1, trangthai: 1 }) },
+    $queryRaw: async () => ++calls === 1 ? rows : [{ total: 0n }],
+  });
 }
 for (const mode of ['detail', 'aggregate']) {
   const run = (service) => mode === 'detail' ? service.getStatisticalData(101, 0) : service.getAggregatedStatisticalData('teacher-A', 1, 1);

@@ -49,15 +49,44 @@ export class StatisticController {
 
     // Chế độ tổng hợp (không có mã đề hợp lệ).
     if (!Number.isInteger(madeNum)) {
-      const hk = mahocky ? Number(mahocky) : NaN;
-      const nh = namhoc ? Number(namhoc) : NaN;
-      const hasFilter = Number.isInteger(hk) && Number.isInteger(nh);
-      const [semesters, academicYears, subjects, groups] = await Promise.all([
+      const requestedSemester = mahocky ? Number(mahocky) : NaN;
+      const requestedYear = namhoc ? Number(namhoc) : NaN;
+      const [semesters, academicYears] = await Promise.all([
         this.statistic.getSemesters(user.id),
         this.statistic.getAcademicYears(user.id),
-        hasFilter ? this.statistic.getSubjectsByCreator(user.id, hk, nh) : [],
-        hasFilter ? this.statistic.getGroupsByCreator(user.id, hk, nh) : [],
       ]);
+      const availableYears = academicYears.filter((year) =>
+        semesters.some((semester) => semester.namhoc === year.namhoc),
+      );
+      const selectedYear =
+        (
+          availableYears.find((year) => year.namhoc === requestedYear) ??
+          availableYears[0]
+        )?.namhoc ?? null;
+      const availableSemesters = semesters.filter(
+        (semester) => semester.namhoc === selectedYear,
+      );
+      const selectedSemester =
+        (
+          availableSemesters.find(
+            (semester) => semester.mahocky === requestedSemester,
+          ) ?? availableSemesters[0]
+        )?.mahocky ?? null;
+      const [subjects, groups] =
+        selectedYear !== null && selectedSemester !== null
+          ? await Promise.all([
+              this.statistic.getSubjectsByCreator(
+                user.id,
+                selectedSemester,
+                selectedYear,
+              ),
+              this.statistic.getGroupsByCreator(
+                user.id,
+                selectedSemester,
+                selectedYear,
+              ),
+            ])
+          : [[], []];
       return {
         Title: 'Thống kê tổng hợp',
         Page: 'statistic',
@@ -66,13 +95,15 @@ export class StatisticController {
         AcademicYears: academicYears,
         Subjects: subjects,
         Groups: groups,
+        SelectedYear: selectedYear,
+        SelectedSemester: selectedSemester,
         Test: null,
         Nhom: [],
         user,
       };
     }
 
-    // Chế độ chi tiết 1 đề — kiểm tồn tại + quyền sở hữu (nguoitao == user).
+    // Chi tiết 1 đề: service áp phạm vi admin/chủ sở hữu từ vai trò trong DB.
     const test = await this.statistic.getTestInfo(madeNum, user.id);
     if (!test) {
       throw new NotFoundException(
@@ -101,7 +132,7 @@ export class StatisticController {
   @Post('getStatictical')
   async getStatictical(@Req() req: Request, @Body() dto: StatDetailDto) {
     const user = req.user as IExamJwtPayload;
-    // Kiểm quyền sở hữu đề như PHP (getTestInfo trả null nếu không phải của mình).
+    // Dùng cùng phạm vi actor với trang SSR và các bộ lọc tổng hợp.
     const test = await this.statistic.getTestInfo(dto.made, user.id);
     if (!test) {
       return { error: 'Đề thi không tồn tại hoặc bạn không có quyền truy cập' };

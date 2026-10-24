@@ -118,22 +118,22 @@ $(document).ready(function () {
   function renderPagination(total, page) {
     lastTotal = total;
     const totalPages = Math.ceil(total / limit) || 1;
-    let html = `<nav><ul class="pagination justify-content-center">`;
+    let html = `<nav aria-label="Phân trang năm học"><ul class="pagination justify-content-center">`;
 
     html += `<li class="page-item ${page <= 1 ? "disabled" : ""}">
-               <a class="page-link" href="#" data-page="${page - 1}">Prev</a>
+               <button type="button" class="page-link" data-page="${page - 1}" aria-label="Trang trước" ${page <= 1 ? "disabled" : ""}>Prev</button>
              </li>`;
 
     let start = Math.max(1, page - 3);
     let end = Math.min(totalPages, page + 3);
     for (let p = start; p <= end; p++) {
       html += `<li class="page-item ${p === page ? "active" : ""}">
-                 <a class="page-link" href="#" data-page="${p}">${p}</a>
+                 <button type="button" class="page-link" data-page="${p}" aria-label="Trang ${p}" ${p === page ? 'aria-current="page" disabled' : ""}>${p}</button>
                </li>`;
     }
 
     html += `<li class="page-item ${page >= totalPages ? "disabled" : ""}">
-               <a class="page-link" href="#" data-page="${page + 1}">Next</a>
+               <button type="button" class="page-link" data-page="${page + 1}" aria-label="Trang sau" ${page >= totalPages ? "disabled" : ""}>Next</button>
              </li>`;
     html += `</ul></nav>`;
 
@@ -175,7 +175,7 @@ $(document).ready(function () {
   // =======================
   // CLICK PHÂN TRANG
   // =======================
-  $pagination.on("click", "a.page-link", function (e) {
+  $pagination.on("click", "button.page-link", function (e) {
     e.preventDefault();
     const p = parseInt($(this).data("page") || 1, 10);
     const totalPages = Math.ceil(lastTotal / limit) || 1;

@@ -71,24 +71,24 @@ function showData(data) {
     // Nút hành động thông minh
     let actionBtn = "";
     if (daThi) {
-      actionBtn = `<a href="./test/start/${test.made}" class="btn btn-sm btn-outline-success rounded-pill px-4">
-                    <i class="fa fa-eye me-1"></i> Xem lại
+      actionBtn = `<a href="./test/start/${test.made}" class="btn btn-success schedule-action">
+                    <i class="fa fa-eye fa-fw" aria-hidden="true"></i><span>Xem lại</span>
                    </a>`;
     } else if (now >= +open && now <= +close) {
-      actionBtn = `<a href="./test/start/${test.made}" class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm">
-                    <i class="fa fa-play me-1"></i> Làm bài
+      actionBtn = `<a href="./test/start/${test.made}" class="btn btn-primary schedule-action">
+                    <i class="fa fa-play fa-fw" aria-hidden="true"></i><span>Làm bài</span>
                    </a>`;
     } else {
-      actionBtn = `<a href="./test/start/${test.made}" class="btn btn-sm btn-outline-secondary rounded-pill px-4" onclick="event.preventDefault()">
-                    <i class="fa fa-eye me-1"></i> Xem chi tiết
-                   </a>`;
+      actionBtn = `<button type="button" class="btn btn-outline-secondary schedule-action" disabled>
+                    <i class="fa fa-lock fa-fw" aria-hidden="true"></i><span>Chưa mở</span>
+                   </button>`;
     }
 
     html += `
 <tr class="transition-all duration-300 hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 hover:shadow-md hover:-translate-y-1 border-l-4 border-transparent hover:border-primary">
 
   <!-- Tên đề thi + Môn -->
-  <td data-label="Bài kiểm tra" class="py-5 ps-5">
+  <td data-label="Bài kiểm tra">
   <div class="d-flex align-items-center gap-3">
 
     <!-- Icon -->
@@ -111,12 +111,12 @@ function showData(data) {
 
 
   <!-- Môn học (ẩn trên mobile nếu cần) -->
-  <td data-label="Môn học" class="py-5 text-muted fw-600">
+  <td data-label="Môn học" class="text-muted fw-600">
     ${test.tenmonhoc?.substring(0, 20) || "-"}
   </td>
 
 <!-- Bắt đầu -->
-<td data-label="Bắt đầu" class="py-5 text-center">
+<td data-label="Bắt đầu" class="text-center">
   <div class="d-flex flex-column align-items-center">
     <div class="text-dark fw-bold">${open.toLocaleDateString("vi-VN")}</div>
     <div class="text-primary small fw-600">
@@ -129,7 +129,7 @@ function showData(data) {
 </td>
 
 <!-- Kết thúc -->
-<td data-label="Kết thúc" class="py-5 text-center">
+<td data-label="Kết thúc" class="text-center">
   <div class="d-flex flex-column align-items-center">
     <div class="text-dark fw-bold">${close.toLocaleDateString("vi-VN")}</div>
     <div class="text-danger small fw-600">
@@ -143,14 +143,12 @@ function showData(data) {
 
 
   <!-- Nhóm -->
-  <td data-label="Nhóm" class="py-5">
-    <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-600">
-      ${tennhomArray[0] || "Chưa gán"}
-    </span>
+  <td data-label="Nhóm">
+    ${tennhomArray[0] || "Chưa gán"}
   </td>
 
   <!-- Điểm -->
-  <td data-label="Điểm" class="py-5 text-center">
+  <td data-label="Điểm" class="text-center">
     ${
       daThi
         ? test.xemdiemthi == 0
@@ -168,8 +166,8 @@ function showData(data) {
   </td>
 
   <!-- Trạng thái -->
-  <td data-label="Trạng thái" class="py-5 text-center">
-    <span class="badge rounded-pill px-4 py-2 fw-bold text-white ${
+  <td data-label="Trạng thái" class="text-center">
+    <span class="badge schedule-state rounded-pill px-3 py-2 fw-bold text-white ${
       daThi
         ? "bg-success"
         : now >= +open && now <= +close
@@ -183,23 +181,8 @@ function showData(data) {
   </td>
 
   <!-- Hành động -->
-<td data-label="Thao tác" class="py-5 text-end pe-5">
-  ${
-    daThi
-      ? `<a href="./test/start/${test.made}" class="btn btn-success rounded-pill px-4 shadow-sm hover:shadow-lg d-flex flex-column align-items-center">
-          <i class="fa fa-eye mb-1"></i>
-          Xem lại
-        </a>`
-      : now >= +open && now <= +close
-      ? `<a href="./test/start/${test.made}" class="btn btn-primary rounded-pill px-5 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all d-flex flex-column align-items-center">
-          <i class="fa fa-play mb-1"></i>
-          Làm bài
-        </a>`
-      : `<button class="btn btn-outline-secondary rounded-pill px-4 d-flex flex-column align-items-center" disabled>
-          <i class="fa fa-lock mb-1"></i>
-          Chưa mở
-        </button>`
-  }
+<td data-label="Thao tác" class="schedule-action-cell text-center">
+  ${actionBtn}
 </td>
 
 
@@ -221,18 +204,16 @@ delete container.dataset.id;
 $(document).ready(function () {
   $(".filtered-by-state").click(function (e) {
     e.preventDefault();
-    $(".btn-filtered-by-state").text($(this).text());
-    const state = $(this).data("value");
+    $(".btn-filtered-by-state .filter-text").text($(this).text().trim());
+    const state = String($(this).data("value"));
     if (state !== "4") {
       mainPagePagination.option.filter = state;
     } else {
       delete mainPagePagination.option.filter;
     }
 
-    mainPagePagination.getPagination(
-      mainPagePagination.option,
-      mainPagePagination.valuePage.curPage
-    );
+    mainPagePagination.valuePage.curPage = 1;
+    mainPagePagination.getPagination(mainPagePagination.option, 1);
   });
 });
 

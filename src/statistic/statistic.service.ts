@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import type {
@@ -21,6 +21,22 @@ import type {
 @Injectable()
 export class StatisticService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /** Admin xem toàn hệ thống; các vai trò còn lại chỉ xem đề của chính mình. */
+  private async creatorCondition(actorId: string): Promise<Prisma.Sql> {
+    const actor = await this.prisma.nguoiDung.findUnique({
+      where: { id: actorId },
+      select: { manhomquyen: true, trangthai: true },
+    });
+    if (!actor || actor.trangthai !== 1 || actor.manhomquyen == null) {
+      throw new ForbiddenException(
+        'Tài khoản không có quyền truy cập thống kê.',
+      );
+    }
+    return actor.manhomquyen === 3
+      ? Prisma.empty
+      : Prisma.sql`AND d.nguoitao = ${actorId}`;
+  }
 
   /** Mảng 10 khoảng điểm rỗng. */
   private emptyBins(): number[] {
@@ -53,54 +69,57 @@ export class StatisticService {
 
   // ── Dropdown lọc (thống kê tổng hợp) ────────────────────────────────────────
 
-  /** Danh sách học kỳ có đề của GV. Thay ThongKeModel::getSemesters. */
+  /** Học kỳ có đề trong phạm vi được xem, kèm năm để chọn đúng cặp bộ lọc. */
   async getSemesters(nguoitao: string): Promise<ISemesterOption[]> {
     if (!nguoitao) return [];
+    const creator = await this.creatorCondition(nguoitao);
     return this.prisma.$queryRaw<ISemesterOption[]>(Prisma.sql`
-      SELECT DISTINCT n.hocky AS mahocky, hk.tenhocky
+      SELECT DISTINCT n.hocky AS mahocky, hk.tenhocky, n.namhoc
       FROM nhom n
       JOIN hocky hk ON n.hocky = hk.mahocky
       JOIN giaodethi g ON n.manhom = g.manhom
       JOIN dethi d ON g.made = d.made
-      WHERE d.nguoitao = ${nguoitao} AND n.trangthai = 1 AND d.trangthai = 1
-      ORDER BY hk.tenhocky
+      WHERE n.trangthai = 1 AND d.trangthai = 1 ${creator}
+      ORDER BY n.namhoc DESC, n.hocky DESC
     `);
   }
 
-  /** Danh sách năm học có đề của GV. Thay ThongKeModel::getAcademicYears. */
+  /** Năm học có đề trong phạm vi được xem. */
   async getAcademicYears(nguoitao: string): Promise<IAcademicYearOption[]> {
     if (!nguoitao) return [];
+    const creator = await this.creatorCondition(nguoitao);
     return this.prisma.$queryRaw<IAcademicYearOption[]>(Prisma.sql`
       SELECT DISTINCT n.namhoc, nh.tennamhoc
       FROM nhom n
       JOIN namhoc nh ON n.namhoc = nh.manamhoc
       JOIN giaodethi g ON n.manhom = g.manhom
       JOIN dethi d ON g.made = d.made
-      WHERE d.nguoitao = ${nguoitao} AND n.trangthai = 1 AND d.trangthai = 1
+      WHERE n.trangthai = 1 AND d.trangthai = 1 ${creator}
       ORDER BY nh.tennamhoc DESC
     `);
   }
 
-  /** Môn học của GV theo học kỳ/năm học. Thay ThongKeModel::getSubjectsByCreator. */
+  /** Môn học theo học kỳ/năm học và phạm vi actor (tên method giữ cho caller cũ). */
   async getSubjectsByCreator(
     nguoitao: string,
     mahocky: number,
     namhoc: number,
   ): Promise<ISubjectOption[]> {
     if (!nguoitao || !mahocky || !namhoc) return [];
+    const creator = await this.creatorCondition(nguoitao);
     return this.prisma.$queryRaw<ISubjectOption[]>(Prisma.sql`
       SELECT DISTINCT m.mamonhoc, m.tenmonhoc
       FROM monhoc m
       JOIN dethi d ON m.mamonhoc = d.monthi
       JOIN giaodethi g ON d.made = g.made
       JOIN nhom n ON g.manhom = n.manhom
-      WHERE d.nguoitao = ${nguoitao} AND d.trangthai = 1
+      WHERE d.trangthai = 1 ${creator}
         AND n.hocky = ${mahocky} AND n.namhoc = ${namhoc} AND n.trangthai = 1
     `);
   }
 
   /**
-   * Nhóm học phần của GV theo học kỳ/năm học (lọc thêm môn nếu có).
+   * Nhóm học phần trong phạm vi actor theo học kỳ/năm học (lọc thêm môn nếu có).
    * Thay ThongKeModel::getGroupsByCreator.
    */
   async getGroupsByCreator(
@@ -110,6 +129,7 @@ export class StatisticService {
     mamonhoc?: string,
   ): Promise<IGroupOption[]> {
     if (!nguoitao || !mahocky || !namhoc) return [];
+    const creator = await this.creatorCondition(nguoitao);
     const monCond = mamonhoc
       ? Prisma.sql`AND n.mamonhoc = ${mamonhoc}`
       : Prisma.empty;
@@ -118,21 +138,22 @@ export class StatisticService {
       FROM nhom n
       JOIN giaodethi g ON n.manhom = g.manhom
       JOIN dethi d ON g.made = d.made
-      WHERE d.nguoitao = ${nguoitao} AND n.trangthai = 1 AND d.trangthai = 1
+      WHERE n.trangthai = 1 AND d.trangthai = 1 ${creator}
         AND n.hocky = ${mahocky} AND n.namhoc = ${namhoc} ${monCond}
     `);
   }
 
   // ── Thông tin đề (thống kê chi tiết) ────────────────────────────────────────
 
-  /** Thông tin 1 đề (kiểm quyền sở hữu qua nguoitao). Thay ThongKeModel::getTestInfo. */
+  /** Admin xem đề hoạt động; các vai trò khác phải sở hữu đề. */
   async getTestInfo(made: number, nguoitao: string): Promise<ITestInfo | null> {
     if (!made || !nguoitao) return null;
+    const creator = await this.creatorCondition(nguoitao);
     const rows = await this.prisma.$queryRaw<ITestInfo[]>(Prisma.sql`
       SELECT d.made, d.tende, d.thoigiantao, m.mamonhoc, m.tenmonhoc
       FROM dethi d
       JOIN monhoc m ON d.monthi = m.mamonhoc
-      WHERE d.made = ${made} AND d.nguoitao = ${nguoitao} AND d.trangthai = 1
+      WHERE d.made = ${made} AND d.trangthai = 1 ${creator}
     `);
     return rows[0] ?? null;
   }
@@ -160,7 +181,10 @@ export class StatisticService {
 
     const nhomCond =
       manhom === 0 ? Prisma.empty : Prisma.sql`AND cn.manhom = ${manhom}`;
-    const resultGroupCond = manhom === 0 ? Prisma.empty : Prisma.sql`
+    const resultGroupCond =
+      manhom === 0
+        ? Prisma.empty
+        : Prisma.sql`
       AND EXISTS (
         SELECT 1 FROM chitietnhom cn
         JOIN giaodethi gd ON gd.manhom = cn.manhom AND gd.made = kq.made
@@ -188,10 +212,7 @@ export class StatisticService {
         data.da_nop_bai++;
         tong += score;
         dem++;
-        data.diem_cao_nhat = Math.max(
-          data.diem_cao_nhat,
-          score,
-        );
+        data.diem_cao_nhat = Math.max(data.diem_cao_nhat, score);
         this.binScore(data.thong_ke_diem, score);
       } else if (row.thoigianvaothi !== null) {
         data.chua_nop_bai++;
@@ -227,6 +248,7 @@ export class StatisticService {
   ): Promise<IStatisticData> {
     const data = this.emptyData();
     if (!nguoitao || !mahocky || !namhoc) return data;
+    const creator = await this.creatorCondition(nguoitao);
 
     const monCond = mamonhoc
       ? Prisma.sql`AND d.monthi = ${mamonhoc}`
@@ -245,7 +267,7 @@ export class StatisticService {
       JOIN chitietnhom cn ON gd.manhom = cn.manhom AND kq.manguoidung = cn.manguoidung
       JOIN dethi d ON kq.made = d.made
       JOIN nhom n ON gd.manhom = n.manhom
-      WHERE d.nguoitao = ${nguoitao} AND d.trangthai = 1 AND n.trangthai = 1
+      WHERE d.trangthai = 1 AND n.trangthai = 1 ${creator}
         AND n.hocky = ${mahocky} AND n.namhoc = ${namhoc} ${monCond} ${nhomCond}
     `);
 
@@ -272,7 +294,7 @@ export class StatisticService {
       JOIN dethi d ON gd.made = d.made
       JOIN nhom n ON cn.manhom = n.manhom
       LEFT JOIN ketqua kq ON cn.manguoidung = kq.manguoidung AND kq.made = d.made
-      WHERE d.nguoitao = ${nguoitao} AND d.trangthai = 1 AND n.trangthai = 1
+      WHERE d.trangthai = 1 AND n.trangthai = 1 ${creator}
         AND n.hocky = ${mahocky} AND n.namhoc = ${namhoc} AND kq.makq IS NULL
         ${monCond} ${nhomCond}
     `);

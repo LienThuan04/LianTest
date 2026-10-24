@@ -25,6 +25,7 @@
 .auth-page #loginError { display: none; margin: 16px 0; }
 .auth-links { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 14px; margin-top: 24px; }
 .checkbox-container { margin: 16px 0 24px; font-size: 14px; } .checkbox-container input { accent-color: var(--color-iris-bolt); }
+.auth-page .terms-toggle { padding: 0; border: 0; background: transparent; color: var(--color-iris-bolt); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .auth-page label.error { color: var(--color-ink-charcoal); font-size: 12px; line-height: 18px; display: block; margin-top: 8px; }
 .auth-page .modal { display: none; position: fixed; inset: 0; z-index: 1060; width: 100%; height: 100%; padding: 24px; align-items: center; justify-content: center; background: rgba(40,46,62,.4); }
 .auth-page .modal-content { width: 100%; max-width: 560px; max-height: calc(100dvh - 48px); overflow-y: auto; padding: 24px; }

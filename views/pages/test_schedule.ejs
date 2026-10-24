@@ -30,32 +30,32 @@
                     <i class="fas fa-chevron-down ms-2 fa-xs"></i>
                   </button>
                   <ul class="dropdown-menu shadow-lg border-0 rounded-3" aria-labelledby="dropdown-filter-state">
-                    <li><a class="dropdown-item py-2 filtered-by-state" href="#" data-value="4">
+                    <li><button type="button" class="dropdown-item py-2 filtered-by-state" data-value="4">
                       <i class="fas fa-globe me-2"></i> Tất cả
-                    </a></li>
+                    </button></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item py-2 filtered-by-state" href="#" data-value="0">
+                    <li><button type="button" class="dropdown-item py-2 filtered-by-state" data-value="0">
                       <span class="badge bg-secondary rounded-pill me-2">•</span> Chưa làm
-                    </a></li>
-                    <li><a class="dropdown-item py-2 filtered-by-state" href="#" data-value="1">
+                    </button></li>
+                    <li><button type="button" class="dropdown-item py-2 filtered-by-state" data-value="1">
                       <span class="badge bg-danger rounded-pill me-2">!</span> Quá hạn
-                    </a></li>
-                    <li><a class="dropdown-item py-2 filtered-by-state" href="#" data-value="2">
+                    </button></li>
+                    <li><button type="button" class="dropdown-item py-2 filtered-by-state" data-value="2">
                       <span class="badge bg-warning rounded-pill me-2">●</span> Chưa mở
-                    </a></li>
-                    <li><a class="dropdown-item py-2 filtered-by-state" href="#" data-value="3">
+                    </button></li>
+                    <li><button type="button" class="dropdown-item py-2 filtered-by-state" data-value="3">
                       <span class="badge bg-success rounded-pill me-2">✓</span> Đã hoàn thành
-                    </a></li>
+                    </button></li>
                   </ul>
                 </div>
 
-                <div class="flex-grow-1 position-relative">
+                <div class="flex-grow-1 schedule-search">
                   <input type="text"
-                         class="form-control form-control-lg rounded-pill ps-5 py-3 shadow-sm border-0"
+                         class="form-control form-control-lg rounded-pill schedule-search-input shadow-sm border-0"
                          placeholder="Tìm kiếm đề thi, tên môn học, mã đề..."
                          id="search-input"
                          autocomplete="off">
-                  <i class="fas fa-search position-absolute top-50 start-3 translate-middle-y text-muted"></i>
+                  <i class="fas fa-search schedule-search-icon text-muted" aria-hidden="true"></i>
                 </div>
               </form>
             </div>
@@ -63,19 +63,19 @@
         </div>
 
         <!-- Bảng danh sách đề thi -->
-        <div class="table-responsive rounded-4 overflow-hidden shadow-xl">
+        <div class="table-responsive schedule-table-wrapper rounded-4 shadow-xl">
           <table class="table table-hover align-middle mb-0 modern-table border-0">
             <thead>
               <tr class="text-white text-uppercase fw-bold fs-6 tracking-wider"
                  >
-                <th class="py-4 ps-5">Tên đề thi</th>
-                <th class="py-4">Môn học</th>
-                <th class="py-4">TG bắt đầu</th>
-                <th class="py-4">TG kết thúc</th>
-                <th class="py-4">Nhóm</th>
-                <th class="py-4 text-center">Điểm</th>
-                <th class="py-4 text-center">Trạng thái</th>
-                <th class="py-4 text-end pe-5">Hành động</th>
+                <th scope="col">Tên đề thi</th>
+                <th scope="col">Môn học</th>
+                <th scope="col" class="text-center">TG bắt đầu</th>
+                <th scope="col" class="text-center">TG kết thúc</th>
+                <th scope="col">Nhóm</th>
+                <th scope="col" class="text-center">Điểm</th>
+                <th scope="col" class="text-center">Trạng thái</th>
+                <th scope="col" class="schedule-action-cell text-center">Hành động</th>
               </tr>
             </thead>
             <tbody class="list-test bg-white fw-medium">

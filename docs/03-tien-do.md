@@ -2,8 +2,21 @@
 
 [Chỉ mục tài liệu](README.md) · [README tiếng Việt](../README.vi.md)
 
-Cập nhật: **21/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
+Cập nhật: **24/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
 dưới chỉ áp dụng cho phạm vi và môi trường được mô tả.
+
+## Cập nhật chức năng ngày 24/10/2026
+
+- Mở rộng dữ liệu mẫu lên 1.033 tài khoản, 16 môn, 62 chương, 131 nhóm, 3.386 câu hỏi,
+  195 đề và 2.052 bài làm; ghi theo lô nhỏ có transaction và log tiến độ.
+- Sửa chọn câu tự động khi không lọc chương; khôi phục ảnh nháp theo mã câu hỏi,
+  tự nộp khi chuyển tab và cho phép thử lại sau lỗi gửi bài.
+- Căn lại bảng lịch thi sinh viên, nút thao tác và ô tìm kiếm; các lệnh trong trang
+  dùng nút phù hợp để tránh điều hướng hoặc gửi biểu mẫu ngoài ý muốn.
+- Đọc chương dùng đúng quyền chương, giữ kiểm tra phân công môn học.
+- Thống kê quản trị viên dùng phạm vi toàn hệ thống theo vai trò hiện tại trong DB;
+  các vai trò khác vẫn chỉ xem đề của mình. Tự chọn cặp kỳ/năm có dữ liệu, đồng bộ
+  bộ lọc phụ thuộc và bỏ phản hồi cũ khi đổi lựa chọn.
 
 ## Chức năng hiện có
 

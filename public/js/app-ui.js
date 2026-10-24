@@ -2,6 +2,15 @@
 (() => {
   const actionNames = { edit: 'Chỉnh sửa', pen: 'Chỉnh sửa', trash: 'Xóa', plus: 'Thêm mới', eye: 'Xem chi tiết', cog: 'Tùy chọn', search: 'Tìm kiếm', magnifier: 'Tìm kiếm', times: 'Đóng', close: 'Đóng', download: 'Tải xuống', copy: 'Sao chép', 'arrow-left': 'Quay lại' };
   function enhance() {
+    document.querySelectorAll('a.skip-link[href^="#"]').forEach(link => {
+      const hash = link.getAttribute('href');
+      const target = document.getElementById(hash.slice(1));
+      if (!target) return;
+      const url = new URL(window.location.href);
+      url.hash = hash;
+      link.setAttribute('href', url.href);
+      if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
+    });
     document.querySelectorAll('.col-sort').forEach(header => {
       header.tabIndex = 0;
       const order = header.getAttribute('data-sort-order');
@@ -29,7 +38,7 @@
     });
     document.querySelectorAll('.nav-main-link.active').forEach(link => link.setAttribute('aria-current', 'page'));
     document.querySelectorAll('.pagination-container .page-link').forEach(link => {
-      const disabled = link.classList.contains('disabled') || link.parentElement?.classList.contains('disabled');
+      const disabled = link.disabled || link.classList.contains('disabled') || link.parentElement?.classList.contains('disabled');
       link.setAttribute('aria-disabled', String(disabled)); link.tabIndex = disabled ? -1 : 0;
       if (link.parentElement?.classList.contains('active')) link.setAttribute('aria-current', 'page');
       else link.removeAttribute('aria-current');

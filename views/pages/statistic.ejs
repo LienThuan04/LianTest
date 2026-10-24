@@ -17,17 +17,23 @@
         <div class="content content-full">
           <div class="block block-rounded shadow-sm">
             <% if (typeof ShowAggregate !== 'undefined' && ShowAggregate) { %>
+              <%
+                const selectedYear = AcademicYears.find(year => year.namhoc === SelectedYear);
+                const selectedSemester = Semesters.find(semester => semester.mahocky === SelectedSemester && semester.namhoc === SelectedYear);
+                const hasPeriod = Boolean(selectedYear && selectedSemester);
+              %>
               <div class="row mb-4 align-items-center">
                 <!-- Bộ lọc học kỳ -->
                 <div class="col-md-3 mb-2 mb-md-0">
                   <div class="dropdown">
-                    <button class="btn btn-outline-info w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-semester" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-calendar me-2"></i> <span>Chọn học kỳ</span> <i class="fa fa-chevron-down ms-auto"></i>
+                    <button class="btn btn-outline-info w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-semester" data-bs-toggle="dropdown" aria-expanded="false" <%= Semesters.length ? '' : 'disabled' %>>
+                      <i class="fa fa-calendar me-2"></i> <span><%= selectedSemester ? selectedSemester.tenhocky : 'Không có học kỳ' %></span> <i class="fa fa-chevron-down ms-auto"></i>
                     </button>
                     <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="dropdown-filter-semester">
                       <% Semesters.forEach(function(semester) { %>
-                        <li><a class="dropdown-item filter-semester" href="javascript:void(0)" data-id="<%= semester.mahocky %>"><%= semester.tenhocky %></a></li>
+                        <li <%= semester.namhoc === SelectedYear ? '' : 'hidden' %>><button type="button" class="dropdown-item filter-semester <%= selectedSemester === semester ? 'active' : '' %>" data-id="<%= semester.mahocky %>" data-year="<%= semester.namhoc %>" <%= semester.namhoc === SelectedYear ? '' : 'hidden disabled' %>><%= semester.tenhocky %></button></li>
                       <% }); %>
+                      <% if (!Semesters.length) { %><li><span class="dropdown-item-text">Không có học kỳ</span></li><% } %>
                     </ul>
                   </div>
                 </div>
@@ -35,13 +41,14 @@
                 <!-- Bộ lọc năm học -->
                 <div class="col-md-3 mb-2 mb-md-0">
                   <div class="dropdown">
-                    <button class="btn btn-outline-warning w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-year" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="fa fa-graduation-cap me-2"></i> <span>Chọn năm học</span> <i class="fa fa-chevron-down ms-auto"></i>
+                    <button class="btn btn-outline-warning w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-year" data-bs-toggle="dropdown" aria-expanded="false" <%= AcademicYears.length ? '' : 'disabled' %>>
+                      <i class="fa fa-graduation-cap me-2"></i> <span><%= selectedYear ? selectedYear.tennamhoc : 'Không có năm học' %></span> <i class="fa fa-chevron-down ms-auto"></i>
                     </button>
                     <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="dropdown-filter-year">
                       <% AcademicYears.forEach(function(year) { %>
-                        <li><a class="dropdown-item filter-year" href="javascript:void(0)" data-id="<%= year.namhoc %>"><%= year.tennamhoc %></a></li>
+                        <li><button type="button" class="dropdown-item filter-year <%= selectedYear === year ? 'active' : '' %>" data-id="<%= year.namhoc %>"><%= year.tennamhoc %></button></li>
                       <% }); %>
+                      <% if (!AcademicYears.length) { %><li><span class="dropdown-item-text">Không có năm học</span></li><% } %>
                     </ul>
                   </div>
                 </div>
@@ -49,11 +56,16 @@
                 <!-- Bộ lọc môn học -->
                 <div class="col-md-3 mb-2 mb-md-0">
                   <div class="dropdown">
-                    <button class="btn btn-outline-primary w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-subject" data-bs-toggle="dropdown" aria-expanded="false" disabled>
-                      <i class="fa fa-book me-2"></i> <span>Chọn môn học</span> <i class="fa fa-chevron-down ms-auto"></i>
+                    <button class="btn btn-outline-primary w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-subject" data-bs-toggle="dropdown" aria-expanded="false" <%= hasPeriod && Subjects.length ? '' : 'disabled' %>>
+                      <i class="fa fa-book me-2"></i> <span><%= hasPeriod && Subjects.length ? 'Tất cả môn học' : 'Không có môn học' %></span> <i class="fa fa-chevron-down ms-auto"></i>
                     </button>
                     <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="dropdown-filter-subject" id="subject-menu">
-                      <!-- Môn học sẽ được load động qua AJAX -->
+                      <% if (hasPeriod && Subjects.length) { %>
+                        <li><button type="button" class="dropdown-item filter-subject active" data-id="">Tất cả môn học</button></li>
+                        <% Subjects.forEach(function(subject) { %>
+                          <li><button type="button" class="dropdown-item filter-subject" data-id="<%= subject.mamonhoc %>"><%= subject.tenmonhoc %></button></li>
+                        <% }); %>
+                      <% } else { %><li><span class="dropdown-item-text">Không có môn học</span></li><% } %>
                     </ul>
                   </div>
                 </div>
@@ -61,15 +73,22 @@
                 <!-- Bộ lọc nhóm -->
                 <div class="col-md-3 mb-2 mb-md-0">
                   <div class="dropdown">
-                    <button class="btn btn-outline-success w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-group" data-bs-toggle="dropdown" aria-expanded="false" disabled>
-                      <i class="fa fa-layer-group me-2"></i> <span>Chọn nhóm</span> <i class="fa fa-chevron-down ms-auto"></i>
+                    <button class="btn btn-outline-success w-100 text-start d-flex align-items-center justify-content-between" type="button" id="dropdown-filter-group" data-bs-toggle="dropdown" aria-expanded="false" <%= hasPeriod && Groups.length ? '' : 'disabled' %>>
+                      <i class="fa fa-layer-group me-2"></i> <span><%= hasPeriod && Groups.length ? 'Tất cả nhóm' : 'Không có nhóm' %></span> <i class="fa fa-chevron-down ms-auto"></i>
                     </button>
                     <ul class="dropdown-menu w-100 shadow-sm" aria-labelledby="dropdown-filter-group" id="group-menu">
-                      <!-- Nhóm sẽ được load động qua AJAX -->
+                      <% if (hasPeriod && Groups.length) { %>
+                        <li><button type="button" class="dropdown-item filter-group active" data-id="">Tất cả nhóm</button></li>
+                        <% Groups.forEach(function(group) { %>
+                          <li><button type="button" class="dropdown-item filter-group" data-id="<%= group.manhom %>"><%= group.tennhom %></button></li>
+                        <% }); %>
+                      <% } else { %><li><span class="dropdown-item-text">Không có nhóm</span></li><% } %>
                     </ul>
                   </div>
                 </div>
               </div>
+
+              <div id="statistic-status" class="alert alert-info" role="status" aria-live="polite" <%= hasPeriod ? 'hidden' : '' %>>Chưa có dữ liệu thống kê. Bộ lọc sẽ khả dụng khi có đề thi trong học kỳ và năm học.</div>
 
               <!-- 8 thẻ thống kê -->
               <%- include('../partials/statistic_cards') %>
@@ -87,12 +106,12 @@
                 <!-- Tabs Navigation -->
                 <ul class="nav nav-tabs nav-tabs-alt nav-justified align-items-center bg-light" role="tablist">
                   <li class="nav-item">
-                    <button class="nav-link text-primary fw-bold" id="bang-diem-tab" data-bs-toggle="tab" data-bs-target="#bang-diem" role="tab" aria-controls="bang-diem" aria-selected="false">
+                    <button type="button" class="nav-link text-primary fw-bold" id="bang-diem-tab" data-bs-toggle="tab" data-bs-target="#bang-diem" role="tab" aria-controls="bang-diem" aria-selected="false">
                       <i class="fa fa-table me-2"></i>Bảng điểm
                     </button>
                   </li>
                   <li class="nav-item">
-                    <button class="nav-link active text-secondary fw-bold" id="thong-ke-tab" data-bs-toggle="tab" data-bs-target="#thong-ke" role="tab" aria-controls="thong-ke" aria-selected="true">
+                    <button type="button" class="nav-link active text-secondary fw-bold" id="thong-ke-tab" data-bs-toggle="tab" data-bs-target="#thong-ke" role="tab" aria-controls="thong-ke" aria-selected="true">
                       <i class="fa fa-chart-bar me-2"></i>Thống kê
                     </button>
                   </li>
@@ -107,9 +126,9 @@
                           Tất cả nhóm
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdown-filter-static">
-                          <li><a class="dropdown-item filtered-by-static active" href="javascript:void(0)" data-id="0">Tất cả nhóm</a></li>
+                          <li><button type="button" class="dropdown-item filtered-by-static active" data-id="0">Tất cả nhóm</button></li>
                           <% Nhom.forEach(function(nhom) { %>
-                            <li><a class="dropdown-item filtered-by-static" href="javascript:void(0)" data-id="<%= nhom.manhom %>"><%= nhom.tennhom %></a></li>
+                            <li><button type="button" class="dropdown-item filtered-by-static" data-id="<%= nhom.manhom %>"><%= nhom.tennhom %></button></li>
                           <% }); %>
                         </ul>
                       </div>

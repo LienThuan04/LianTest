@@ -64,6 +64,56 @@ async function authorize(C, method, role) {
 const AssignmentsController = loadController('src/assignments/assignments.controller.ts', 'AssignmentsController', {
   '@/assignments/assignments.service': {}, '@/assignments/dto/assignment.dto': {},
 });
+
+const SubjectsController = loadController('src/subjects/subjects.controller.ts', 'SubjectsController', {
+  '@/subjects/subjects.service': {}, '@/subjects/dto/subject.dto': {},
+});
+const { SubjectsService } = loadTypeScript(path.join(root, 'src/subjects/subjects.service.ts'), {
+  '@nestjs/common': { ...common, Logger: class { error() {} } },
+  '@prisma/client': { Prisma: {} }, '@/prisma/prisma.service': {},
+});
+function chapterController({ assigned = true, activeAssignment = true, role = 1 } = {}) {
+  const rows = [
+    { machuong: 11, mamonhoc: 'SUBJECT-A', tenchuong: 'Chapter 1', trangthai: 1 },
+    { machuong: 12, mamonhoc: 'SUBJECT-A', tenchuong: 'Chapter 2', trangthai: 1 },
+    { machuong: 13, mamonhoc: 'SUBJECT-A', tenchuong: 'Deleted chapter', trangthai: 0 },
+    { machuong: 21, mamonhoc: 'SUBJECT-B', tenchuong: 'Other subject', trangthai: 1 },
+  ];
+  const service = new SubjectsService({
+    nguoiDung: { findUnique: async () => ({ manhomquyen: role, trangthai: 1 }) },
+    phanCong: { count: async ({ where }) => assigned && activeAssignment
+      && where.mamonhoc === 'SUBJECT-A' && where.manguoidung === 'teacher-A'
+      && where.trangthai === 1 ? 1 : 0 },
+    chuong: { findMany: async ({ where }) => rows.filter(row =>
+      row.mamonhoc === where.mamonhoc && row.trangthai === where.trangthai) },
+  });
+  return new SubjectsController(service);
+}
+test('seeded teacher can load active chapters for question filters and exam creation without subject administration rights', async () => {
+  assert.equal(await authorize(SubjectsController, 'getAllChapter', 1), true);
+  const rows = await chapterController().getAllChapter({ mamonhoc: 'SUBJECT-A' }, { user: { id: 'teacher-A' } });
+  assert.deepEqual(rows.map(row => row.machuong), [11, 12]);
+  await assert.rejects(authorize(SubjectsController, 'page', 1), { status: 403 });
+});
+test('administrator retains chapter lookup access', async () => {
+  assert.equal(await authorize(SubjectsController, 'getAllChapter', 3), true);
+  const rows = await chapterController({ role: 3, assigned: false }).getAllChapter(
+    { mamonhoc: 'SUBJECT-B' }, { user: { id: 'admin' } });
+  assert.deepEqual(rows.map(row => row.machuong), [21]);
+});
+test('student cannot load chapters through the shared lookup endpoint', async () => {
+  await assert.rejects(authorize(SubjectsController, 'getAllChapter', 2), { status: 403 });
+});
+for (const [name, options] of [
+  ['unassigned', { assigned: false }],
+  ['inactive assignment', { activeAssignment: false }],
+]) {
+  test(`chapter lookup rejects a teacher with ${name} subject access`, async () => {
+    await assert.rejects(chapterController(options).getAllChapter(
+      { mamonhoc: 'SUBJECT-A' }, { user: { id: 'teacher-A' } }), { status: 403 });
+  });
+}
+
 for (const method of ['getGiangVien', 'getMonHoc', 'getNamHoc', 'getHocKy', 'getTotalPages', 'paginate', 'checkDuplicate', 'addAssignment', 'checkDuplicateForUpdate', 'update', 'delete']) {
   for (const role of [2, 1]) {
     test(`assignment ${method} denies seeded ${role === 2 ? 'student' : 'teacher'} role`, async () => {
