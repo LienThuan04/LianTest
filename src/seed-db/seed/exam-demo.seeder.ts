@@ -8,13 +8,18 @@
 // tự rồi tra ngược qua Map theo `key`/tên khai báo trong `data/*.json` — nhờ vậy
 // file dữ liệu không phải hardcode id.
 //
-// KHÔNG bọc toàn bộ trong 1 $transaction: dữ liệu khá nhiều và kết nối qua Prisma
-// Accelerate có giới hạn thời gian giao dịch tương tác; seed là thao tác một lần nên
-// chấp nhận ghi tuần tự, có thể dọn bằng `clearExamDemo` rồi chạy lại.
+// Không bọc toàn bộ trong một transaction dài. Ngân hàng câu và kết quả được ghi
+// bằng các lô nhỏ atomic; lỗi vẫn dừng seed và có thể để lại các lô đã commit.
+// Khi seed dở, dùng DB test sạch để chạy lại; không tự retry một commit chưa rõ.
 
 import { PrismaClient } from '@prisma/client';
 import { loadSeedData } from '../seed-data.loader';
 import { seedExamTimes } from '../seed-exam-times';
+import {
+  seedQuestionBank,
+  SEED_BATCH_SIZE,
+  SEED_TRANSACTION_OPTIONS,
+} from './question-bank.seeder';
 import type {
   IDemoDeThi,
   IDemoSeedData,
@@ -40,9 +45,6 @@ export interface ISeedDemoResult {
   dethi: number;
   ketqua: number;
 }
-
-/** A/B/C/D theo vị trí đáp án đúng — ghi vào cột `cauhoi.dapan_dung` như DB gốc. */
-const CHU_CAI = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 /** Bảng tra: mức độ trong `socau` của đề tự động ↔ giá trị cột `dokho`. */
 const MUC_DO = [
@@ -250,81 +252,21 @@ export async function seedExamDemo(
   log(`Nhóm học phần: ${nhomIds.size}.`);
 
   // ── 5. Ngân hàng câu hỏi ───────────────────────────────────────────────────
-  const cauhoiIds = new Map<string, number>(); // key câu hỏi → macauhoi
-
-  for (const q of demoCauHoi) {
-    const dapanDung =
-      q.loai === 'mcq' && q.dapan
-        ? (CHU_CAI[q.dapan.findIndex((a) => a.ladapan === 1)] ?? null)
-        : null;
-    const created = await prisma.cauHoi.create({
-      data: {
-        noidung: q.noidung,
-        dapan_dung: dapanDung,
-        dokho: q.dokho,
-        mamonhoc: q.mamonhoc,
-        machuong: machuongOf(q.mamonhoc, q.chuong),
-        nguoitao: q.nguoitao,
-        trangthai: 1,
-        loai: q.loai,
-      },
-    });
-    cauhoiIds.set(q.key, created.macauhoi);
-    if (q.dapan?.length) {
-      await prisma.cauTraLoi.createMany({
-        data: q.dapan.map((a) => ({
-          macauhoi: created.macauhoi,
-          noidungtl: a.noidungtl,
-          ladapan: a.ladapan,
-        })),
-      });
-    }
-  }
-
-  for (const dv of demoDoanVan) {
-    const machuong = machuongOf(dv.mamonhoc, dv.chuong);
-    const doanvan = await prisma.doanVan.create({
-      data: {
-        noidung: dv.noidung,
-        tieude: dv.tieude,
-        mamonhoc: dv.mamonhoc,
-        machuong,
-        nguoitao: dv.nguoitao,
-        trangthai: 1,
-      },
-    });
-    for (const q of dv.cauhoi) {
-      const created = await prisma.cauHoi.create({
-        data: {
-          noidung: q.noidung,
-          dapan_dung:
-            CHU_CAI[q.dapan.findIndex((a) => a.ladapan === 1)] ?? null,
-          dokho: dv.dokho,
-          mamonhoc: dv.mamonhoc,
-          machuong,
-          nguoitao: dv.nguoitao,
-          trangthai: 1,
-          loai: 'reading',
-          madv: doanvan.madv,
-        },
-      });
-      cauhoiIds.set(q.key, created.macauhoi);
-      await prisma.cauTraLoi.createMany({
-        data: q.dapan.map((a) => ({
-          macauhoi: created.macauhoi,
-          noidungtl: a.noidungtl,
-          ladapan: a.ladapan,
-        })),
-      });
-    }
-  }
+  const cauhoiIds = await seedQuestionBank(
+    prisma,
+    demoCauHoi,
+    demoDoanVan,
+    machuongOf,
+    log,
+  );
   log(
     `Câu hỏi: ${cauhoiIds.size} (gồm ${demoDoanVan.length} đoạn văn đọc hiểu).`,
   );
 
   // ── 6. Đề thi (+ giao nhóm, thông báo, bài làm mẫu) ────────────────────────
   let soKetQua = 0;
-  for (const t of demoDeThi) {
+  log(`Đề thi: 0/${demoDeThi.length} — bắt đầu ghi đề và bài làm mẫu.`);
+  for (const [index, t] of demoDeThi.entries()) {
     soKetQua += await taoDeThi(prisma, t, {
       referenceTime,
       log,
@@ -332,6 +274,9 @@ export async function seedExamDemo(
       nhomIds,
       cauhoiIds,
     });
+    log(
+      `Đề thi: ${index + 1}/${demoDeThi.length}, bài làm mẫu đã ghi: ${soKetQua}.`,
+    );
   }
   log(`Đề thi: ${demoDeThi.length}, bài làm mẫu: ${soKetQua}.`);
 
@@ -444,7 +389,7 @@ async function taoDeThi(
   await taoThongBaoDeThi(prisma, made, t, manhom);
 
   if (!t.ketqua?.length) return 0;
-  return taoKetQuaMau(prisma, made, t, macauhoi, times);
+  return taoKetQuaMau(prisma, made, t, macauhoi, times, ctx.log);
 }
 
 /**
@@ -546,6 +491,7 @@ async function taoKetQuaMau(
   t: IDemoDeThi,
   macauhoi: number[],
   times: ReturnType<typeof seedExamTimes>,
+  log: (message: string) => void,
 ): Promise<number> {
   // Nạp loại câu + đáp án để biết chọn đáp án đúng/sai cho từng câu.
   const cauhoi = await prisma.cauHoi.findMany({
@@ -571,8 +517,7 @@ async function taoKetQuaMau(
   const cauTuLuan = macauhoi.filter((id) => loaiOf.get(id) === 'essay');
   const cauChamTuDong = macauhoi.filter((id) => loaiOf.get(id) !== 'essay');
 
-  let dem = 0;
-  for (const [index, kq] of (t.ketqua ?? []).entries()) {
+  const prepared = (t.ketqua ?? []).map((kq, index) => {
     const dungIds = new Set(cauChamTuDong.slice(0, kq.socaudung));
     const dungMcq = cauTracNghiem.filter((id) => dungIds.has(id)).length;
     const dungDocHieu = cauDocHieu.filter((id) => dungIds.has(id)).length;
@@ -587,7 +532,9 @@ async function taoKetQuaMau(
       : 0;
 
     const ketthuc = times.results[index];
-    const created = await prisma.ketQua.create({
+    return {
+      original: kq,
+      dungIds,
       data: {
         made,
         manguoidung: kq.manguoidung,
@@ -603,34 +550,60 @@ async function taoKetQuaMau(
         trangthai: 'Đã nộp',
         trangthai_tuluan: cauTuLuan.length ? 'Chưa chấm' : 'Đã chấm',
       },
-    });
-
-    await prisma.chiTietKetQua.createMany({
-      data: macauhoi.map((id, i) => ({
-        makq: created.makq,
-        macauhoi: id,
-        thutu: i + 1,
-        dapanchon:
-          loaiOf.get(id) === 'essay'
-            ? null
-            : ((dungIds.has(id) ? dungOf.get(id) : saiOf.get(id)) ?? null),
-      })),
-      skipDuplicates: true,
-    });
-
-    if (cauTuLuan.length && kq.baituluan) {
-      await prisma.traLoiTuLuan.createMany({
-        data: cauTuLuan.map((id) => ({
-          makq: created.makq,
-          macauhoi: id,
-          noidung: `<p>${kq.baituluan}</p>`,
-          thoigianlam: ketthuc,
-        })),
+    };
+  });
+  log(`Bài làm ${t.key}: 0/${prepared.length}.`);
+  for (let offset = 0; offset < prepared.length; offset += SEED_BATCH_SIZE) {
+    const batch = prepared.slice(offset, offset + SEED_BATCH_SIZE);
+    await prisma.$transaction(async (tx) => {
+      const created = await tx.ketQua.createManyAndReturn({
+        data: batch.map((row) => row.data),
+        select: { makq: true, manguoidung: true },
       });
-    }
-    dem++;
+      const resultIds = new Map(
+        created.map((row) => [row.manguoidung, row.makq]),
+      );
+      if (created.length !== batch.length || resultIds.size !== batch.length) {
+        throw new Error('Seed batch không trả đủ ID bài làm.');
+      }
+      const resultId = (userId: string): number => {
+        const id = resultIds.get(userId);
+        if (id == null)
+          throw new Error('Không ghép được ID bài làm với sinh viên.');
+        return id;
+      };
+      await tx.chiTietKetQua.createMany({
+        data: batch.flatMap((row) =>
+          macauhoi.map((id, index) => ({
+            makq: resultId(row.original.manguoidung),
+            macauhoi: id,
+            thutu: index + 1,
+            dapanchon:
+              loaiOf.get(id) === 'essay'
+                ? null
+                : ((row.dungIds.has(id) ? dungOf.get(id) : saiOf.get(id)) ??
+                  null),
+          })),
+        ),
+        skipDuplicates: true,
+      });
+      const essays = batch.flatMap((row) =>
+        row.original.baituluan
+          ? cauTuLuan.map((id) => ({
+              makq: resultId(row.original.manguoidung),
+              macauhoi: id,
+              noidung: `<p>${row.original.baituluan}</p>`,
+              thoigianlam: row.data.thoigianketthuc,
+            }))
+          : [],
+      );
+      if (essays.length) await tx.traLoiTuLuan.createMany({ data: essays });
+    }, SEED_TRANSACTION_OPTIONS);
+    log(
+      `Bài làm ${t.key}: ${offset + batch.length}/${prepared.length} — đã ghi xong lô.`,
+    );
   }
-  return dem;
+  return prepared.length;
 }
 
 /** Reject missing database users before writing or clearing demo data. */

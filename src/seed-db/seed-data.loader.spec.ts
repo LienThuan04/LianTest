@@ -40,8 +40,18 @@ describe('Editable JSON seed data', () => {
 
   it('loads the complete existing dataset and relative exam times', () => {
     const data = load();
-    expect(data.base.users).toHaveLength(13);
-    expect(data.demo?.questions).toHaveLength(35);
+    const accounts = JSON.parse(
+      readFileSync(join(directory, 'users.json'), 'utf8'),
+    ) as { id: string }[];
+    const questions = JSON.parse(
+      readFileSync(join(directory, 'questions.json'), 'utf8'),
+    ) as { key: string }[];
+    expect(data.base.users.map((user) => user.id)).toEqual(
+      accounts.map((user) => user.id),
+    );
+    expect(data.demo?.questions.map((question) => question.key)).toEqual(
+      questions.map((question) => question.key),
+    );
     expect(data.demo?.readingPassages[0].cauhoi).toHaveLength(3);
     expect(data.demo?.exams[0].ketthucOffsetHours).toBe(168);
   });

@@ -40,8 +40,14 @@ describe('Seed JSON CLI and packaged data (no database)', () => {
   it('checks an editable dataset with an unusable DATABASE_URL', () => {
     const result = run('scripts/check-seed-data.cjs');
     expect(result.status).toBe(0);
-    expect(result.stdout).toContain('users: 13');
-    expect(result.stdout).toContain('exams: 3');
+    const users = JSON.parse(
+      readFileSync(join(dataDirectory, 'users.json'), 'utf8'),
+    ) as unknown[];
+    const exams = JSON.parse(
+      readFileSync(join(dataDirectory, 'exams.json'), 'utf8'),
+    ) as unknown[];
+    expect(result.stdout).toContain(`users: ${users.length}`);
+    expect(result.stdout).toContain(`exams: ${exams.length}`);
   });
   it.each([
     ['scripts/check-seed-data.cjs', []],

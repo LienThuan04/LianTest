@@ -48,5 +48,161 @@
       "Cây và bảng băm",
       "Sắp xếp và tìm kiếm"
     ]
+  },
+  {
+    "mamonhoc": "HDH001",
+    "tenmonhoc": "Hệ điều hành",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Tiến trình và luồng",
+      "Lập lịch CPU",
+      "Quản lý bộ nhớ",
+      "Hệ thống tệp"
+    ]
+  },
+  {
+    "mamonhoc": "LTHDT1",
+    "tenmonhoc": "Lập trình hướng đối tượng",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Lớp và đối tượng",
+      "Đóng gói và kế thừa",
+      "Đa hình và giao diện",
+      "Thiết kế đối tượng"
+    ]
+  },
+  {
+    "mamonhoc": "CNPM01",
+    "tenmonhoc": "Công nghệ phần mềm",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Phân tích yêu cầu",
+      "Mô hình hóa hệ thống",
+      "Thiết kế phần mềm",
+      "Quản lý thay đổi"
+    ]
+  },
+  {
+    "mamonhoc": "KTPM01",
+    "tenmonhoc": "Kiểm thử phần mềm",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Thiết kế ca kiểm thử",
+      "Phân vùng và giá trị biên",
+      "Kiểm thử tích hợp",
+      "Kiểm thử hồi quy"
+    ]
+  },
+  {
+    "mamonhoc": "ATTT01",
+    "tenmonhoc": "An toàn thông tin",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Xác thực và phân quyền",
+      "Bảo vệ dữ liệu",
+      "An toàn ứng dụng",
+      "Giám sát và xử lý sự cố"
+    ]
+  },
+  {
+    "mamonhoc": "TOANRR",
+    "tenmonhoc": "Toán rời rạc",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Mệnh đề và logic",
+      "Tập hợp và quan hệ",
+      "Đồ thị",
+      "Tổ hợp"
+    ]
+  },
+  {
+    "mamonhoc": "XSTK01",
+    "tenmonhoc": "Xác suất thống kê",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Biến cố và xác suất",
+      "Biến ngẫu nhiên",
+      "Thống kê mô tả",
+      "Ước lượng tham số"
+    ]
+  },
+  {
+    "mamonhoc": "TTNT01",
+    "tenmonhoc": "Trí tuệ nhân tạo cơ bản",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Biểu diễn bài toán",
+      "Tìm kiếm trạng thái",
+      "Phân loại dữ liệu",
+      "Đánh giá mô hình"
+    ]
+  },
+  {
+    "mamonhoc": "DDTO01",
+    "tenmonhoc": "Phát triển ứng dụng di động",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Vòng đời màn hình",
+      "Quản lý trạng thái",
+      "Lưu trữ trên thiết bị",
+      "Đồng bộ dữ liệu"
+    ]
+  },
+  {
+    "mamonhoc": "TKWEB1",
+    "tenmonhoc": "Thiết kế giao diện người dùng",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Bố cục và phân cấp",
+      "Biểu mẫu và phản hồi",
+      "Khả năng truy cập",
+      "Thiết kế thích ứng"
+    ]
+  },
+  {
+    "mamonhoc": "GITH01",
+    "tenmonhoc": "Quản lý mã nguồn và cộng tác",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Kho mã và lịch sử",
+      "Nhánh và hợp nhất",
+      "Rà soát thay đổi",
+      "Quy trình phát hành"
+    ]
+  },
+  {
+    "mamonhoc": "PYTH01",
+    "tenmonhoc": "Lập trình Python",
+    "sotinchi": 3,
+    "sotietlythuyet": 30,
+    "sotietthuchanh": 30,
+    "chuong": [
+      "Biến và kiểu dữ liệu",
+      "Điều kiện và vòng lặp",
+      "Hàm và mô-đun",
+      "Cấu trúc dữ liệu cơ bản"
+    ]
   }
 ]

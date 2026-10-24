@@ -52,5 +52,2297 @@
     "mamonhoc": "CTDL01",
     "tennamhoc": "2025-2026",
     "sohocky": 1
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv001",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv002",
+    "mamonhoc": "LTW001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv003",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv004",
+    "mamonhoc": "CSDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv005",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv006",
+    "mamonhoc": "MMT001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv007",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv008",
+    "mamonhoc": "CTDL01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv009",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv010",
+    "mamonhoc": "HDH001",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv011",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv012",
+    "mamonhoc": "LTHDT1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv013",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv014",
+    "mamonhoc": "CNPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv015",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv016",
+    "mamonhoc": "KTPM01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv017",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv018",
+    "mamonhoc": "ATTT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv019",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv020",
+    "mamonhoc": "TOANRR",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv021",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv022",
+    "mamonhoc": "XSTK01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv023",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv024",
+    "mamonhoc": "TTNT01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv025",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv026",
+    "mamonhoc": "DDTO01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv027",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv028",
+    "mamonhoc": "TKWEB1",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv029",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv030",
+    "mamonhoc": "GITH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv031",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2024-2025",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2025-2026",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2026-2027",
+    "sohocky": 3
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 1
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 2
+  },
+  {
+    "manguoidung": "gv032",
+    "mamonhoc": "PYTH01",
+    "tennamhoc": "2027-2028",
+    "sohocky": 3
   }
 ]

@@ -101,10 +101,12 @@ describe('Shared JSON seed functions', () => {
       ],
     };
     let chapterId = 0;
-    const question = jest.fn<
-      Promise<{ macauhoi: number }>,
-      [{ data: { mamonhoc: string; machuong: number } }]
-    >(() => Promise.resolve({ macauhoi: 1 }));
+    const question = jest.fn(
+      ({ data }: { data: { mamonhoc: string; machuong: number }[] }) =>
+        Promise.resolve(
+          data.map((row, index) => ({ ...row, macauhoi: index + 1 })),
+        ),
+    );
     const exam = jest.fn<
       Promise<{ made: number }>,
       [{ data: { thoigianbatdau: Date } }]
@@ -117,10 +119,12 @@ describe('Shared JSON seed functions', () => {
       },
       chuong: { create: () => Promise.resolve({ machuong: ++chapterId }) },
       phanCong: { createMany: () => Promise.resolve({ count: 0 }) },
-      cauHoi: { create: question },
+      cauHoi: { createManyAndReturn: question },
       deThi: { create: exam },
       chiTietDeThi: { createMany: () => Promise.resolve({ count: 1 }) },
       thongBao: { create: () => Promise.resolve({ matb: 1 }) },
+      $transaction: async (run: (tx: PrismaClient) => Promise<unknown>) =>
+        run(prisma as unknown as PrismaClient),
     };
     // Simulate database/clear work taking time after the JSON preflight.
     const clock = jest
@@ -135,7 +139,7 @@ describe('Shared JSON seed functions', () => {
     } finally {
       clock.mockRestore();
     }
-    expect(question.mock.calls[0][0].data).toMatchObject({
+    expect(question.mock.calls[0][0].data[0]).toMatchObject({
       mamonhoc: 'A#B',
       machuong: 1,
     });

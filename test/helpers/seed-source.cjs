@@ -1,0 +1,15 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const { PrismaClient } = require('@prisma/client');
+const { loadTypeScript } = require('./load-typescript.cjs');
+const root = path.resolve(__dirname, '../..');
+const load = (file, imports = {}) => loadTypeScript(path.join(root, 'src/seed-db', file), imports);
+const rules = load('seed-data.validation.ts');
+const times = load('seed-exam-times.ts', { './seed-data.validation': rules });
+const relations = load('seed-relations.validation.ts', { './seed-data.validation': rules, './seed-exam-times': times });
+const loader = load('seed-data.loader.ts', { 'node:fs': fs, 'node:path': path, './seed-data.validation': rules, './seed-relations.validation': relations });
+const bankPath = path.join(root, 'src/seed-db/seed/question-bank.seeder.ts');
+const bank = fs.existsSync(bankPath) ? load('seed/question-bank.seeder.ts') : {};
+const seeder = load('seed/exam-demo.seeder.ts', { '@prisma/client': { PrismaClient }, '../seed-data.loader': loader, '../seed-exam-times': times, './question-bank.seeder': bank });
+module.exports = { ...loader, ...seeder };
