@@ -1,0 +1,264 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Kiểm tra giao diện làm bài</title>
+<style>body{font:16px system-ui;margin:24px}li{margin:10px 0}.pass{color:#147d45}.fail{color:#c53030}iframe{width:100%;height:430px;border:1px solid #ccc}</style>
+<h1>Kiểm tra JavaScript làm bài trong Edge thật</h1>
+<p>DOM thật + nguyên de_thi.js; network/clock/Storage dùng boundary kiểm thử. Luồng DB được kiểm tra riêng.</p>
+<button id="run">Chạy toàn bộ ca</button><p id="status">Chưa chạy</p><ol id="results"></ol><div id="frame"></div>
+<script>
+const reviewCase = new URLSearchParams(location.search).get('review');
+if (reviewCase) {
+  document.body.innerHTML='<div id="page-container"><button id="show-exam-detail" data-id="7">Xem bài fixture</button><div class="modal" id="modal-show-test" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-body" id="content-file"></div></div></div></div></div>';
+  const teacherCase=reviewCase.startsWith('review-teacher');
+  if(teacherCase) {
+    document.querySelector('#show-exam-detail').className='show-exam-detail';
+    const holder=document.createElement('div');holder.innerHTML='<div id="chitietdethi" data-id="1"></div><div id="danh-sach-sinhvien-tuluan"><button class="student-item" data-makq="7" data-hoten="Fixture" data-manguoidung="s1">Bài tự luận</button></div><div id="noi-dung-tuluan"></div>';
+    document.querySelector('#page-container').append(holder);
+    window.mainPagePagination={option:{filter:'present',manhom:[]},valuePage:{curPage:1},getPagination(){}};
+  }
+  const state=window.fixture={errors:[],ready:false};
+  window.addEventListener('error',e=>state.errors.push(e.message));
+  (async()=>{
+    const load=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=reject;document.body.append(s);});
+    await load('/public/js/lib/jquery.min.js'); await load('/public/js/dashmix.app.min.js'); await load('/public/js/app-ui.js');
+    if(teacherCase) {
+      await load('/public/js/plugins/sweetalert2/sweetalert2.all.min.js');
+      window.Pagination=class {constructor(){this.option={filter:'present',manhom:[]};this.valuePage={curPage:1};}getPagination(){}};
+    }
+    const question=reviewCase==='review-hidden'
+      ? {macauhoi:1,loai:'mcq',noidung:'Câu fixture',dapanchon:11,cautraloi:[{macautl:11,noidungtl:'Đã chọn A'},{macautl:12,noidungtl:'B'}]}
+      : {macauhoi:1,loai:'essay',noidung:'Tự luận',noidung_tra_loi:'<p><strong>Nội dung hợp lệ</strong></p><img src="invalid" onerror="document.body.dataset.unsafe=1"><svg onload="document.body.dataset.unsafe=1"></svg>',ds_hinhanh:'',cautraloi:[]};
+    $.ajax=options=>{if(!teacherCase)options.success({success:true,data:[question]});return $.Deferred().resolve().promise();};
+    $.post=(url,_data,callback)=>{
+      if(url==='/test/getResultDetail')callback({success:true,data:[question]});
+      if(url==='/test/getEssayDetailAction')callback({success:true,cautraloi:[{macauhoi:1,noidung_cauhoi:'Essay',noidung_tra_loi:question.noidung_tra_loi,hinhanh:[],diem_cham:0}],tong_diem_tuluan:2});
+      return $.Deferred().resolve().promise();
+    };
+    await load('/public/js/exam-essay-html.js'); await load(teacherCase?'/public/js/pages/test_detail.js':'/public/js/pages/vaothi.js'); await new Promise(resolve=>setTimeout(resolve,50)); state.ready=true;
+  })();
+} else {
+const settle = () => new Promise(resolve => setTimeout(resolve, 40));
+const assert = (condition, message) => { if (!condition) throw new Error(message); };
+function loadFixtureFrame(frame, url) {
+  return new Promise((resolve,reject)=>{
+    const expected=new URL(url,location.href).href;
+    const finish=error=>{clearInterval(poll);clearTimeout(timeout);error?reject(error):resolve();};
+    const poll=setInterval(()=>{
+      try {
+        const w=frame.contentWindow;
+        if(w.location.href===expected&&w.document.readyState!=='loading'&&w.fixture)finish();
+      } catch(_) {}
+    },20);
+    const timeout=setTimeout(()=>finish(new Error('DOM và script test chưa sẵn sàng trong 15 giây')),15000);
+    frame.src=url;
+  });
+}
+const tests = [
+  ['fresh', 'Tải payload API dạng object và hiển thị đầy đủ lựa chọn', async w => {
+    assert(w.document.querySelectorAll('input[type=radio]').length === 2, 'Không hiển thị đủ đáp án');
+  }],
+  ['server-choice', 'Khôi phục lựa chọn đã lưu server khi chưa có nháp local', async w => {
+    assert(w.document.querySelector('input[data-macautl="12"]')?.checked, 'Lựa chọn server bị mất');
+  }],
+  ['corrupt-draft', 'Nháp JSON hỏng không làm trang làm bài ngừng chạy', async w => {
+    assert(w.document.querySelectorAll('input[type=radio]').length === 2, 'JSON hỏng làm mất giao diện');
+  }],
+  ['mode', 'Đổi đáp án và chuyển Full/Từng câu vẫn giữ đúng lựa chọn', async w => {
+    const input=w.document.querySelector('input[data-macautl="12"]'); input.click(); await settle();
+    w.document.querySelector('#mode-one').click(); await settle();
+    assert(w.document.querySelector('input[data-macautl="12"]').checked, 'Mất đáp án ở từng câu');
+    w.document.querySelector('#mode-full').click(); await settle();
+    assert(w.document.querySelector('input[data-macautl="12"]').checked, 'Mất đáp án khi quay Full');
+  }],
+  ['expired-tick', 'Đồng hồ nhảy qua 0 vẫn tự nộp đúng một lần', async w => {
+    w.fixture.tick(11_500); await settle();
+    assert(w.fixture.requests.length === 1, 'Qua mốc 0 nhưng không tự nộp');
+  }],
+  ['expired-load', 'Tải lại khi quá hạn thử nộp nháp và giữ nháp nếu mạng lỗi', async w => {
+    await settle();
+    assert(w.fixture.requests.length === 1, 'Không thử nộp nháp khi tải lại quá hạn');
+    assert(w.localStorage.getItem('cautraloi_'+w.document.querySelector('#dethicontent').dataset.id+'_user_fixture-student'), 'Nháp bị xóa khi chưa nộp thành công');
+  }],
+  ['no-close', 'Đề không có ngày đóng vẫn dùng thời lượng cá nhân', async w => {
+    w.fixture.tick(2_000); await settle();
+    assert(w.fixture.requests.length === 0, 'Đề không đóng bị coi là đã hết hạn');
+    assert(!w.document.querySelector('#timer').textContent.includes('-'), 'Đồng hồ âm');
+  }],
+  ['double-submit', 'Hai lần xác nhận nộp chỉ tạo một request đang xử lý', async w => {
+    w.document.querySelector('#btn-nop-bai').click(); w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.requests.length === 1, 'Có nhiều request nộp đang chạy đồng thời');
+    w.fixture.release?.();
+  }],
+  ['cleanup-failure', 'Server nhận bài nhưng lỗi dọn IndexedDB vẫn báo nộp thành công', async w => {
+    w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.dialogs.some(args => args[0] === 'Thành công!'), 'Lỗi dọn local che mất kết quả server đã nhận bài');
+  }],
+  ['offline', 'Mạng lỗi giữ nháp và cho phép thử nộp lại', async w => {
+    w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.requests.length === 1, 'Request nộp không được tạo');
+    const key='cautraloi_'+w.document.querySelector('#dethicontent').dataset.id+'_user_fixture-student';
+    assert(w.localStorage.getItem(key), 'Nháp bị xóa khi mạng lỗi');
+    w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.requests.length === 2, 'Không cho thử nộp lại');
+  }],
+  ['tab-auto', 'Rời tab với cờ tự nộp tạo request nộp', async w => {
+    w.dispatchEvent(new Event('blur')); await settle();
+    assert(w.fixture.requests.length === 1, 'Rời tab không tự nộp');
+  }],
+  ['tab-blank', 'Vi phạm tự nộp bài trắng ngay khi chưa bấm OK thông báo', async w => {
+    w.dispatchEvent(new w.Event('blur')); await settle();
+    assert(w.fixture.requests.length===1,'Tự nộp còn chờ sinh viên xác nhận thông báo');
+    assert(JSON.parse(w.fixture.requests[0].listCauTraLoi)[0].cautraloi===0,'Bài trắng bị thay đáp án');
+  }],
+  ['tab-hidden', 'Ẩn tab vẫn tự nộp bài trắng và không đếm trùng blur', async w => {
+    Object.defineProperty(w.document,'visibilityState',{configurable:true,value:'hidden'});
+    w.document.dispatchEvent(new w.Event('visibilitychange')); w.dispatchEvent(new w.Event('blur')); await settle();
+    assert(w.fixture.requests.length===1,'Ẩn tab không tự nộp hoặc gửi trùng');
+    assert(w.fixture.tabRequests===1,'Một lần rời tab bị ghi nhận nhiều lần');
+  }],
+  ['tab-retry', 'Tự nộp do vi phạm lỗi mạng vẫn nộp lại được bài trắng', async w => {
+    w.dispatchEvent(new w.Event('blur')); await settle();
+    assert(w.fixture.requests.length===1,'Không thử nộp khi vi phạm');
+    w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.requests.length===2,'Bài vi phạm bị chặn thử lại vì chưa trả lời');
+  }],
+  ['manual-blank', 'Chủ động nộp bài trắng không có vi phạm vẫn bị chặn', async w => {
+    w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.requests.length===0,'Cho nộp chủ động khi chưa trả lời');
+    assert(w.fixture.dialogs.some(args=>args[0]?.title==='Chưa hoàn thành!'),'Không báo câu chưa làm');
+  }],
+  ['tab-disabled', 'Giáo viên tắt tự nộp: rời tab chỉ cảnh báo, không nộp', async w => {
+    w.dispatchEvent(new w.Event('blur')); await settle();
+    assert(w.fixture.requests.length===0,'Tự nộp dù giáo viên tắt');
+    assert(w.fixture.dialogs.some(args=>args[0]?.icon==='warning'),'Không cảnh báo khi rời tab');
+  }],
+  ['missing-idb', 'Thiếu thư viện ảnh không làm hỏng phần trắc nghiệm', async w => {
+    assert(w.document.querySelectorAll('input[type=radio]').length === 2, 'Thiếu idb làm ngừng toàn bộ trang');
+  }],
+  ['question-error', 'Lỗi tải đề không khóa nút nộp và không gửi bài rỗng', async w => {
+    w.document.querySelector('#btn-nop-bai').click(); await settle();
+    assert(w.fixture.requests.length===0,'Gửi bài rỗng khi tải đề thất bại');
+    assert(!w.document.querySelector('#btn-nop-bai').disabled,'Nút nộp bị khóa vô hạn');
+  }],
+  ['review-hidden', 'Không kết luận đáp án sai khi giáo viên ẩn đáp án đúng', async w => {
+    w.document.querySelector('#show-exam-detail').click(); await settle();
+    assert(w.document.querySelector('#content-file').textContent.includes('Đã chọn'),'Không hiển thị lựa chọn');
+    assert(!w.document.querySelector('#content-file').textContent.includes('không đúng'),'Gán sai khi không được xem đáp án');
+  }],
+  ['review-safe', 'Xem tự luận giữ định dạng nhưng loại nội dung có thể chạy script', async w => {
+    w.document.querySelector('#show-exam-detail').click(); await settle();
+    const content=w.document.querySelector('#content-file');
+    assert(content.textContent.includes('Nội dung hợp lệ'),'Không hiển thị bài tự luận');
+    assert(!content.querySelector('[onerror], [onload], svg, script'),'Chèn nội dung thực thi vào DOM');
+    assert(!w.document.body.dataset.unsafe,'Nội dung người nộp đã chạy mã');
+    assert(content.querySelector('strong'),'Mất định dạng hợp lệ');
+  }],
+  ['essay-format', 'Giữ định dạng tự luận khi chuyển từ Full sang Từng câu', async w => {
+    for(let i=0;i<50&&!w.ckeditor_editor_1;i++)await settle();
+    assert(w.ckeditor_editor_1,'Không khởi tạo editor');
+    w.ckeditor_editor_1.setData('<p><strong>Nội dung định dạng</strong></p>');await settle();
+    w.document.querySelector('#mode-one').click();await settle();
+    for(let i=0;i<50&&!w.document.querySelector('.ck-editor__editable');i++)await settle();
+    assert(w.document.querySelector('.ck-editor__editable strong'),'Định dạng tự luận bị mất');
+  }],
+  ['mobile', 'Màn hình 390px không tràn ngang và nút nộp nằm trong khung', async w => {
+    assert(w.innerWidth===390,'Viewport của ca mobile không đúng 390px');
+    assert(w.document.documentElement.scrollWidth<=w.innerWidth,'Giao diện tràn ngang');
+    const rect=w.document.querySelector('#btn-nop-bai').getBoundingClientRect();
+    assert(rect.left>=0&&rect.right<=w.innerWidth,'Nút nộp nằm ngoài màn hình');
+  }],
+  ['image-race', 'Hết giờ khi đang xử lý ảnh vẫn gửi đủ ảnh sau khi xử lý xong', async w => {
+    for(let i=0;i<50&&!w.ckeditor_editor_1;i++)await settle();
+    assert(w.ckeditor_editor_1,'Không khởi tạo editor cho ca ảnh');
+    const bytes=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aTm0AAAAASUVORK5CYII='),c=>c.charCodeAt(0));
+    const transfer=new w.DataTransfer();transfer.items.add(new w.File([bytes],'fixture.png',{type:'image/png'}));
+    const input=w.document.querySelector('input[type=file]');input.files=transfer.files;input.dispatchEvent(new w.Event('change',{bubbles:true}));
+    w.fixture.tick(11_500);
+    for(let i=0;i<50&&!w.fixture.requests.length;i++)await settle();
+    assert(w.fixture.requests.length===1,'Không nộp được sau khi hết giờ');
+    assert(w.fixture.requests[0].essay_0_image_0,'Ảnh đang xử lý bị bỏ khỏi bài nộp');
+  }],
+  ['reading-image','Đáp án đọc hiểu có ảnh xuất hiện ở Full mode', async w=>{
+    assert(w.document.querySelector('img[src="/fixture/image/reading.png"]'),'Mất ảnh lựa chọn đọc hiểu');
+  }],
+  ['partial-retry','Tự nộp bài còn câu trống bị lỗi vẫn có thể thử lại',async w=>{
+    w.fixture.tick(11_500);await settle();assert(w.fixture.requests.length===1,'Không thử tự nộp');
+    w.document.querySelector('#btn-nop-bai').click();await settle();
+    assert(w.fixture.requests.length===2,'Không cho thử lại bài còn câu trống');
+  }],
+  ['clock-retry','Lỗi mạng khi lấy giờ thi được thử lại và đồng hồ chạy',async w=>{
+    for(let i=0;i<50&&!/^00:00:(?!00)\d{2}$/.test(w.document.querySelector('#timer').textContent);i++)await settle();
+    w.fixture.tick(2_000);await settle();
+    assert(w.document.querySelector('#timer').textContent==='00:00:08','Không khôi phục đồng hồ sau lỗi mạng');
+  }],
+  ['image-owner','Ảnh giữ đúng câu sau khi reload đề bị đổi thứ tự',async w=>{
+    for(let i=0;i<50&&!w.ckeditor_editor_1;i++)await settle();
+    assert(w.ckeditor_editor_1,'Không khởi tạo editor trước khi thêm ảnh');
+    const bytes=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aTm0AAAAASUVORK5CYII='),c=>c.charCodeAt(0));
+    const transfer=new w.DataTransfer();transfer.items.add(new w.File([bytes],'fixture.png',{type:'image/png'}));
+    const input=w.document.querySelector('input[type=file]');input.files=transfer.files;input.dispatchEvent(new w.Event('change',{bubbles:true}));
+    for(let i=0;i<50&&!w.document.querySelector('.img-thumbnail');i++)await settle();
+    assert(w.document.querySelector('.img-thumbnail'),'Không lưu ảnh trước reload');
+    if(new URLSearchParams(w.location.search).get('case')==='image-legacy') {
+      const key='cautraloi_'+w.document.querySelector('#dethicontent').dataset.id+'_user_fixture-student';
+      const oldDraft=JSON.parse(w.localStorage.getItem(key));oldDraft.forEach(answer=>delete answer.imagesByQuestionId);w.localStorage.setItem(key,JSON.stringify(oldDraft));
+      for(const row of await w.fixture.imageDb.getAll('images'))if(row.answerKey===key){delete row.questionId;row.questionIndex=0;await w.fixture.imageDb.put('images',row);}
+    }
+    const frame=w.frameElement;await loadFixtureFrame(frame,frame.src+'&stage=2');
+    for(let i=0;i<50&&!frame.contentWindow.document.querySelector('.img-thumbnail');i++)await settle();
+    const next=frame.contentWindow;const image=next.document.querySelector('.img-thumbnail');
+    assert(image&&image.closest('.question').id==='c2','Ảnh bị mất hoặc chuyển sang câu khác');
+    next.fixture.tick(11_500);for(let i=0;i<50&&!next.fixture.requests.length;i++)await settle();
+    assert(next.fixture.requests[0]?.essay_1_macauhoi==='101'&&next.fixture.requests[0]?.essay_1_image_0,'Ảnh không đi cùng mã câu gốc khi nộp');
+  }],
+  ['image-orphan','Mất nháp gốc rồi nhập mới và reload không gán nhầm ảnh legacy',async w=>{
+    for(let i=0;i<50&&!w.ckeditor_editor_1;i++)await settle();
+    assert(w.ckeditor_editor_1,'Không khởi tạo editor');
+    assert(!w.document.querySelector('.img-thumbnail'),'Đoán ảnh khi thiếu nháp gốc');
+    w.ckeditor_editor_1.setData('<p>Nội dung mới theo thứ tự mới</p>');await settle();
+    const frame=w.frameElement;await loadFixtureFrame(frame,frame.src+'&stage=2');
+    const next=frame.contentWindow;
+    for(let i=0;i<50&&!next.ckeditor_editor_1;i++)await settle();
+    assert(next.ckeditor_editor_1,'Không khởi tạo editor sau reload');
+    const key='cautraloi_'+next.document.querySelector('#dethicontent').dataset.id+'_user_fixture-student';
+    const rows=(await next.fixture.imageDb.getAll('images')).filter(row=>row.answerKey===key);
+    assert(rows.length===1,'Mất ảnh chưa xác định chủ sở hữu');
+    assert(rows[0].questionId==null&&!next.document.querySelector('.img-thumbnail'),'Nháp nhập mới bị dùng để gán nhầm ảnh cũ');
+  }],
+  ['review-teacher-detail','Giáo viên xem bài không thực thi HTML người nộp',async w=>{
+    w.document.querySelector('.show-exam-detail').click();
+    for(let i=0;i<30&&!w.document.querySelector('#content-file').textContent.includes('Nội dung hợp lệ');i++)await settle();
+    const content=w.document.querySelector('#content-file');
+    assert(content.textContent.includes('Nội dung hợp lệ'),'Không tải được chi tiết bài');
+    assert(!content.querySelector('[onerror],[onload],svg,script'),'Chi tiết bài có nội dung thực thi');
+    assert(content.querySelector('strong'),'Mất định dạng bài tự luận');
+  }],
+  ['review-teacher-grade','Giáo viên mở form chấm không thực thi HTML người nộp',async w=>{
+    w.document.querySelector('.student-item').click();await settle();
+    const content=w.document.querySelector('#noi-dung-tuluan');
+    assert(content.textContent.includes('Nội dung hợp lệ'),'Không tải được bài chấm');
+    assert(!content.querySelector('[onerror],[onload],svg,script'),'Form chấm có nội dung thực thi');
+    assert(content.querySelector('strong'),'Mất định dạng khi chấm');
+  }],
+];
+tests.push(['image-legacy','Ảnh nháp v3 cũ khôi phục đúng câu dựa trên mã câu trong nháp',tests.find(t=>t[0]==='image-owner')[2]]);
+document.querySelector('#run').onclick = async () => {
+  document.querySelector('#run').disabled=true; document.querySelector('#results').innerHTML=''; let pass=0;
+  const filter=new URLSearchParams(location.search).get('cases');
+  const selected=filter?tests.filter(t=>filter.split(',').includes(t[0])):tests;
+  for (let index=0;index<selected.length;index++) {
+    const [name,title,run]=selected[index]; document.querySelector('#status').textContent=`Đang chạy ${index+1}/${selected.length}`;
+    const frame=document.createElement('iframe'); document.querySelector('#frame').replaceChildren(frame);
+    if(name==='mobile')frame.style.width='390px';
+    const li=document.createElement('li');
+    try {
+      await loadFixtureFrame(frame,name.startsWith('review-')?'/fixture/client-tests?review='+name:'/fixture/client?case='+name+'&made='+(9000+tests.findIndex(t=>t[0]===name))); await settle();
+      if(name.startsWith('review-'))for(let i=0;i<50&&!frame.contentWindow.fixture?.ready;i++)await settle();
+      await run(frame.contentWindow); pass++; li.className='pass'; li.textContent='PASS — '+title;
+    }
+    catch(error) { li.className='fail'; li.textContent='FAIL — '+title+': '+error.message; }
+    document.querySelector('#results').append(li);
+  }
+  document.querySelector('#status').textContent=`Kết quả: ${pass}/${selected.length} đạt; ${selected.length-pass} lỗi.`;
+  document.querySelector('#run').disabled=false;
+};
+}
+</script></html>

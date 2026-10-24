@@ -469,10 +469,7 @@ $(document).ready(function () {
       if (hasText) {
         html += `
         <div class="bg-white p-4 rounded-3 border shadow-sm mb-4">
-          <div class="lh-lg">${item.noidung_tra_loi.replace(
-            /\n/g,
-            "<br>"
-          )}</div>
+          <div class="lh-lg">${window.examEssayHtml(item.noidung_tra_loi)}</div>
         </div>`;
       }
 
@@ -1231,7 +1228,7 @@ $(document).on(
             <div class="bg-white p-3 rounded border mt-2 min-vh-20">
               ${
                 c.noidung_tra_loi
-                  ? c.noidung_tra_loi
+                  ? window.examEssayHtml(c.noidung_tra_loi)
                   : '<em class="text-muted">Không có nội dung</em>'
               }
             </div>

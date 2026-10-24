@@ -56,6 +56,7 @@ const PAGE_SIZE = 10;
  */
 @Injectable()
 export class ExamsService {
+  static readonly SUBMISSION_GRACE_MS = 120_000;
   private readonly logger = new Logger(ExamsService.name);
 
   /** Thư mục lưu ảnh bài làm tự luận trên bucket Supabase. */
@@ -132,7 +133,14 @@ export class ExamsService {
       throw new ForbiddenException('Bạn không thuộc nhóm học phần này');
   }
 
-  async assertCanTakeExam(made: number, userId: string): Promise<void> {
+  async assertCanTakeExam(
+    made: number,
+    userId: string,
+    phase: 'start' | 'questions' | 'clock' | 'submit' = 'start',
+  ): Promise<void> {
+    if (!Number.isSafeInteger(made) || made <= 0) {
+      throw new NotFoundException('Đề thi không tồn tại');
+    }
     const exam = await this.prisma.deThi.findUnique({ where: { made } });
     if (!exam || exam.trangthai !== 1) {
       throw new NotFoundException('Đề thi không tồn tại');
@@ -141,11 +149,28 @@ export class ExamsService {
       throw new ForbiddenException('Bạn không được giao đề thi này');
     }
     const now = Date.now();
-    if (
-      (exam.thoigianbatdau && now < exam.thoigianbatdau.getTime()) ||
-      (exam.thoigianketthuc && now > exam.thoigianketthuc.getTime())
-    ) {
-      throw new ForbiddenException('Đề thi chưa mở hoặc đã kết thúc');
+    if (exam.thoigianbatdau && now < exam.thoigianbatdau.getTime()) {
+      throw new ForbiddenException('Đề thi chưa mở');
+    }
+    const attempt = await this.prisma.ketQua.findFirst({
+      where: { made, manguoidung: userId },
+      select: { diemthi: true, trangthai: true, thoigianvaothi: true },
+    });
+    if (attempt && (attempt.diemthi !== null || attempt.trangthai === 'Đã nộp')) {
+      throw new ForbiddenException('Bài thi đã nộp');
+    }
+    if (phase !== 'start' && !attempt) {
+      throw new ForbiddenException('Bạn chưa bắt đầu làm bài');
+    }
+    const deadline = Math.min(
+      exam.thoigianketthuc?.getTime() ?? Infinity,
+      attempt ? attempt.thoigianvaothi.getTime() + Number(exam.thoigianthi) * 60_000 : Infinity,
+    );
+    // Preserve the existing 120-second transport tolerance, measured by server time.
+    // Clock reads still return the deadline so reload can submit an expired draft.
+    const grace = attempt ? ExamsService.SUBMISSION_GRACE_MS : 0;
+    if (phase !== 'clock' && now > deadline + grace) {
+      throw new ForbiddenException('Đã hết thời gian làm bài');
     }
   }
 
@@ -720,12 +745,15 @@ export class ExamsService {
     types: string[],
     qty: number,
   ): Promise<number[]> {
-    if (!chuong.length || !types.length || qty <= 0) return [];
+    if (!types.length || qty <= 0) return [];
+    const chuongCond = chuong.length
+      ? Prisma.sql`AND machuong IN (${Prisma.join(chuong)})`
+      : Prisma.empty;
     const rows = await tx.$queryRaw<{ macauhoi: number }[]>(Prisma.sql`
       SELECT macauhoi FROM cauhoi
       WHERE mamonhoc = ${monhoc} AND dokho = ${dokho}
         AND loai IN (${Prisma.join(types)})
-        AND machuong IN (${Prisma.join(chuong)}) AND trangthai = 1
+        ${chuongCond} AND trangthai = 1
       ORDER BY RANDOM() LIMIT ${qty}
     `);
     return rows.map((r) => r.macauhoi);
@@ -743,11 +771,14 @@ export class ExamsService {
     dokho: number,
     qty: number,
   ): Promise<number[]> {
-    if (!chuong.length || qty <= 0) return [];
+    if (qty <= 0) return [];
+    const chuongCond = chuong.length
+      ? Prisma.sql`AND machuong IN (${Prisma.join(chuong)})`
+      : Prisma.empty;
     const rows = await tx.$queryRaw<{ macauhoi: number }[]>(Prisma.sql`
       SELECT macauhoi FROM cauhoi
       WHERE mamonhoc = ${monhoc} AND dokho = ${dokho} AND loai = 'reading'
-        AND machuong IN (${Prisma.join(chuong)}) AND trangthai = 1
+        ${chuongCond} AND trangthai = 1
       ORDER BY madv ASC, macauhoi ASC LIMIT ${qty}
     `);
     return rows.map((r) => r.macauhoi);
@@ -1191,6 +1222,7 @@ export class ExamsService {
       SELECT 1 AS ok
       FROM giaodethi gdt
       JOIN chitietnhom ctn ON gdt.manhom = ctn.manhom
+      JOIN nhom n ON n.manhom = gdt.manhom AND n.trangthai = 1
       WHERE gdt.made = ${made} AND ctn.manguoidung = ${userId}
       LIMIT 1
     `);
@@ -1337,19 +1369,7 @@ export class ExamsService {
 
     const cauhoi: IStudentQuestion[] = [];
     for (const row of rows) {
-      let options: IStudentAnswerOption[];
-      if (row.dapanchon && (row.loai === 'mcq' || row.loai === 'reading')) {
-        // Quirk PHP: đã lưu đáp án → chỉ trả lựa chọn đã chọn (để tô lại).
-        options = [
-          {
-            macautl: row.dapanchon,
-            noidungtl: String(row.dapanchon),
-            hinhanhtl: '',
-          },
-        ];
-      } else {
-        options = await this.getAnswersWithoutKey(row.macauhoi);
-      }
+      const options = await this.getAnswersWithoutKey(row.macauhoi);
       if (trondapan && row.loai !== 'essay') this.shuffle(options);
 
       cauhoi.push({
@@ -1597,10 +1617,16 @@ export class ExamsService {
       }
 
       // Upload ảnh tự luận lên Supabase TRƯỚC transaction (tránh I/O mạng trong tx).
-      const essayEntries = await this.collectEssayAnswers(body);
-      newlyUploadedImages.push(
-        ...essayEntries.flatMap((entry) => entry.imageUrls),
+      const essayEntries = await this.collectEssayAnswers(
+        body,
+        newlyUploadedImages,
       );
+      // Omitted essay answers are blank submissions, still available for grading.
+      for (const [macauhoi, loai] of typeMap) {
+        if (loai === 'essay' && !seenEssays.has(macauhoi)) {
+          essayEntries.push({ macauhoi, noidung: '', thutu: 0, imageUrls: [] });
+        }
+      }
       const obsoleteImages: (string | null)[] = [];
 
       const diemthi = await this.prisma.$transaction(async (tx) => {
@@ -1723,6 +1749,7 @@ export class ExamsService {
    */
   private async collectEssayAnswers(
     body: Record<string, unknown>,
+    newlyUploadedImages: string[],
   ): Promise<
     { macauhoi: number; noidung: string; thutu: number; imageUrls: string[] }[]
   > {
@@ -1760,7 +1787,10 @@ export class ExamsService {
           b64,
           ExamsService.ESSAY_FOLDER,
         );
-        if (url) imageUrls.push(url);
+        if (url) {
+          imageUrls.push(url);
+          newlyUploadedImages.push(url);
+        }
       }
       result.push({
         macauhoi: e.macauhoi,
@@ -2144,9 +2174,9 @@ export class ExamsService {
       : Prisma.empty;
     const statusCond =
       status === 'graded'
-        ? Prisma.sql`AND (k.diem_tuluan IS NOT NULL AND k.diem_tuluan > 0)`
+        ? Prisma.sql`AND k.trangthai_tuluan = 'Đã chấm'`
         : status === 'ungraded'
-          ? Prisma.sql`AND (k.diem_tuluan IS NULL OR k.diem_tuluan = 0)`
+          ? Prisma.sql`AND COALESCE(k.trangthai_tuluan, 'Chưa chấm') <> 'Đã chấm'`
           : Prisma.empty;
 
     const rows = await this.prisma.$queryRaw<
@@ -2158,6 +2188,7 @@ export class ExamsService {
         diemthi: number | null;
         diem_dochieu: number | null;
         diem_tuluan: number | null;
+        trangthai_tuluan: string | null;
       }[]
     >(Prisma.sql`
       SELECT k.makq, k.manguoidung, COALESCE(nd.hoten, k.manguoidung) AS hoten,
@@ -2183,7 +2214,7 @@ export class ExamsService {
         diemthi: r.diemthi,
         diem_dochieu: r.diem_dochieu,
         diem_tuluan_hien_tai: diemTL,
-        trangthai_cham: diemTL > 0 ? 'Đã chấm' : 'Chưa chấm',
+        trangthai_cham: r.trangthai_tuluan === 'Đã chấm' ? 'Đã chấm' : 'Chưa chấm',
       };
     });
     return { success: true, data };
@@ -2295,6 +2326,10 @@ export class ExamsService {
     if (!Number.isInteger(makq) || makq <= 0) {
       return { success: false, message: 'Mã kết quả không hợp lệ' };
     }
+    if (!Number.isFinite(diemTong) || diemTong < 0 ||
+      Object.values(diemTungCau).some((score) => !Number.isFinite(Number(score)) || Number(score) < 0)) {
+      return { success: false, message: 'Điểm tự luận không hợp lệ' };
+    }
     const diemTongRounded = Math.round(diemTong * 100) / 100;
 
     const maxRows = await this.prisma.$queryRaw<{ diem_tuluan_max: number }[]>(
@@ -2342,7 +2377,7 @@ export class ExamsService {
           where: { makq },
           data: {
             diem_tuluan: diemTongRounded,
-            trangthai_tuluan: diemTongRounded > 0 ? 'Đã chấm' : 'Chưa chấm',
+            trangthai_tuluan: 'Đã chấm',
           },
         });
       });

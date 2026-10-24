@@ -170,9 +170,11 @@ export class AccountService {
     const ext = extname(file.originalname || '').toLowerCase();
     if (!VALID_AVATAR_EXT.includes(ext)) return false;
 
+    const uploadedImages: string[] = [];
     try {
       const url = await this.storage.uploadImage(file.buffer, 'avatars');
       if (!url) return false;
+      uploadedImages.push(url);
 
       const cu = await this.prisma.nguoiDung.findUnique({
         where: { id },
@@ -193,6 +195,13 @@ export class AccountService {
     } catch (err) {
       this.logger.error('Lưu ảnh đại diện thất bại', err as Error);
       return false;
+    } finally {
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        uploadedImages,
+        this.logger,
+      );
     }
   }
 }

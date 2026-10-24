@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma/prisma.service';
 import { SupabaseStorageService } from '@/storage/supabase-storage.service';
@@ -65,7 +70,10 @@ export class QuestionsService {
     return actor;
   }
 
-  private async assertSubjectAccess(mamonhoc: string, actorId: string): Promise<void> {
+  private async assertSubjectAccess(
+    mamonhoc: string,
+    actorId: string,
+  ): Promise<void> {
     const actor = await this.getActor(actorId);
     if (actor.manhomquyen === 3) return;
     const assigned = await this.prisma.phanCong.count({
@@ -76,7 +84,11 @@ export class QuestionsService {
     }
   }
 
-  private async assertQuestionAccess(id: number, actorId: string, write = false) {
+  private async assertQuestionAccess(
+    id: number,
+    actorId: string,
+    write = false,
+  ) {
     const [question, actor] = await Promise.all([
       this.prisma.cauHoi.findUnique({ where: { macauhoi: id } }),
       this.getActor(actorId),
@@ -84,7 +96,8 @@ export class QuestionsService {
     if (!question || question.trangthai === 0) {
       throw new NotFoundException('Câu hỏi không tồn tại.');
     }
-    if (actor.manhomquyen === 3 || question.nguoitao === actorId) return question;
+    if (actor.manhomquyen === 3 || question.nguoitao === actorId)
+      return question;
     if (write) {
       throw new ForbiddenException('Bạn không có quyền sửa câu hỏi này.');
     }
@@ -345,7 +358,10 @@ export class QuestionsService {
   }
 
   /** POST /question/getAnswerById — đáp án (mcq/essay) hoặc câu con + đáp án (reading). */
-  async getAnswerById(id: number, actorId: string): Promise<IAnswerRow[] | IReadingAnswerRow[]> {
+  async getAnswerById(
+    id: number,
+    actorId: string,
+  ): Promise<IAnswerRow[] | IReadingAnswerRow[]> {
     const q = await this.assertQuestionAccess(id, actorId);
 
     // Reading: gom đáp án của từng câu hỏi con (thay getSubQuestions + getAll).
@@ -399,7 +415,9 @@ export class QuestionsService {
     actorId: string,
   ): Promise<IMultiAnswerRow[]> {
     if (!ids.length) return [];
-    await Promise.all([...new Set(ids)].map((id) => this.assertQuestionAccess(id, actorId)));
+    await Promise.all(
+      [...new Set(ids)].map((id) => this.assertQuestionAccess(id, actorId)),
+    );
     const rows = await this.prisma.cauTraLoi.findMany({
       where: { macauhoi: { in: ids } },
       select: {
@@ -459,6 +477,7 @@ export class QuestionsService {
   private async uploadQueue(
     files: Express.Multer.File[],
     field: string,
+    uploadedImages: string[],
   ): Promise<string[]> {
     const matched = files.filter(
       (f) => f.fieldname === field && f.buffer?.length,
@@ -469,7 +488,10 @@ export class QuestionsService {
         f.buffer,
         QuestionsService.FOLDER,
       );
-      if (url) urls.push(url);
+      if (url) {
+        urls.push(url);
+        uploadedImages.push(url);
+      }
     }
     return urls;
   }
@@ -493,10 +515,16 @@ export class QuestionsService {
   /** Ảnh câu hỏi chính: upload file đầu tiên field `hinhanh` → URL (null nếu không có). */
   private async mainImageUrl(
     files: Express.Multer.File[],
+    uploadedImages: string[],
   ): Promise<string | null> {
     const f = files.find((x) => x.fieldname === 'hinhanh' && x.buffer?.length);
     if (!f) return null;
-    return this.storage.uploadImage(f.buffer, QuestionsService.FOLDER);
+    const url = await this.storage.uploadImage(
+      f.buffer,
+      QuestionsService.FOLDER,
+    );
+    if (url) uploadedImages.push(url);
+    return url;
   }
 
   /** Parse JSON `cautraloi`; lỗi cú pháp → null (báo lỗi cho client). */
@@ -538,10 +566,14 @@ export class QuestionsService {
       return { status: 'error', message: 'Dữ liệu đáp án không hợp lệ' };
     }
 
-    const mainImg = await this.mainImageUrl(files);
-    const optQueue = await this.uploadQueue(files, 'option_hinhanh[]');
-
+    const uploadedImages: string[] = [];
     try {
+      const mainImg = await this.mainImageUrl(files, uploadedImages);
+      const optQueue = await this.uploadQueue(
+        files,
+        'option_hinhanh[]',
+        uploadedImages,
+      );
       if (loai === 'mcq' || loai === 'essay') {
         await this.prisma.$transaction(async (tx) => {
           const q = await tx.cauHoi.create({
@@ -638,6 +670,13 @@ export class QuestionsService {
         status: 'error',
         message: 'Lỗi hệ thống: ' + (err as Error).message,
       };
+    } finally {
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        uploadedImages,
+        this.logger,
+      );
     }
   }
 
@@ -672,11 +711,18 @@ export class QuestionsService {
     await this.assertSubjectAccess(mamonhoc, nguoitao);
     const questionOwner = question.nguoitao;
 
-    const mainImg = deleteQuestionImage ? null : await this.mainImageUrl(files);
-    const optQueue = await this.uploadQueue(files, 'option_hinhanh[]');
+    const uploadedImages: string[] = [];
     const obsoleteImages: (string | null)[] = [];
 
     try {
+      const mainImg = deleteQuestionImage
+        ? null
+        : await this.mainImageUrl(files, uploadedImages);
+      const optQueue = await this.uploadQueue(
+        files,
+        'option_hinhanh[]',
+        uploadedImages,
+      );
       if (loai === 'reading') {
         const noidungDV = this.encodeHTML((input.doanvan_noidung ?? '').trim());
         if (noidungDV === '') {
@@ -866,6 +912,13 @@ export class QuestionsService {
         status: 'error',
         message: 'Lỗi hệ thống: ' + (err as Error).message,
       };
+    } finally {
+      await removeUnreferencedImages(
+        this.prisma,
+        this.storage,
+        uploadedImages,
+        this.logger,
+      );
     }
   }
 

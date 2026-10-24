@@ -122,7 +122,7 @@
       <div class="essay-block">
         <div class="essay-title">Bài làm của sinh viên:</div>
         <% if (q.noidung_tra_loi) { %>
-          <div class="essay-content"><%- q.noidung_tra_loi %></div>
+          <div class="essay-content" data-exam-essay><%= q.noidung_tra_loi %></div>
         <% } %>
         <% if (q.hinhanh_list.length) { %>
           <div class="essay-images">
@@ -178,6 +178,7 @@
   <% } %>
 <% }); %>
 
+<script src="/public/js/exam-essay-html.js"></script>
 <script>
   // Mở hộp thoại in ngay khi trang (kèm ảnh) tải xong → người dùng "Lưu dạng PDF".
   window.addEventListener('load', function () {

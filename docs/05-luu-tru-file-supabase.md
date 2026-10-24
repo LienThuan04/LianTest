@@ -46,7 +46,8 @@ Không tự ghép tiền tố thư mục vào giá trị có thể đã là URL.
 
 ## Dọn ảnh thay thế
 
-`src/storage/image-cleanup.ts` chỉ xử lý sau khi DB ghi thành công:
+`src/storage/image-cleanup.ts` kiểm tra tham chiếu sau khi thao tác DB đã commit,
+rollback hoặc upload bị ngắt:
 
 - URL phải thuộc đúng origin và đường dẫn public của bucket cấu hình.
   Bỏ qua URL bên ngoài, tên file local hoặc đường dẫn không hợp lệ.
@@ -54,9 +55,13 @@ Không tự ghép tiền tố thư mục vào giá trị có thể đã là URL.
   luận và người dùng, kể cả bản ghi ẩn hoặc đã xoá mềm. Ảnh còn tham chiếu được giữ lại.
 - Nộp lại một mục tự luận thay bộ ảnh của chính mục đó trong transaction;
   chỉ xét xoá các ảnh thay thế hết tham chiếu sau commit.
+- Thêm/sửa câu hỏi và avatar ghi nhận URL ngay sau từng upload, xét dọn ảnh mới
+  sau thao tác DB; ảnh upload dư, dữ liệu bị từ chối hoặc transaction rollback
+  được dọn khi không có bản ghi nào tham chiếu. Luồng nộp tự luận cũng ghi nhận
+  từng URL để dọn ảnh trước đó nếu một ảnh kế tiếp upload thất bại.
 - Lỗi kiểm tra tham chiếu hoặc xoá Storage chỉ ghi cảnh báo, không làm thao tác
   đã ghi DB báo thất bại. Cơ chế này không quét hàng loạt object mồ côi hoặc tự
-  dọn ảnh mới upload khi transaction DB rollback.
+  khôi phục các object rác từ những lần upload cũ hoặc lần cleanup thất bại.
 
 Ứng dụng hiện giả định bucket public. Chuyển bucket thành private cần thay cơ chế
 lưu path/phát signed URL đồng bộ với backend và giao diện; chỉ đổi quyền bucket

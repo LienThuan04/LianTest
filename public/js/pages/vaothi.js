@@ -89,12 +89,13 @@ $(document).ready(function () {
 
     questions.forEach((item, index) => {
       const correctOp = item.cautraloi?.find((op) => op.ladapan == 1);
+      const hasAnswerKey = item.cautraloi?.some((op) => op.ladapan !== undefined && op.ladapan !== null);
       const selectedOp = item.cautraloi?.find(
         (op) => op.macautl === item.dapanchon
       );
       const isCorrect =
         selectedOp && correctOp && selectedOp.macautl === correctOp.macautl;
-      const isWrong = selectedOp && !isCorrect;
+      const isWrong = hasAnswerKey && selectedOp && !isCorrect;
       const notAnswered = !item.dapanchon;
 
       const normalizedContext = item.context
@@ -206,6 +207,8 @@ $(document).ready(function () {
           <i class="fas fa-clock me-2"></i>Đáp án chưa được chọn!
         </div>
       </div>`;
+      } else if (!hasAnswerKey) {
+        resultBar = '<div class="alert alert-info mt-4">Đã chọn đáp án. Giáo viên chưa cho phép xem đáp án đúng.</div>';
       } else if (isCorrect) {
         resultBar = `<div class="mx-auto mt-4 rounded-4 overflow-hidden" style="max-width:480px">
         <div class="bg-success text-white py-3 px-4 d-flex align-items-center justify-content-center gap-3">
@@ -264,10 +267,7 @@ $(document).ready(function () {
       if (hasText) {
         html += `
         <div class="bg-white p-4 rounded-3 border shadow-sm mb-4">
-          <div class="lh-lg">${item.noidung_tra_loi.replace(
-            /\n/g,
-            "<br>"
-          )}</div>
+          <div class="lh-lg">${window.examEssayHtml(item.noidung_tra_loi)}</div>
         </div>`;
       }
 
@@ -362,10 +362,7 @@ $(document).ready(function () {
       if (hasText) {
         html += `
         <div class="bg-white p-4 rounded-3 border shadow-sm mb-4">
-          <div class="lh-lg">${item.noidung_tra_loi.replace(
-            /\n/g,
-            "<br>"
-          )}</div>
+          <div class="lh-lg">${window.examEssayHtml(item.noidung_tra_loi)}</div>
         </div>`;
       }
 

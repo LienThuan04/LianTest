@@ -121,7 +121,7 @@
             <% } else { %>
               <button class="btn btn-danger w-100 rounded-pill py-3" disabled>Đã hoàn thành</button>
             <% } %>
-          <% } else if (hasAttempt && !hasScore) { %>
+          <% } else if (hasAttempt && !hasScore && C.trangthai === 'Đã nộp') { %>
             <button class="btn btn-danger w-100 rounded-pill py-3" disabled>Đã hoàn thành (Chưa chấm)</button>
           <% } else { %>
             <% if (now < startTime) { %>
@@ -131,7 +131,7 @@
             <% } else { %>
               <button name="start-test" id="start-test" data-id="<%= T.made %>"
                       class="btn btn-info w-100 rounded-pill py-3 text-white shadow-sm btn-st">
-                Bắt đầu thi <i class='fa fa-angle-right ms-2'></i>
+                <%= hasAttempt ? 'Tiếp tục làm bài' : 'Bắt đầu thi' %> <i class='fa fa-angle-right ms-2'></i>
               </button>
             <% } %>
           <% } %>
@@ -245,6 +245,7 @@
   <%- include('../partials/script') %>
   <!-- Plugin trang Vào thi: notify (Dashmix jq-notify). -->
   <script src="/public/js/plugins/bootstrap-notify/bootstrap-notify.min.js"></script>
+  <script src="/public/js/exam-essay-html.js"></script>
   <script src="/public/js/pages/vaothi.js"></script>
 </body>
 </html>

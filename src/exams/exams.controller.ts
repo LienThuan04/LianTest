@@ -350,6 +350,9 @@ export class ExamsController {
     if (!Number.isInteger(made) || made <= 0) {
       throw new NotFoundException('Đề thi không tồn tại');
     }
+    if (!(await this.exams.checkStudentAllowed(user.id, made))) {
+      throw new ForbiddenException('Bạn không thuộc nhóm được giao đề thi này');
+    }
     const dethi = await this.exams.getById(made);
     const check = await this.exams.getMaKQ(made, user.id);
     const now = Date.now();
@@ -359,8 +362,11 @@ export class ExamsController {
     const end = dethi?.thoigianketthuc
       ? new Date(dethi.thoigianketthuc).getTime()
       : Number.MAX_SAFE_INTEGER;
-    const notSubmitted = !check || check.diemthi == null;
-    if (dethi && now >= start && now <= end && notSubmitted) {
+    const notSubmitted = check && check.diemthi == null && check.trangthai !== 'Đã nộp';
+    const personalEnd = check
+      ? new Date(check.thoigianvaothi).getTime() + Number(dethi?.thoigianthi) * 60_000
+      : 0;
+    if (dethi?.trangthai === 1 && now >= start && now <= Math.min(end, personalEnd) + ExamsService.SUBMISSION_GRACE_MS && notSubmitted) {
       return res.render('pages/de_thi', {
         Title: 'Làm bài kiểm tra',
         Page: 'de_thi',
@@ -377,7 +383,7 @@ export class ExamsController {
   @Post('getQuestion')
   async getQuestion(@Body() dto: TestMadeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
-    await this.exams.assertCanTakeExam(dto.made, user.id);
+    await this.exams.assertCanTakeExam(dto.made, user.id, 'questions');
     return this.exams.getQuestionByUser(dto.made, user.id);
   }
 
@@ -397,7 +403,7 @@ export class ExamsController {
   @Post('getTimeTest')
   async getTimeTest(@Body() dto: TestTimeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
-    await this.exams.assertCanTakeExam(dto.dethi, user.id);
+    await this.exams.assertCanTakeExam(dto.dethi, user.id, 'clock');
     return this.exams.getTimeTest(dto.dethi, user.id);
   }
 
@@ -409,6 +415,7 @@ export class ExamsController {
     await this.exams.assertCanTakeExam(
       dto.dethi,
       (req.user as IExamJwtPayload).id,
+      'clock',
     );
     return this.exams.getTimeEndTest(dto.dethi);
   }
@@ -419,7 +426,7 @@ export class ExamsController {
   @Post('chuyentab')
   async chuyentab(@Body() dto: TestMadeDto, @Req() req: Request) {
     const user = req.user as IExamJwtPayload;
-    await this.exams.assertCanTakeExam(dto.made, user.id);
+    await this.exams.assertCanTakeExam(dto.made, user.id, 'questions');
     return this.exams.chuyentab(dto.made, user.id);
   }
 
@@ -436,7 +443,7 @@ export class ExamsController {
     const user = req.user as IExamJwtPayload;
     const body = req.body as Record<string, unknown>;
     const made = Number(body.made);
-    await this.exams.assertCanTakeExam(made, user.id);
+    await this.exams.assertCanTakeExam(made, user.id, 'submit');
     return this.exams.submit(made, user.id, body);
   }
 

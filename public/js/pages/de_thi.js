@@ -7,10 +7,39 @@ $(document).ready(function () {
 
   const dethiKey = `dethi_${made}_user_${userId}`;
   const answerKey = `cautraloi_${made}_user_${userId}`;
+  let submitting = false;
+  let submitted = false;
+  let timeExpired = false;
+  let tabViolation = false;
+  let resolveQuestions;
+  const questionsReady = new Promise((resolve) => { resolveQuestions = resolve; });
+  const pendingImageReads = new Set();
+
+  function trackImageChange(handler) {
+    return (event) => {
+      const task = handler(event);
+      pendingImageReads.add(task);
+      task.catch((error) => Swal.fire("Lỗi ảnh", error.message, "error"))
+        .finally(() => pendingImageReads.delete(task));
+    };
+  }
+
+  function trackImageRead(reader) {
+    const handleLoad = reader.onload;
+    const task = new Promise((resolve, reject) => {
+      reader.onload = async (event) => {
+        try { await handleLoad(event); resolve(); } catch (error) { reject(error); }
+      };
+      reader.onerror = () => reject(new Error("Không đọc được ảnh đã chọn"));
+    });
+    pendingImageReads.add(task);
+    task.catch((error) => Swal.fire("Lỗi ảnh", error.message, "error"))
+      .finally(() => pendingImageReads.delete(task));
+  }
 
   // ==================== INDEXEDDB CHO ẢNH TỰ LUẬN ====================
   let db;
-  const dbPromise = idb.openDB("exam-images-db-v3", 3, {
+  const dbPromise = (typeof idb === "undefined" ? Promise.resolve(null) : idb.openDB("exam-images-db-v3", 3, {
     upgrade(db, oldVersion) {
       if (oldVersion < 1) {
         const store = db.createObjectStore("images", {
@@ -23,7 +52,7 @@ $(document).ready(function () {
         ]);
       }
     },
-  });
+  })).catch((error) => { console.warn("Không mở được kho ảnh nháp", error); return null; });
 
   (async () => {
     try {
@@ -37,9 +66,11 @@ $(document).ready(function () {
   async function saveImageToDB(qIndex, base64) {
     if (!base64 || base64.length < 100) return;
     const db = await dbPromise;
+    if (!db) throw new Error("Không mở được kho ảnh nháp. Vui lòng tải lại trang trước khi thêm ảnh.");
     await db.add("images", {
       answerKey,
-      questionIndex: qIndex,
+      questionIndex: listQues[qIndex].macauhoi,
+      questionId: listQues[qIndex].macauhoi,
       base64: base64.trim(),
       timestamp: Date.now(),
     });
@@ -47,25 +78,48 @@ $(document).ready(function () {
 
   async function getImagesForQuestion(qIndex) {
     const db = await dbPromise;
-    const range = IDBKeyRange.bound(
-      [answerKey, qIndex],
-      [answerKey, qIndex, []]
-    );
-    return await db.getAllFromIndex("images", "by_exam_user_question", range);
+    if (!db) return [];
+    const questionId = listQues[qIndex]?.macauhoi;
+    if (questionId == null) return [];
+    const current = await db.getAllFromIndex("images", "by_exam_user_question",
+      IDBKeyRange.bound([answerKey, questionId], [answerKey, questionId, []]));
+    return current.filter((row) => row.questionId === questionId);
+  }
+
+  // Nháp v3 lưu vị trí cũ. Chỉ khôi phục khi nháp text chứng minh được mã câu.
+  async function migrateLegacyImages(savedAnswers) {
+    if (!savedAnswers.length) return;
+    const db = await dbPromise;
+    if (!db) return;
+    const essayIds = new Set(listQues.filter((q) => q.loai === "essay").map((q) => q.macauhoi));
+    for (const row of await db.getAll("images")) {
+      if (row.answerKey !== answerKey || row.questionId != null) continue;
+      if (!Number.isInteger(row.questionIndex) || row.questionIndex < 0) continue;
+      const originalAnswer = savedAnswers[row.questionIndex];
+      // Nháp mới được lưu theo thứ tự hiện tại, không chứng minh vị trí ảnh v3 cũ.
+      if (originalAnswer?.imagesByQuestionId) continue;
+      const questionId = originalAnswer?.macauhoi;
+      if (!essayIds.has(questionId)) continue;
+      await db.put("images", { ...row, questionIndex: questionId, questionId });
+    }
   }
 
   async function deleteImageFromDB(qIndex, base64) {
+    const db = await dbPromise;
+    if (!db) return;
     const all = await db.getAll("images");
     const item = all.find(
       (i) =>
         i.answerKey === answerKey &&
-        i.questionIndex === qIndex &&
+        i.questionId === listQues[qIndex]?.macauhoi &&
         i.base64 === base64
     );
     if (item) await db.delete("images", item.id);
   }
 
   async function clearImagesForExam() {
+    const db = await dbPromise;
+    if (!db) return;
     const all = await db.getAll("images");
     const tx = db.transaction("images", "readwrite");
     all
@@ -75,8 +129,9 @@ $(document).ready(function () {
   }
 
   function compressImage(base64) {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const img = new Image();
+      img.onerror = () => reject(new Error("File đã chọn không phải ảnh hợp lệ"));
       img.onload = () => {
         const canvas = document.createElement("canvas");
         const MAX = 1400;
@@ -357,6 +412,7 @@ $(document).ready(function () {
         }
       },
       error: function (xhr) {
+        resolveQuestions(false);
         $("#list-question").html(
           "<p class='text-center text-danger'>Lỗi khi tải câu hỏi</p>"
         );
@@ -368,7 +424,7 @@ $(document).ready(function () {
   function initListAnswer(questions) {
     return questions.map((q) => ({
       macauhoi: q.macauhoi,
-      cautraloi: q.loai !== "essay" ? 0 : null,
+      cautraloi: q.loai !== "essay" ? (q.dapanchon ?? 0) : null,
       noidungtl: q.loai === "essay" ? "" : null,
     }));
   }
@@ -386,9 +442,9 @@ $(document).ready(function () {
         return;
 
       // Tạo HTML cho essay
-      const userEssayText = (answers[idx]?.noidungtl || "")
+      const userEssayText = window.examEssayHtml((answers[idx]?.noidungtl || "")
         .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">");
+        .replace(/&gt;/g, ">"));
       const editorId = `editor_${idx + 1}`;
       const fileInputId = `fileinput_${idx + 1}`;
       const thumbId = `thumb_${idx + 1}`;
@@ -507,7 +563,7 @@ $(document).ready(function () {
               await showBtnSideBar(listQues, answers);
             });
 
-            fileInput.addEventListener("change", async (e) => {
+            fileInput.addEventListener("change", trackImageChange(async (e) => {
               const files = Array.from(e.target.files);
               if (!files.length) return;
               const current = (await getImagesForQuestion(idx)).length;
@@ -532,10 +588,11 @@ $(document).ready(function () {
                   saveAnswers();
                   await showBtnSideBar(listQues, answers);
                 };
+                trackImageRead(reader);
                 reader.readAsDataURL(file);
               }
               fileInput.value = "";
-            });
+            }));
           })
           .catch((err) => console.error("Lỗi CKEditor:", err));
       }, 100);
@@ -699,7 +756,7 @@ $(document).ready(function () {
     questions.forEach((question, index) => {
       const userAnswer = answers[index] || {};
       const userChosenId = userAnswer.cautraloi || null;
-      const userEssayText = userAnswer.noidungtl || "";
+      const userEssayText = window.examEssayHtml(userAnswer.noidungtl || "");
       const editorId = `editor_${index + 1}`;
       const thumbId = `thumb_${index + 1}`;
       const fileInputId = `fileinput_${index + 1}`;
@@ -731,7 +788,7 @@ $(document).ready(function () {
           groupHtml += `<div class="row g-3 mb-4">`;
           question.cautraloi.forEach((ctl, i) => {
             const content = ctl.noidungtl || ctl.content || "";
-            const img = ctl.hinhanhlt || "";
+            const img = ctl.hinhanhtl || ctl.hinhanh || "";
             groupHtml += `
 <div class="col-12 col-md-6">
   <div class="border border-2 rounded-4 p-4 bg-white shadow-sm h-100 d-flex flex-column transition-all hover-shadow-lg"
@@ -883,7 +940,7 @@ $(document).ready(function () {
                   .replace(/<[^>]*>/g, "")
                   .trim();
                 answers[index] = answers[index] || {};
-                answers[index].noidungtl = text || null;
+                answers[index].noidungtl = editor.getData();
                 saveAnswers();
                 const imgs = await getImagesForQuestion(index);
                 if (text || imgs.length > 0) {
@@ -894,7 +951,7 @@ $(document).ready(function () {
                 await showBtnSideBar(questions, answers);
               });
 
-              fileInput.addEventListener("change", async (e) => {
+              fileInput.addEventListener("change", trackImageChange(async (e) => {
                 const files = Array.from(e.target.files);
                 if (!files.length) return;
                 const current = (await getImagesForQuestion(index)).length;
@@ -919,10 +976,11 @@ $(document).ready(function () {
                     saveAnswers();
                     await showBtnSideBar(questions, answers);
                   };
+                  trackImageRead(reader);
                   reader.readAsDataURL(file);
                 }
                 fileInput.value = "";
-              });
+              }));
 
               (async () => {
                 const saved = await getImagesForQuestion(index);
@@ -1025,6 +1083,7 @@ $(document).ready(function () {
   function saveAnswers() {
     const data = answers.map((ans) => ({
       macauhoi: ans.macauhoi,
+      imagesByQuestionId: true,
       cautraloi: ans.cautraloi ?? 0,
       noidungtl: ans.noidungtl ?? null,
     }));
@@ -1033,6 +1092,7 @@ $(document).ready(function () {
   // ================= Khởi tạo và render lần đầu =================
   $.when(getQuestion()).done(async (response) => {
     if (!response || !response.cauhoi) {
+      resolveQuestions(false);
       $("#list-question").html(
         "<p class='text-center text-danger'>Không tải được đề thi!</p>"
       );
@@ -1050,15 +1110,25 @@ $(document).ready(function () {
     listQues = questions.map((q, i) => ({ ...q, displayOrder: i + 1 }));
 
     // Khởi tạo mảng đáp án
-    let savedA = localStorage.getItem(answerKey);
-    if (savedA) {
-      const savedAnswers = JSON.parse(savedA);
+    let savedAnswers = [];
+    try {
+      const parsed = JSON.parse(localStorage.getItem(answerKey) || "[]");
+      if (Array.isArray(parsed)) savedAnswers = parsed;
+    } catch (error) {
+      console.warn("Nháp không hợp lệ, khôi phục dữ liệu từ đề thi", error);
+    }
+    try {
+      await migrateLegacyImages(savedAnswers);
+    } catch (error) {
+      console.warn("Chưa khôi phục được ảnh nháp cũ, giữ nguyên dữ liệu", error);
+    }
+    if (savedAnswers.length) {
       answers = listQues.map((q) => {
         // tìm đáp án đã lưu dựa trên macauhoi
-        const saved = savedAnswers.find((s) => s.macauhoi === q.macauhoi);
+        const saved = savedAnswers.find((s) => s && s.macauhoi === q.macauhoi);
         return {
           macauhoi: q.macauhoi,
-          cautraloi: saved?.cautraloi ?? (q.loai === "essay" ? null : 0),
+          cautraloi: saved?.cautraloi ?? (q.loai === "essay" ? null : (q.dapanchon ?? 0)),
           noidungtl: saved?.noidungtl ?? (q.loai === "essay" ? "" : null),
         };
       });
@@ -1073,6 +1143,7 @@ $(document).ready(function () {
         JSON.stringify(
           answers.map((ans) => ({
             macauhoi: ans.macauhoi,
+            imagesByQuestionId: true,
             cautraloi: ans.cautraloi,
             noidungtl: ans.noidungtl,
           }))
@@ -1083,6 +1154,7 @@ $(document).ready(function () {
     // Render giao diện
     renderCurrentView();
     await showBtnSideBar(listQues, answers);
+    resolveQuestions(true);
 
     // Highlight câu hiện tại (chế độ 1 câu)
     if (displayMode === "one") {
@@ -1223,7 +1295,7 @@ $(document).ready(function () {
       }
     }
 
-    if (unanswered.length > 0) {
+    if (unanswered.length > 0 && !timeExpired && !tabViolation) {
       Swal.fire({
         icon: "warning",
         title: "Chưa hoàn thành!",
@@ -1255,6 +1327,13 @@ $(document).ready(function () {
   });
 
   async function nopbai() {
+    if (submitting || submitted) return;
+    submitting = true;
+    $("#btn-nop-bai").prop("disabled", true);
+    $("input[type=file]").prop("disabled", true);
+    try {
+    if (!(await questionsReady) || !listQues.length) throw new Error("Chưa tải được đề thi. Nháp vẫn được giữ lại.");
+    while (pendingImageReads.size) await Promise.all([...pendingImageReads]);
     const formData = new FormData();
     const savedAnswers = answers.map((ans, i) => ({
       macauhoi: listQues[i].macauhoi,
@@ -1349,14 +1428,14 @@ $(document).ready(function () {
     // }
 
     // ==== GỬI LÊN SERVER ====
-    try {
       const res = await fetch("/test/submit", {
         method: "POST",
         body: formData,
       }).then((r) => r.json());
       if (res.success) {
-        await clearImagesForExam();
-        clearExamData();
+        submitted = true;
+        try { await clearImagesForExam(); } catch (error) { console.warn("Bài đã nộp, chưa dọn được ảnh nháp", error); }
+        try { clearExamData(); } catch (error) { console.warn("Bài đã nộp, chưa dọn được nháp", error); }
         Swal.fire("Thành công!", "Bài thi đã được nộp.", "success").then(() => {
           location.href = `/test/start/${made}`;
         });
@@ -1366,6 +1445,12 @@ $(document).ready(function () {
     } catch (err) {
       console.error(err);
       Swal.fire("Lỗi!", "Không thể nộp bài: " + err.message, "error");
+    } finally {
+      submitting = false;
+      if (!submitted) {
+        $("#btn-nop-bai").prop("disabled", false);
+        $("input[type=file]").prop("disabled", false);
+      }
     }
   }
 
@@ -1390,7 +1475,14 @@ $(document).ready(function () {
   });
 
   var endTime = -1;
+  let clockRetries = 0;
   getTimeTest();
+
+  function retryClock() {
+    $("#timer").text("Đang đồng bộ thời gian...");
+    if (++clockRetries <= 3) setTimeout(getTimeTest, 1000);
+    else $("#timer").text("Không tải được giờ thi. Vui lòng tải lại trang.");
+  }
 
   function getTimeTest() {
     let dethi = $("#dethicontent").data("id");
@@ -1401,13 +1493,9 @@ $(document).ready(function () {
         dethi: dethi,
       },
       success: function (response) {
-        endTime = new Date(response).getTime();
-        let curTime = new Date().getTime();
-        if (curTime > endTime) {
-          localStorage.removeItem(answerKey);
-          localStorage.removeItem(dethiKey);
-          location.href = `/test/start/${made}`;
-        } else {
+        endTime = response ? new Date(response).getTime() : NaN;
+        if (!Number.isFinite(endTime)) { retryClock(); return; }
+        clockRetries = 0;
           $.ajax({
             type: "post",
             url: "/test/getTimeEndTest",
@@ -1415,22 +1503,23 @@ $(document).ready(function () {
               dethi: dethi,
             },
             success: function (responseEnd) {
-              let endTimeTest = new Date(responseEnd).getTime();
-              if (endTimeTest < endTime) {
+              let endTimeTest = responseEnd ? new Date(responseEnd).getTime() : NaN;
+              if (Number.isFinite(endTimeTest) && endTimeTest < endTime) {
                 endTime = endTimeTest;
               }
+              countDown();
             },
+            error: function () { countDown(); },
           });
-          countDown();
-        }
       },
+      error: retryClock,
     });
   }
 
   function countDown() {
-    var x = setInterval(function () {
+    const update = function () {
       var now = new Date().getTime();
-      var distance = endTime - now;
+      var distance = Math.max(0, endTime - now);
       var hours = Math.floor(
         (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
       );
@@ -1445,23 +1534,16 @@ $(document).ready(function () {
         $("#timer").css("color", "red").css("font-weight", "bold");
       }
 
-      if (distance <= 1000 && distance >= 0) {
+      if (endTime <= now) {
+        timeExpired = true;
         // Thay vì chỉ gọi nopbai(), bạn có thể thêm thông báo trước
         clearInterval(x);
 
-        Swal.fire({
-          icon: "error",
-          title: "Hết thời gian!",
-          text: "Thời gian làm bài đã hết. Hệ thống sẽ tự động nộp bài.",
-          allowOutsideClick: false,
-          allowEscapeKey: false,
-          timer: 3000,
-          timerProgressBar: true,
-        }).then(() => {
-          nopbai();
-        });
+        nopbai();
       }
-    }, 1000);
+    };
+    var x = setInterval(update, 1000);
+    update();
   }
 
   // Logic xử lý chuyển tab
@@ -1472,6 +1554,7 @@ $(document).ready(function () {
     10
   );
   let hasWarned = false;
+  let isAway = false;
 
   // Khi click vào input file → set flag true (bắt đầu quá trình chọn file)
   $(document).on("click", "input[type=file]", function () {
@@ -1489,13 +1572,13 @@ $(document).ready(function () {
     if (isSelectingFile) {
       isSelectingFile = false; // Reset nếu đang ở trạng thái chọn file (xử lý cancel hoặc focus back mà không change)
     }
+    if (document.visibilityState !== "hidden") isAway = false;
   });
 
-  // Phát hiện blur thật sự (chuyển tab)
-  $(window).on("blur", function () {
-    if (isSelectingFile) {
-      return; // Bỏ qua nếu đang chọn file (tìm lâu, cancel nhầm, hoặc dialog mở)
-    }
+  // Blur và visibilitychange có thể cùng phát sinh cho một lần rời bài.
+  function handleExamLeave() {
+    if (isSelectingFile || isAway || submitted) return;
+    isAway = true;
 
     // Đây là chuyển tab thật
     tabSwitchCount++;
@@ -1508,6 +1591,7 @@ $(document).ready(function () {
     })
       .done(function (res) {
         if (res == 1) {
+          tabViolation = true;
           if (!hasWarned) {
             hasWarned = true;
             Swal.fire({
@@ -1517,36 +1601,28 @@ $(document).ready(function () {
               allowOutsideClick: false,
               allowEscapeKey: false,
               confirmButtonText: "OK",
-            }).then(() => nopbai());
+            });
           }
+          // Quy chế của giáo viên có hiệu lực ngay, không chờ SV xác nhận.
+          nopbai();
         } else {
           localStorage.setItem("isTabSwitched_" + made, tabSwitchCount);
-
-          document.addEventListener("visibilitychange", function () {
-            if (document.visibilityState === "hidden") {
-              Swal.fire({
-                icon: "warning",
-                title: "Cảnh báo",
-                html: "Bạn đã rời khỏi cửa sổ bài thi.",
-                confirmButtonText: "Tôi hiểu",
-              });
-            }
+          Swal.fire({
+            icon: "warning",
+            title: "Cảnh báo",
+            html: "Bạn đã rời khỏi cửa sổ bài thi.",
+            confirmButtonText: "Tôi hiểu",
           });
-
-          // else if (tabSwitchCount >= 2) {
-          //   Swal.fire({
-          //     icon: "error",
-          //     title: "Nhiều lần rời khỏi bài thi",
-          //     text: "Hệ thống tự động nộp bài để đảm bảo công bằng.",
-          //     allowOutsideClick: false,
-          //     allowEscapeKey: false,
-          //   }).then(() => nopbai());
-          // }
         }
       })
       .fail(function () {
         localStorage.setItem("isTabSwitched_" + made, tabSwitchCount);
       });
+  }
+  $(window).on("blur", handleExamLeave);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") handleExamLeave();
+    else isAway = false;
   });
 
   //

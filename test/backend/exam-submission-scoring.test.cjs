@@ -182,7 +182,9 @@ function harness(options = {}) {
       assert.notEqual(transactionContext.getStore(), true, 'upload must precede its transaction');
       assert.equal(folder, 'essays');
       trace.push('upload');
-      return options.uploadUrls?.[uploads++] ?? asset('new-essay');
+      const index = uploads++;
+      if (options.failUpload === index + 1) throw new Error('Fixture upload failed');
+      return options.uploadUrls?.[index] ?? asset('new-essay');
     },
     ownedObjectPath: (url) => url?.startsWith('https://fixture.invalid/images/')
       ? url.slice('https://fixture.invalid/images/'.length) : null,
@@ -382,6 +384,21 @@ test('failed commit cleans a new upload while preserving prior attachments', asy
   assert.equal(h.trace.includes(`remove:${asset('new-essay')}`), true);
   assert.equal(h.trace.includes(`remove:${asset('old-essay')}`), false);
 });
+
+for (const secondEssay of [false, true]) {
+  test(`partial essay upload failure cleans preceding uploads (${secondEssay ? 'two answers' : 'one answer'})`, async () => {
+    const previous = [{ traloi_id: 301, hinhanh: asset('old-essay') }];
+    const h = harness({ failUpload: 2, images: previous, examIds: [31, 98] });
+    const payload = secondEssay
+      ? { ...essay(31, 0, true), ...essay(98, 1, true) }
+      : { ...essay(31, 0, true), essay_0_image_1: 'data:image/png;base64,bmV3' };
+    assert.equal((await h.service.submit(42, 'SV-A', body([], payload))).success, false);
+    assert.deepEqual(h.state().images, previous);
+    assert.equal(h.trace.includes('transaction'), false);
+    assert.equal(h.trace.includes(`remove:${asset('new-essay')}`), true);
+    assert.equal(h.trace.includes(`remove:${asset('old-essay')}`), false);
+  });
+}
 
 test('failed transaction rolls back its claim so the student can retry', async () => {
   const h = harness({ failCommits: 1 });

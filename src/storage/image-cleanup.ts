@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import type { PrismaService } from '../prisma/prisma.service';
 import type { SupabaseStorageService } from './supabase-storage.service';
 
-/** Call only after the write commits; retain objects referenced by any saved row. */
+/** Call after commit/rollback or an aborted upload; retain every saved reference. */
 export async function removeUnreferencedImages(
   prisma: PrismaService,
   storage: SupabaseStorageService,
