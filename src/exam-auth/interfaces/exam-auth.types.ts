@@ -10,6 +10,11 @@ export interface IExamJwtPayload {
   roleName: string; // nhomquyen.tennhomquyen
 }
 
+/** Danh tính trong req.user: bổ sung avatar hiện tại từ DB ở mỗi request. */
+export interface IExamAuthenticatedUser extends IExamJwtPayload {
+  avatar: string | null;
+}
+
 /**
  * Payload vé khôi phục mật khẩu — thay `$_SESSION['checkMail']` của PHP.
  * Ký bằng JWT, gửi kèm cookie httpOnly ngắn hạn (10 phút).

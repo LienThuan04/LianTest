@@ -58,7 +58,12 @@ export class ClientController {
   @Render('pages/test_schedule')
   testSchedule(@Req() req: Request) {
     const user = req.user as IExamJwtPayload;
-    return { Title: 'Lịch kiểm tra', Page: 'test_schedule', user_id: user.id };
+    return {
+      Title: 'Lịch kiểm tra',
+      Page: 'test_schedule',
+      user_id: user.id,
+      user,
+    };
   }
 
   /** POST /client/joinGroup — tham gia nhóm bằng mã mời (0 | 1 | chi tiết nhóm). */

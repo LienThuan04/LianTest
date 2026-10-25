@@ -4,7 +4,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/prisma/prisma.service';
 import type { Request } from 'express';
-import type { IExamJwtPayload } from '@/exam-auth/interfaces/exam-auth.types';
+import type {
+  IExamAuthenticatedUser,
+  IExamJwtPayload,
+} from '@/exam-auth/interfaces/exam-auth.types';
 
 /**
  * Xác thực JWT cho hệ thi (hạ tầng giữ lại từ bộ khung).
@@ -39,7 +42,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: unknown): Promise<IExamJwtPayload> {
+  async validate(payload: unknown): Promise<IExamAuthenticatedUser> {
     const claims = payload as Partial<IExamJwtPayload> | null;
     if (
       !claims ||
@@ -59,6 +62,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         id: true,
         email: true,
         hoten: true,
+        avatar: true,
         trangthai: true,
         manhomquyen: true,
         nhomQuyen: { select: { tennhomquyen: true, trangthai: true } },
@@ -76,6 +80,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       id: user.id,
       email: user.email,
       hoten: user.hoten,
+      avatar: user.avatar,
       manhomquyen: user.manhomquyen,
       roleName: user.nhomQuyen.tennhomquyen,
     };

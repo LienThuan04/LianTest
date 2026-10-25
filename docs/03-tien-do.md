@@ -2,8 +2,15 @@
 
 [Chỉ mục tài liệu](README.md) · [README tiếng Việt](../README.vi.md)
 
-Cập nhật: **24/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
+Cập nhật: **25/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
 dưới chỉ áp dụng cho phạm vi và môi trường được mô tả.
+
+## Cập nhật chức năng ngày 25/10/2026
+
+- Avatar trên thanh tài khoản được đọc từ dữ liệu người dùng hiện tại mỗi lần
+  xác thực, nên ảnh mới hiển thị khi chuyển trang với cùng phiên đăng nhập.
+- Lịch thi sinh viên truyền đầy đủ dữ liệu người dùng cho thanh tài khoản,
+  hiển thị đúng avatar đã lưu.
 
 ## Cập nhật chức năng ngày 24/10/2026
 
