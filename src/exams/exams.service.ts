@@ -1629,91 +1629,108 @@ export class ExamsService {
       }
       const obsoleteImages: (string | null)[] = [];
 
-      const diemthi = await this.prisma.$transaction(async (tx) => {
-        // Giành quyền nộp trong cùng transaction với bài làm và điểm. UPDATE
-        // khóa hàng; request đến sau phải kiểm lại diemthi sau khi hàng mở khóa.
-        const claimed = await tx.ketQua.updateMany({
-          where: { makq, diemthi: null },
-          data: { trangthai: 'Đã nộp' },
-        });
-        if (claimed.count !== 1) throw alreadySubmitted;
-
-        let socaudungMcq = 0;
-        let socaudungReading = 0;
-
-        for (const ans of listCauTraLoi) {
-          const { macauhoi, cautraloi, thutu } = ans;
-          const loai = typeMap.get(macauhoi);
-
-          await tx.chiTietKetQua.upsert({
-            where: { makq_macauhoi: { makq, macauhoi } },
-            create: {
-              makq,
-              macauhoi,
-              dapanchon: cautraloi || null,
-              thutu,
-            },
-            update: { dapanchon: cautraloi || null, thutu },
+      const diemthi = await this.prisma.$transaction(
+        async (tx) => {
+          // Giành quyền nộp trong cùng transaction với bài làm và điểm. UPDATE
+          // khóa hàng; request đến sau phải kiểm lại diemthi sau khi hàng mở khóa.
+          const claimed = await tx.ketQua.updateMany({
+            where: { makq, diemthi: null },
+            data: { trangthai: 'Đã nộp' },
           });
+          if (claimed.count !== 1) throw alreadySubmitted;
 
-          if (cautraloi === 0) continue;
-          const correct = await tx.cauTraLoi.count({
-            where: { macauhoi, macautl: cautraloi, ladapan: 1 },
-          });
-          if (correct > 0) {
-            if (loai === 'reading') socaudungReading++;
-            else socaudungMcq++;
+          let socaudungMcq = 0;
+          let socaudungReading = 0;
+
+          // Đọc khóa đáp án một lần; tránh một lượt DB cho mỗi câu khi chấm.
+          const correctAnswers = selectedIds.length
+            ? await tx.cauTraLoi.findMany({
+                where: { macautl: { in: selectedIds }, ladapan: 1 },
+                select: { macautl: true, macauhoi: true },
+              })
+            : [];
+          const correctOwners = new Map(
+            correctAnswers.map((ans) => [ans.macautl, ans.macauhoi]),
+          );
+
+          // Chỉ thay các câu được gửi lên, giữ các dòng nháp bị bỏ qua. Claim ở
+          // trên bảo vệ nộp đồng thời; delete/create cùng rollback nếu lưu lỗi.
+          if (listCauTraLoi.length) {
+            await tx.chiTietKetQua.deleteMany({
+              where: {
+                makq,
+                macauhoi: { in: listCauTraLoi.map((ans) => ans.macauhoi) },
+              },
+            });
+            await tx.chiTietKetQua.createMany({
+              data: listCauTraLoi.map(({ macauhoi, cautraloi, thutu }) => ({
+                makq,
+                macauhoi,
+                dapanchon: cautraloi || null,
+                thutu,
+              })),
+            });
           }
-        }
-        const socaudungTong = socaudungMcq + socaudungReading;
 
-        // Điểm trắc nghiệm / đọc hiểu.
-        const dethi = await tx.deThi.findUnique({
-          where: { made },
-          select: { diem_tracnghiem: true, diem_dochieu: true },
-        });
-        const mcqTotal = this.decToNum(dethi?.diem_tracnghiem ?? 10);
-        const readingTotal = this.decToNum(dethi?.diem_dochieu ?? 0);
-        let tongMcq = 0;
-        let tongReading = 0;
-        for (const loai of typeMap.values()) {
-          if (loai === 'mcq') tongMcq++;
-          else if (loai === 'reading') tongReading++;
-        }
-        const diemTracNghiem =
-          tongMcq > 0
-            ? Math.round((mcqTotal / tongMcq) * socaudungMcq * 100) / 100
-            : 0;
-        const diemDoChieu =
-          tongReading > 0
-            ? Math.round(
-                (readingTotal / tongReading) * socaudungReading * 100,
-              ) / 100
-            : 0;
-        const diem = diemTracNghiem + diemDoChieu;
+          for (const ans of listCauTraLoi) {
+            const { macauhoi, cautraloi } = ans;
+            const loai = typeMap.get(macauhoi);
+            if (correctOwners.get(cautraloi) === macauhoi) {
+              if (loai === 'reading') socaudungReading++;
+              else socaudungMcq++;
+            }
+          }
+          const socaudungTong = socaudungMcq + socaudungReading;
 
-        // Tự luận (ảnh đã upload → URL ở essayEntries).
-        obsoleteImages.push(
-          ...(await this.saveEssayAnswers(tx, makq, essayEntries)),
-        );
+          // Điểm trắc nghiệm / đọc hiểu.
+          const dethi = await tx.deThi.findUnique({
+            where: { made },
+            select: { diem_tracnghiem: true, diem_dochieu: true },
+          });
+          const mcqTotal = this.decToNum(dethi?.diem_tracnghiem ?? 10);
+          const readingTotal = this.decToNum(dethi?.diem_dochieu ?? 0);
+          let tongMcq = 0;
+          let tongReading = 0;
+          for (const loai of typeMap.values()) {
+            if (loai === 'mcq') tongMcq++;
+            else if (loai === 'reading') tongReading++;
+          }
+          const diemTracNghiem =
+            tongMcq > 0
+              ? Math.round((mcqTotal / tongMcq) * socaudungMcq * 100) / 100
+              : 0;
+          const diemDoChieu =
+            tongReading > 0
+              ? Math.round(
+                  (readingTotal / tongReading) * socaudungReading * 100,
+                ) / 100
+              : 0;
+          const diem = diemTracNghiem + diemDoChieu;
 
-        // Đề có câu tự luận → chờ chấm.
-        const hasEssay = [...typeMap.values()].includes('essay');
+          // Tự luận (ảnh đã upload → URL ở essayEntries).
+          obsoleteImages.push(
+            ...(await this.saveEssayAnswers(tx, makq, essayEntries)),
+          );
 
-        await tx.ketQua.update({
-          where: { makq },
-          data: {
-            diemthi: diem,
-            diem_dochieu: diemDoChieu,
-            thoigianlambai,
-            thoigianketthuc: end,
-            socaudung: socaudungTong,
-            trangthai: 'Đã nộp',
-            trangthai_tuluan: hasEssay ? 'Chưa chấm' : 'Đã chấm',
-          },
-        });
-        return diem;
-      });
+          // Đề có câu tự luận → chờ chấm.
+          const hasEssay = [...typeMap.values()].includes('essay');
+
+          await tx.ketQua.update({
+            where: { makq },
+            data: {
+              diemthi: diem,
+              diem_dochieu: diemDoChieu,
+              thoigianlambai,
+              thoigianketthuc: end,
+              socaudung: socaudungTong,
+              trangthai: 'Đã nộp',
+              trangthai_tuluan: hasEssay ? 'Chưa chấm' : 'Đã chấm',
+            },
+          });
+          return diem;
+        },
+        { timeout: 20_000 },
+      );
 
       void diemthi;
       await removeUnreferencedImages(

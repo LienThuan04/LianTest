@@ -2,8 +2,16 @@
 
 [Chỉ mục tài liệu](README.md) · [README tiếng Việt](../README.vi.md)
 
-Cập nhật: **25/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
+Cập nhật: **26/10/2026**. Đây là bản ghi trạng thái hiện tại; kết quả kiểm tra bên
 dưới chỉ áp dụng cho phạm vi và môi trường được mô tả.
+
+## Cập nhật chức năng ngày 26/10/2026
+
+- Sửa lỗi nộp bài bị hết hạn transaction: lưu đáp án trắc nghiệm/đọc hiểu theo lô
+  và tra khóa đáp án một lần, giảm truy vấn khi đề có nhiều câu.
+- Tăng timeout riêng cho nộp bài lên 20 giây; giữ kiểm tra đáp án thuộc câu hỏi,
+  chống nộp trùng và rollback dữ liệu khi lưu thất bại.
+- Bổ sung hồi quy độ trễ DB, bài 100 câu, giữ nháp, rollback và nộp đồng thời.
 
 ## Cập nhật chức năng ngày 25/10/2026
 

@@ -50,26 +50,51 @@ function matches(value, condition) {
 }
 
 function harness(options = {}) {
+  const examQuestions = options.questions ?? questions;
+  const availableAnswers = options.answers ?? answers;
   const examIds = options.examIds ?? [11, 12, 21, 22, 31];
   let state = {
-    choices: [], result: null,
+    choices: options.choices ?? [],
+    result: null,
     essays: [{ id: 301, makq: 7, macauhoi: 31, noidung: 'Previous essay' }],
     images: options.images ?? [],
   };
   const trace = [];
+  const errors = [];
   const transactionContext = new AsyncLocalStorage();
   let transactionQueue = Promise.resolve();
   let resultReads = 0;
   let releaseReads;
-  const readsReady = new Promise((resolve) => { releaseReads = resolve; });
+  const readsReady = new Promise((resolve) => {
+    releaseReads = resolve;
+  });
   let uploads = 0;
-  let commitFailures = options.failCommit ? Infinity : options.failCommits ?? 0;
+  let commitFailures = options.failCommit
+    ? Infinity
+    : (options.failCommits ?? 0);
   const delegates = (draft) => ({
     chiTietKetQua: {
+      deleteMany: async ({ where }) => {
+        const before = draft.choices.length;
+        draft.choices = draft.choices.filter(
+          (row) =>
+            !Object.entries(where).every(([key, value]) =>
+              matches(row[key], value),
+            ),
+        );
+        return { count: before - draft.choices.length };
+      },
+      createMany: async ({ data }) => {
+        if (options.failDetailInsert)
+          throw new Error('Fixture detail insert failed');
+        trace.push('choice-write');
+        draft.choices.push(...structuredClone(data));
+        return { count: data.length };
+      },
       upsert: async ({ where, create, update }) => {
         trace.push('choice-write');
-        const row = draft.choices.find((entry) =>
-          entry.macauhoi === where.makq_macauhoi.macauhoi,
+        const row = draft.choices.find(
+          (entry) => entry.macauhoi === where.makq_macauhoi.macauhoi,
         );
         if (row) Object.assign(row, update);
         else draft.choices.push({ ...create });
@@ -77,18 +102,30 @@ function harness(options = {}) {
       },
     },
     cauTraLoi: {
-      count: async ({ where }) => answers.filter((row) =>
-        Object.entries(where).every(([key, value]) => matches(row[key], value)),
-      ).length,
+      findMany: async ({ where }) =>
+        (options.transactionAnswers ?? availableAnswers).filter((row) =>
+          Object.entries(where).every(([key, value]) =>
+            matches(row[key], value),
+          ),
+        ),
+      count: async ({ where }) =>
+        availableAnswers.filter((row) =>
+          Object.entries(where).every(([key, value]) =>
+            matches(row[key], value),
+          ),
+        ).length,
     },
-    deThi: { findUnique: async () => ({
-      diem_tracnghiem: new Prisma.Decimal(options.mcqTotal ?? 6),
-      diem_dochieu: new Prisma.Decimal(options.readingTotal ?? 4),
-    }) },
+    deThi: {
+      findUnique: async () => ({
+        diem_tracnghiem: new Prisma.Decimal(options.mcqTotal ?? 6),
+        diem_dochieu: new Prisma.Decimal(options.readingTotal ?? 4),
+      }),
+    },
     traLoiTuLuan: {
-      findFirst: async ({ where }) => draft.essays.find((row) =>
-        row.makq === where.makq && row.macauhoi === where.macauhoi,
-      ) ?? null,
+      findFirst: async ({ where }) =>
+        draft.essays.find(
+          (row) => row.makq === where.makq && row.macauhoi === where.macauhoi,
+        ) ?? null,
       update: async ({ where, data }) => {
         trace.push('essay-write');
         const row = draft.essays.find((entry) => entry.id === where.id);
@@ -103,10 +140,13 @@ function harness(options = {}) {
       },
     },
     hinhAnhTraLoiTuLuan: {
-      findMany: async ({ where }) => draft.images.filter((row) => row.traloi_id === where.traloi_id),
+      findMany: async ({ where }) =>
+        draft.images.filter((row) => row.traloi_id === where.traloi_id),
       deleteMany: async ({ where }) => {
         trace.push('image-write');
-        draft.images = draft.images.filter((row) => row.traloi_id !== where.traloi_id);
+        draft.images = draft.images.filter(
+          (row) => row.traloi_id !== where.traloi_id,
+        );
         return { count: 1 };
       },
       create: async ({ data }) => {
@@ -131,71 +171,125 @@ function harness(options = {}) {
         return data;
       },
     },
-    $queryRaw: async () => [{
-      cnt: questions.filter((row) => examIds.includes(row.macauhoi) && row.loai === 'essay').length,
-    }],
+    $queryRaw: async () => [
+      {
+        cnt: examQuestions.filter(
+          (row) => examIds.includes(row.macauhoi) && row.loai === 'essay',
+        ).length,
+      },
+    ],
   });
   const prisma = {
-    ketQua: { findFirst: async () => {
-      const snapshot = options.completed || state.result ? null : {
-        makq: 7, thoigianvaothi: new Date(Date.now() - 120000),
-      };
-      if (options.concurrentReads && resultReads < 2) {
-        resultReads++;
-        if (resultReads === 2) releaseReads();
-        await readsReady;
-      }
-      return snapshot;
-    } },
-    chiTietDeThi: { findMany: async ({ where }) => {
-      assert.equal(where.made, 42);
-      return examIds.map((macauhoi) => ({ macauhoi }));
-    } },
-    cauHoi: { findMany: async ({ where }) => questions.filter((row) =>
-      matches(row.macauhoi, where.macauhoi),
-    ) },
-    cauTraLoi: { findMany: async ({ where }) => answers.filter((row) =>
-      Object.entries(where).every(([key, value]) => matches(row[key], value)),
-    ) },
+    ketQua: {
+      findFirst: async () => {
+        const snapshot =
+          options.completed || state.result
+            ? null
+            : {
+                makq: 7,
+                thoigianvaothi: new Date(Date.now() - 120000),
+              };
+        if (options.concurrentReads && resultReads < 2) {
+          resultReads++;
+          if (resultReads === 2) releaseReads();
+          await readsReady;
+        }
+        return snapshot;
+      },
+    },
+    chiTietDeThi: {
+      findMany: async ({ where }) => {
+        assert.equal(where.made, 42);
+        return examIds.map((macauhoi) => ({ macauhoi }));
+      },
+    },
+    cauHoi: {
+      findMany: async ({ where }) =>
+        examQuestions.filter((row) => matches(row.macauhoi, where.macauhoi)),
+    },
+    cauTraLoi: {
+      findMany: async ({ where }) =>
+        availableAnswers.filter((row) =>
+          Object.entries(where).every(([key, value]) =>
+            matches(row[key], value),
+          ),
+        ),
+    },
     $queryRaw: async () => state.images.map((row) => ({ url: row.hinhanh })),
-    $transaction: (callback) => {
+    $transaction: (callback, config = {}) => {
       // Serialize transactions touching this result, modeling the row update
       // lock and predicate recheck. Both initial reads can still see null.
-      const operation = transactionQueue.then(() => transactionContext.run(true, async () => {
-        trace.push('transaction');
-        const draft = structuredClone(state);
-        const result = await callback(delegates(draft));
-        if (commitFailures > 0) {
-          commitFailures--;
-          throw new Error('Fixture commit rejected');
-        }
-        state = draft;
-        trace.push('commit');
-        return result;
-      }));
+      const operation = transactionQueue.then(() =>
+        transactionContext.run(true, async () => {
+          trace.push('transaction');
+          const draft = structuredClone(state);
+          const tx = delegates(draft);
+          let elapsed = 0;
+          // Deterministic DB round-trip latency without wall-clock sleeps. All
+          // current service queries execute through the same transaction budget.
+          for (const [model, methods] of Object.entries(tx)) {
+            if (typeof methods !== 'object') continue;
+            for (const [method, run] of Object.entries(methods)) {
+              methods[method] = async (...args) => {
+                trace.push(`query:${model}.${method}`);
+                elapsed += options.queryLatencyMs ?? 0;
+                if (elapsed > (config.timeout ?? 5000)) {
+                  throw new Error(
+                    `Transaction API error: A query cannot be executed on an expired transaction. The timeout for this transaction was ${config.timeout ?? 5000} ms, however ${elapsed} ms passed since the start of the transaction.`,
+                  );
+                }
+                return run(...args);
+              };
+            }
+          }
+          const result = await callback(tx);
+          if (commitFailures > 0) {
+            commitFailures--;
+            throw new Error('Fixture commit rejected');
+          }
+          state = draft;
+          trace.push('commit');
+          return result;
+        }),
+      );
       transactionQueue = operation.catch(() => {});
       return operation;
     },
   };
   const storage = {
     uploadBase64: async (value, folder) => {
-      assert.notEqual(transactionContext.getStore(), true, 'upload must precede its transaction');
+      assert.notEqual(
+        transactionContext.getStore(),
+        true,
+        'upload must precede its transaction',
+      );
       assert.equal(folder, 'essays');
       trace.push('upload');
       const index = uploads++;
-      if (options.failUpload === index + 1) throw new Error('Fixture upload failed');
+      if (options.failUpload === index + 1)
+        throw new Error('Fixture upload failed');
       return options.uploadUrls?.[index] ?? asset('new-essay');
     },
-    ownedObjectPath: (url) => url?.startsWith('https://fixture.invalid/images/')
-      ? url.slice('https://fixture.invalid/images/'.length) : null,
+    ownedObjectPath: (url) =>
+      url?.startsWith('https://fixture.invalid/images/')
+        ? url.slice('https://fixture.invalid/images/'.length)
+        : null,
     remove: async (url) => {
-      assert.notEqual(transactionContext.getStore(), true, 'cleanup must follow its transaction');
-      if (url === asset('old-essay')) assert.equal(trace.includes('commit'), true);
+      assert.notEqual(
+        transactionContext.getStore(),
+        true,
+        'cleanup must follow its transaction',
+      );
+      if (url === asset('old-essay'))
+        assert.equal(trace.includes('commit'), true);
       trace.push(`remove:${url}`);
     },
   };
+  const service = new ExamsService(prisma, storage);
+  service.logger = { error: (message) => errors.push(message), warn() {} };
   return {
-    service: new ExamsService(prisma, storage),
+    service,
+    errors,
     trace,
     state: () => state,
   };
@@ -214,6 +308,113 @@ function essay(macauhoi = 31, index = 0, image = false) {
 function body(choices, extra = {}) {
   return { listCauTraLoi: JSON.stringify(choices), ...extra };
 }
+
+test('100-question submit survives remote DB latency without per-question transaction round trips', async (t) => {
+  const examQuestions = Array.from({ length: 100 }, (_, i) => ({
+    macauhoi: i + 1,
+    loai: 'mcq',
+  }));
+  const correctAnswers = examQuestions.map((q) => ({
+    macauhoi: q.macauhoi,
+    macautl: q.macauhoi + 1000,
+    ladapan: 1,
+  }));
+  const h = harness({
+    questions: examQuestions,
+    answers: correctAnswers,
+    examIds: examQuestions.map((q) => q.macauhoi),
+    queryLatencyMs: 100,
+    mcqTotal: 10,
+  });
+  const result = await h.service.submit(
+    42,
+    'SV-A',
+    body(correctAnswers.map((a, i) => choice(a.macauhoi, a.macautl, i + 1))),
+  );
+  assert.equal(result.success, true, h.errors.join('\n'));
+  assert.equal(h.state().result.diemthi, 10);
+  assert.equal(h.state().result.socaudung, 100);
+  assert.equal(h.state().choices.length, 100);
+  const queryCount = h.trace.filter((event) =>
+    event.startsWith('query:'),
+  ).length;
+  assert.ok(
+    queryCount <= 8,
+    'transaction queries must stay bounded as the exam grows',
+  );
+  t.diagnostic(
+    `100 questions: ${queryCount} transaction delegate calls, ${queryCount * 100} ms simulated DB time`,
+  );
+});
+
+test('submit allows a short fixed batch to exceed the default five-second transaction budget', async () => {
+  const h = harness({ examIds: [11, 12], queryLatencyMs: 1200 });
+  const result = await h.service.submit(
+    42,
+    'SV-A',
+    body([choice(11, 101), choice(12, 0)]),
+  );
+  assert.equal(result.success, true, h.errors.join('\n'));
+  assert.equal(h.state().result.diemthi, 3);
+});
+
+test('replacing submitted choices preserves omitted draft rows and another attempt', async () => {
+  const h = harness({
+    examIds: [11, 12],
+    choices: [
+      { makq: 7, macauhoi: 11, dapanchon: 102, thutu: 99 },
+      { makq: 7, macauhoi: 12, dapanchon: 103, thutu: 2 },
+      { makq: 8, macauhoi: 11, dapanchon: 102, thutu: 1 },
+    ],
+  });
+  assert.equal(
+    (await h.service.submit(42, 'SV-A', body([choice(11, 0, 3)]))).success,
+    true,
+  );
+  assert.deepEqual(
+    h.state().choices.find((row) => row.makq === 7 && row.macauhoi === 11),
+    { makq: 7, macauhoi: 11, dapanchon: null, thutu: 3 },
+  );
+  assert.deepEqual(
+    h.state().choices.find((row) => row.makq === 7 && row.macauhoi === 12),
+    { makq: 7, macauhoi: 12, dapanchon: 103, thutu: 2 },
+  );
+  assert.equal(h.state().choices.find((row) => row.makq === 8).dapanchon, 102);
+});
+
+test('bulk insert failure rolls back deleted draft answers and the submission claim', async () => {
+  const previous = [{ makq: 7, macauhoi: 11, dapanchon: 102, thutu: 1 }];
+  const h = harness({
+    examIds: [11, 12],
+    choices: previous,
+    failDetailInsert: true,
+  });
+  assert.equal(
+    (await h.service.submit(42, 'SV-A', body([choice(11, 101)]))).success,
+    false,
+  );
+  assert.deepEqual(h.state().choices, previous);
+  assert.equal(h.state().result, null);
+  assert.ok(
+    h.errors.some((message) =>
+      message.includes('Fixture detail insert failed'),
+    ),
+  );
+  assert.equal(h.trace.includes('commit'), false);
+});
+
+test('grading checks answer ownership again in the transaction snapshot', async () => {
+  const h = harness({
+    examIds: [11, 12],
+    transactionAnswers: [{ macautl: 101, macauhoi: 12, ladapan: 1 }],
+  });
+  assert.equal(
+    (await h.service.submit(42, 'SV-A', body([choice(11, 101)]))).success,
+    true,
+  );
+  assert.equal(h.state().result.socaudung, 0);
+  assert.equal(h.state().result.diemthi, 0);
+});
 
 test('omitted MCQ questions stay in the server denominator', async () => {
   const h = harness();
